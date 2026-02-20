@@ -1,15 +1,30 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+import java.util.Random;
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
-        }
+public class Main {
+    private static final Random seedRng = new Random();
+    private static final Random distanceRng = new Random(seedRng.nextLong());
+    private static final Random degreeRng = new Random(seedRng.nextLong());
+    private static final int TRIALS = 1_000_000;
+    private static final double NEEDLE_LENGTH = 1.0;
+    private static final double LINE_SPACING = 2.0;
+
+    public static void main(String[] args) {
+     buffonNeedle();
+    }
+
+    public static void buffonNeedle() {
+        	int crosses = 0;
+
+        	for (int i = 0; i < TRIALS; i++) {
+        		double distanceFromLine = distanceRng.nextDouble() * (LINE_SPACING / 2);
+        		double angle = degreeRng.nextDouble() * Math.PI / 2;
+
+        		if (distanceFromLine < (NEEDLE_LENGTH / 2) * Math.sin(angle)) {
+        			crosses++;
+        		}
+        	}
+
+        	double piEstimate = (2.0 * NEEDLE_LENGTH * TRIALS) / (crosses * LINE_SPACING);
+        	System.out.println("Estimated Pi: " + piEstimate);
     }
 }
