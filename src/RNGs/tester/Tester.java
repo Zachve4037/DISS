@@ -16,7 +16,7 @@ public class Tester {
     private static final int SAMPLES = 10_000_000;
     private static final int HIST_BINS = 21;
     private static final int HIST_BINS_2 = 31;
-    private static final Random SEED_RNG = new Random(1);
+    private static final Random SEED_RNG = new Random();
 
     public static void main(String[] args) {
 
@@ -53,7 +53,7 @@ public class Tester {
 
         System.out.printf("  Min: %d  Max: %d  Priemer: %.4f  (ocakavany: %.4f)%n",
                 min, max, mean, expectedMean);
-        System.out.println("  Hodnota\tPocet\t\tRelat. pocetnost\t\tOcakavana pocetnost");
+        System.out.println("  Hodnota\tPocet\t\tRelat.poc\t\tOcakavana pocetnost");
         double expectedFreq = 1.0 / HIST_BINS;
         for (int v = 55; v <= 75; v++) {
             double relFreq = (double) counts[v] / SAMPLES;
@@ -89,7 +89,7 @@ public class Tester {
 
         System.out.printf("  Min: %.4f  Max: %.4f  Priemer: %.4f  (ocakavany: %.4f)%n",
                 minV, maxV, mean, expectedMean);
-        System.out.println("  Od\t\tDo\t\tPocet\t\tRelat. pocetnost\t\tOcakavana pocetnost");
+        System.out.println("  Od\t\tDo\t\tPocet\t\tRelat.poc\t\tOcakavana pocetnost");
         double expectedBinP = 1.0 / HIST_BINS_2;
         for (int b = 0; b < HIST_BINS_2; b++) {
             double from = low + b;
@@ -134,7 +134,7 @@ public class Tester {
 
         double mean = sum / SAMPLES;
         System.out.printf("  Min: %.4f  Max: %.4f  Priemer: %.4f%n", minV, maxV, mean);
-        System.out.println("  Interval\t\tPocet\t\tRelat. pocetnost\t\tOcakavana pocetnost");
+        System.out.println("  Interval\t\tPocet\t\tRelat.poc\t\tOcakavana pocetnost");
         for (int b = 0; b < 5; b++) {
             System.out.printf("  <%.0f; %.0f)\t\t%d\t\t%.4f\t\t%.4f%n",
                     boundaries[b], boundaries[b + 1], counts[b],
@@ -172,7 +172,7 @@ public class Tester {
 
         double mean = sum / SAMPLES;
         System.out.printf("  Min: %d  Max: %d  Priemer: %.4f%n", minV, maxV, mean);
-        System.out.println("  Interval\t\tPocet\t\tRelat. cetnost\t\tOcakavana p");
+        System.out.println("  Interval\t\tPocet\t\tRelat.poc\t\tOcakavana pocetnost");
         String[] labels = {"<15;29)", "<29;45)", "<45;65)"};
         for (int b = 0; b < 3; b++) {
             System.out.printf("  %-12s\t\t%d\t\t%.4f\t\t%.4f%n",
