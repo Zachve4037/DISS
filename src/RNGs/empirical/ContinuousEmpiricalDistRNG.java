@@ -1,0 +1,27 @@
+package RNGs.empirical;
+
+import sections.intervals.EmpiricInterval;
+
+import java.util.List;
+import java.util.Random;
+
+public class ContinuousEmpiricalDistRNG extends EmpiricGenerator {
+    public ContinuousEmpiricalDistRNG(Random seedGenerator, List<EmpiricInterval> intervals) {
+        super(seedGenerator, intervals);
+    }
+
+
+    public double sample() {
+        double intervalProbability = this.getIntervalGenerator().nextDouble();
+        int max = this.getIntervals().size();
+        for (int i = 0; i < max; i++) {
+            EmpiricInterval row = this.getIntervals().get(i);
+            if (intervalProbability < row.getP()) {
+                return this.getValueGenerators()[i].nextDouble(row.getLow(), row.getHigh());
+            }
+        }
+        return this.getValueGenerators()[max].nextDouble(
+                this.getIntervals().getLast().getLow(), this.getIntervals().getLast().getHigh()
+        );
+    }
+}

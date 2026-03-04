@@ -1,40 +1,29 @@
-public class SimCore {
-    private int reps;
-    private boolean stopped = false;
-    public SimCore(int counts) {
-        this.reps = counts;
-        sim();
-    }
+public abstract class SimCore {
+    private boolean run = true;
 
-    private void sim() {
-        int counter = 0;
-        beforeSim();
-        while (counter < 1000000 && !stopped) {
-            beforeRep();
-            replication();
-            afterRep();
-            counter++;
+    public void runSimulation(int replicationCount) {
+        int currentReplication = 1;
+        beforeSimulation();
+        while (currentReplication <= replicationCount && run) {
+            beforeReplication();
+            doReplication();
+            afterReplication();
+            currentReplication++;
         }
-        afterSim();
+        afterSimulation();
     }
 
-    private void beforeSim() {
-
+    public void setRun(boolean run) {
+        this.run = run;
     }
 
-    private void afterSim() {
+    protected abstract void beforeSimulation();
 
-    }
+    protected abstract void beforeReplication();
 
-    private void afterRep() {
+    protected abstract void doReplication();
 
-    }
+    protected abstract void afterReplication();
 
-    private void replication() {
-
-    }
-
-    private void beforeRep() {
-
-    }
+    protected abstract void afterSimulation();
 }
