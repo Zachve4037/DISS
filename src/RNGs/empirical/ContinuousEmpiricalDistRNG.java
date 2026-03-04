@@ -10,17 +10,15 @@ public class ContinuousEmpiricalDistRNG extends EmpiricGenerator {
         super(seedGenerator, intervals);
     }
 
-
     public double generate() {
         double intervalProbability = this.getIntervalGenerator().nextDouble();
-        int max = this.getIntervals().size();
-        for (int i = 0; i < max; i++) {
+        for (int i = 0; i < this.getIntervals().size(); i++) {
             EmpiricInterval row = this.getIntervals().get(i);
             if (intervalProbability < row.getP()) {
                 return this.getValueGenerators()[i].nextDouble(row.getLow(), row.getHigh());
             }
         }
-        return this.getValueGenerators()[max - 1].nextDouble(
+        return this.getValueGenerators()[this.getIntervals().size() - 1].nextDouble(
                 this.getIntervals().getLast().getLow(), this.getIntervals().getLast().getHigh()
         );
     }

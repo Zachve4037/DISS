@@ -1,3 +1,5 @@
+package MonteCarlo;
+
 public abstract class SimCore {
     private boolean run = true;
 

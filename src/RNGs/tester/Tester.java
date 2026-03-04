@@ -89,13 +89,12 @@ public class Tester {
 
         System.out.printf("  Min: %.4f  Max: %.4f  Priemer: %.4f  (ocakavany: %.4f)%n",
                 minV, maxV, mean, expectedMean);
-        System.out.println("  Od\t\tDo\t\tPocet\t\tRelat.poc\t\tOcakavana pocetnost");
+        System.out.println("  Hodnota\t\tPocet\t\tRelat.poc\t\tOcakavana pocetnost");
         double expectedBinP = 1.0 / HIST_BINS_2;
         for (int b = 0; b < HIST_BINS_2; b++) {
             double from = low + b;
-            double to = from + 1;
-            System.out.printf("  %.1f\t\t%.1f\t\t%.0f\t\t%.4f\t\t%.4f%n",
-                    from, to, bins[b], bins[b] / SAMPLES, expectedBinP);
+            System.out.printf("  %.1f\t\t%.0f\t\t%.4f\t\t%.4f%n",
+                    from, bins[b], bins[b] / SAMPLES, expectedBinP);
         }
     }
 
@@ -155,7 +154,7 @@ public class Tester {
         );
 
         int[] counts = new int[3];
-        double[] expectedP = {0.20, 0.40, 0.40};
+        double[] expectedFreq = {0.20, 0.40, 0.40};
 
         double sum = 0;
         int minV = Integer.MAX_VALUE, maxV = Integer.MIN_VALUE;
@@ -176,7 +175,7 @@ public class Tester {
         String[] labels = {"<15;29)", "<29;45)", "<45;65)"};
         for (int b = 0; b < 3; b++) {
             System.out.printf("  %-12s\t\t%d\t\t%.4f\t\t%.4f%n",
-                    labels[b], counts[b], (double) counts[b] / SAMPLES, expectedP[b]);
+                    labels[b], counts[b], (double) counts[b] / SAMPLES, expectedFreq[b]);
         }
     }
 }
