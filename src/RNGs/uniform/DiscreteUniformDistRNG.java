@@ -9,7 +9,7 @@ public class DiscreteUniformDistRNG extends UniformGenerator {
         super(seedGenerator, interval);
     }
 
-    public int sample() {
+    public int generate() {
         return this.getValueGenerator().nextInt(
                 this.getInterval().getLow(),
                 this.getInterval().getHigh()

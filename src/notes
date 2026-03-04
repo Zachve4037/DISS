@@ -1,8 +1,8 @@
 1. pre kazdy nahodny jav jeden generator
-2. nad jednym generátorom nepozivat rozne - nextDouble, nextInt, nextInt(0,10),..., Vzdy len jedno, ak som uz pouzil nextDouble, mozem iba nextDouble, ani nikdy nemenim parameter (napr. ak zavolam nextInt(5), tak uz mozem iba to volat, nemozem volat napr. nextInt(6))
+2. nad jednym generatorom nepozivat rozne - nextDouble, nextInt, nextInt(0,10),..., Vzdy len jedno, ak som uz pouzil nextDouble, mozem iba nextDouble, ani nikdy nemenim parameter (napr. ak zavolam nextInt(5), tak uz mozem iba to volat, nemozem volat napr. nextInt(6))
 3. nahodne cisla nikdy nebudem zahadzovat - napr. nebudem mat while kde sa bude generovat nove cislo, ktore sa este nevygenerovalo - vytvorim si novy generator (napr. najprv nextInt(5), potom dalsie generovanie nextInt(4) - ALE MUSI BYT NOVY GENERATOR, mohol by som si vytvorit pole generatorov - pre napr 1000 miest na parkovanie potrebujem pole 999 generatorov)
-4. generatory musíme dobre nainicializovat a znova uz ich neinicializujeme (nemenime nasadu), ani cez replikacie nie, celu simulaciu su zapnute, mozu ostat pocas celého zivota programu
-5. aj ked v jave je to vyriesene, tak to budem riesit. Vytvorim si nejaky generator seedov, Random so seedom pomocou systémového casu, a tymto generátorom pomocou nextInt si vytvorim seedy pre vsetky generatory - viem takto aj debugovat, do generatora seedov si mozem dat nejaku fixnu nasadu - napr. 0. V jednej simulacii si mozem pamatat startovaci seed a viem replikovat veci
+4. generatory musíme dobre nainicializovat a znova uz ich neinicializujeme (nemenime nasadu), ani cez replikacie nie, celu simulaciu su zapnute, mozu ostat pocas celeho zivota programu
+5. aj ked v jave je to vyriesene, tak to budem riesit. Vytvorim si nejaky generator seedov, Random so seedom pomocou systemoveho casu, a tymto generatorom pomocou nextInt si vytvorim seedy pre vsetky generatory - viem takto aj debugovat, do generatora seedov si mozem dat nejaku fixnu nasadu - napr. 0. V jednej simulacii si mozem pamatat startovaci seed a viem replikovat veci
 6. ak chcem nieco vykonat s pravdepodobnostou napr. 60%, tak sa to robi ako
 if (r.nextDouble() < 0.6) {
     ...
@@ -53,20 +53,20 @@ class MonteCarloCore {
 TO JADRO BUDES VYUZIVAT DO BUDUCNA
 otestovat generatory - histogram do excelu
 bude 6 kombinacii - Zilina, ...
-dat to do samostatných grafov
+dat to do samostatnych grafov
 
 POZIADAVKY NA GRAF
 x-ova os replikacie, y-ova hodnota priemerna - hodnota v minutach
-moja aplikacia nemoze byt obmedzena poctom vykonaných replikacii
+moja aplikacia nemoze byt obmedzena poctom vykonanych replikacii
 nepouzivat pole
 aplikacia ide konstantnou rychlostou
 ked si uzivatel nastavi ze chce 1 000 000 replikacii, a moja komponenta zvladne 1000 replikacii, tak vykreslujem kazdu tisicu replikaciu (dam si prec tie ktore nechce - dole popisane)
 viac nas zaujima koniec grafu ako zaciatok
 graf nastavim tak aby sa mi naskaloval na hodnoty y automaticky - graf naskalovany napr od 20.0 po 20.4, y-lonova os nie je fixna - plochu grafu vyuzivam na 100%
 na gui vytiahnut pre pouzivatela, ze kolko % grafu sa nema zobrazovat, defaultne napr na 40%, nastavi si to pouzivatel
-napr ak mam 1 000 000 replikacii a je 40%, tak sa prvých 400 000 replikacii v grafe vôbec nezorazi, ak mi graf zvladne 1000 bodov, tak potom sa kazda 600 replikacia vykresluje - je nastavitelne kolko hodnot na do grafu nema zobrazovat - ALE SIMULUJU SA, LEN SA NEZOBRAZUJU
+napr ak mam 1 000 000 replikacii a je 40%, tak sa prvych 400 000 replikacii v grafe vôbec nezorazi, ak mi graf zvladne 1000 bodov, tak potom sa kazda 600 replikacia vykresluje - je nastavitelne kolko hodnot na do grafu nema zobrazovat - ALE SIMULUJU SA, LEN SA NEZOBRAZUJU
 defaultne to vykresluje spravne - nie zoomovat a sprostosti
-mozem spustat rozne varianty za sebou, nemusia bezat na viacerých vláknach, naplnit sa mozu postupne
+mozem spustat rozne varianty za sebou, nemusia bezat na viacerych vlaknach, naplnit sa mozu postupne
 
 DOKUMENTACIA
 AI samozrejme

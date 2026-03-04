@@ -13,13 +13,14 @@ import java.util.Random;
 
 public class Tester {
 
-    private static final int SAMPLES    = 10_000_000;
-    private static final int HIST_BINS  = 20;        // počet stĺpcov histogramu
-    private static final Random SEED_RNG = new Random(0); // fixný seed → reprodukovateľné výsledky
+    private static final int SAMPLES = 10_000_000;
+    private static final int HIST_BINS = 21;
+    private static final int HIST_BINS_2 = 31;
+    private static final Random SEED_RNG = new Random(1);
 
     public static void main(String[] args) {
 
-        System.out.println("GENERATOR TESTER  –  " + SAMPLES + " vzoriek na generátor");
+        System.out.println("GENERATOR TESTER  –  " + SAMPLES + " vzoriek na generator");
 
         testDiscreteUniform();
         testContinuousUniform();
@@ -28,7 +29,7 @@ public class Tester {
     }
 
     private static void testDiscreteUniform() {
-        System.out.println("ČERVENÝ úsek: Diskrétne rovnomerné <55;75)");
+        System.out.println("Cerveny usek: Diskretne rovnomerne <55;75)");
 
         DiscreteUniformDistRNG rng = new DiscreteUniformDistRNG(
                 new Random(SEED_RNG.nextInt()),
@@ -40,7 +41,7 @@ public class Tester {
         int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
 
         for (int i = 0; i < SAMPLES; i++) {
-            int v = rng.sample();
+            int v = rng.generate();
             counts[v]++;
             sum += v;
             if (v < min) min = v;
@@ -52,55 +53,54 @@ public class Tester {
 
         System.out.printf("  Min: %d  Max: %d  Priemer: %.4f  (ocakavany: %.4f)%n",
                 min, max, mean, expectedMean);
-        System.out.println("  Hodnota\tPočet\t\tRelat. četnosť\tOčakávaná p");
-        double expectedP = 1.0 / 21; // 21 hodnôt: 55..75 vrátane
+        System.out.println("  Hodnota\tPocet\t\tRelat. pocetnost\t\tOcakavana pocetnost");
+        double expectedFreq = 1.0 / HIST_BINS;
         for (int v = 55; v <= 75; v++) {
             double relFreq = (double) counts[v] / SAMPLES;
-            System.out.printf("  %d\t\t%d\t\t%.4f\t\t%.4f%n", v, counts[v], relFreq, expectedP);
+            System.out.printf("  %d\t\t%d\t\t%.4f\t\t%.4f%n", v, counts[v], relFreq, expectedFreq);
         }
     }
 
     private static void testContinuousUniform() {
-        System.out.println("ZELENÝ úsek: Spojité rovnomerné <50;80)");
+        System.out.println("Zeleny usek: Spojite rovnomerne <50;80)");
 
         ContinuousUniformDistRNG rng = new ContinuousUniformDistRNG(
                 new Random(SEED_RNG.nextInt()),
                 new UniformInterval(50, 80)
         );
 
-        double low = 50, high = 80, width = high - low;
-        double[] bins = new double[HIST_BINS];
-        double binSize = width / HIST_BINS;
+        double low = 50, high = 80;
+        double[] bins = new double[51];
         double sum = 0;
         double minV = Double.MAX_VALUE, maxV = Double.MIN_VALUE;
 
         for (int i = 0; i < SAMPLES; i++) {
-            double v = rng.sample();
+            double v = rng.generate();
             sum += v;
             if (v < minV) minV = v;
             if (v > maxV) maxV = v;
-            int bin = (int) ((v - low) / binSize);
-            if (bin >= HIST_BINS) bin = HIST_BINS - 1;
+            int bin = (int) (v - low);
+            if (bin >= HIST_BINS_2) bin = HIST_BINS_2 - 1;
             bins[bin]++;
         }
 
         double mean = sum / SAMPLES;
         double expectedMean = (low + high) / 2.0;
 
-        System.out.printf("  Min: %.4f  Max: %.4f  Priemer: %.4f  (očakávaný: %.4f)%n",
+        System.out.printf("  Min: %.4f  Max: %.4f  Priemer: %.4f  (ocakavany: %.4f)%n",
                 minV, maxV, mean, expectedMean);
-        System.out.println("  Od\t\tDo\t\tRelat. četnosť\tOčakávaná p");
-        double expectedBinP = 1.0 / HIST_BINS;
-        for (int b = 0; b < HIST_BINS; b++) {
-            double from = low + b * binSize;
-            double to   = from + binSize;
-            System.out.printf("  %.1f\t\t%.1f\t\t%.4f\t\t%.4f%n",
-                    from, to, bins[b] / SAMPLES, expectedBinP);
+        System.out.println("  Od\t\tDo\t\tPocet\t\tRelat. pocetnost\t\tOcakavana pocetnost");
+        double expectedBinP = 1.0 / HIST_BINS_2;
+        for (int b = 0; b < HIST_BINS_2; b++) {
+            double from = low + b;
+            double to = from + 1;
+            System.out.printf("  %.1f\t\t%.1f\t\t%.0f\t\t%.4f\t\t%.4f%n",
+                    from, to, bins[b], bins[b] / SAMPLES, expectedBinP);
         }
     }
 
     private static void testContinuousEmpirical() {
-        System.out.println("ČIERNY úsek: Spojité empirické");
+        System.out.println("Cierny usek: Spojite empiricke");
 
         List<EmpiricInterval> intervals = new LinkedList<>();
         intervals.add(new EmpiricInterval(10, 20, 0.10));
@@ -114,13 +114,13 @@ public class Tester {
         );
 
         double[] boundaries = {10, 20, 32, 45, 75, 85};
-        double[] expectedP   = {0.10, 0.50, 0.20, 0.15, 0.05};
-        int[]    counts      = new int[5];
-        double   sum = 0;
-        double   minV = Double.MAX_VALUE, maxV = -Double.MAX_VALUE;
+        double[] expectedFreq = {0.10, 0.50, 0.20, 0.15, 0.05};
+        int[] counts = new int[5];
+        double sum = 0;
+        double minV = Double.MAX_VALUE, maxV = -Double.MAX_VALUE;
 
         for (int i = 0; i < SAMPLES; i++) {
-            double v = rng.sample();
+            double v = rng.generate();
             sum += v;
             if (v < minV) minV = v;
             if (v > maxV) maxV = v;
@@ -134,16 +134,16 @@ public class Tester {
 
         double mean = sum / SAMPLES;
         System.out.printf("  Min: %.4f  Max: %.4f  Priemer: %.4f%n", minV, maxV, mean);
-        System.out.println("  Interval\t\tRelat. četnosť\tOčakávaná p");
+        System.out.println("  Interval\t\tPocet\t\tRelat. pocetnost\t\tOcakavana pocetnost");
         for (int b = 0; b < 5; b++) {
-            System.out.printf("  <%.0f; %.0f)\t\t%.4f\t\t%.4f%n",
-                    boundaries[b], boundaries[b + 1],
-                    (double) counts[b] / SAMPLES, expectedP[b]);
+            System.out.printf("  <%.0f; %.0f)\t\t%d\t\t%.4f\t\t%.4f%n",
+                    boundaries[b], boundaries[b + 1], counts[b],
+                    (double) counts[b] / SAMPLES, expectedFreq[b]);
         }
     }
 
     private static void testDiscreteEmpirical() {
-        System.out.println("MODRÝ úsek: Diskrétne empirické");
+        System.out.println("Modry usek: Diskretne empiricke");
 
         List<EmpiricInterval> intervals = new LinkedList<>();
         intervals.add(new EmpiricInterval(15, 29, 0.20));
@@ -154,31 +154,29 @@ public class Tester {
                 new Random(SEED_RNG.nextInt()), intervals
         );
 
-        int[] groupCounts = new int[3];
+        int[] counts = new int[3];
         double[] expectedP = {0.20, 0.40, 0.40};
 
         double sum = 0;
         int minV = Integer.MAX_VALUE, maxV = Integer.MIN_VALUE;
 
         for (int i = 0; i < SAMPLES; i++) {
-            int v = rng.sample();
+            int v = rng.generate();
             sum += v;
             if (v < minV) minV = v;
             if (v > maxV) maxV = v;
-            if (v >= 15 && v <= 29)      groupCounts[0]++;
-            else if (v >= 29 && v <= 45) groupCounts[1]++;
-            else if (v >= 45 && v <= 65) groupCounts[2]++;
+            if (v >= 15 && v < 29) counts[0]++;
+            else if (v >= 29 && v < 45) counts[1]++;
+            else if (v >= 45 && v < 65) counts[2]++;
         }
 
         double mean = sum / SAMPLES;
         System.out.printf("  Min: %d  Max: %d  Priemer: %.4f%n", minV, maxV, mean);
-
-        System.out.println("  Skupinová kontrola:");
-        System.out.println("  Interval\t\tRelat. četnosť\tOčakávaná p");
+        System.out.println("  Interval\t\tPocet\t\tRelat. cetnost\t\tOcakavana p");
         String[] labels = {"<15;29)", "<29;45)", "<45;65)"};
         for (int b = 0; b < 3; b++) {
-            System.out.printf("  %-12s\t\t%.4f\t\t%.4f%n",
-                    labels[b], (double) groupCounts[b] / SAMPLES, expectedP[b]);
+            System.out.printf("  %-12s\t\t%d\t\t%.4f\t\t%.4f%n",
+                    labels[b], counts[b], (double) counts[b] / SAMPLES, expectedP[b]);
         }
     }
 }

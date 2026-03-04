@@ -11,7 +11,7 @@ public class DiscreteEmpiricalDistRNG extends EmpiricGenerator {
         super(seedGenerator, intervals);
     }
 
-    public int sample() {
+    public int generate() {
         double intervalProbability = this.getIntervalGenerator().nextDouble();
         int max = this.getIntervals().size();
         for (int i = 0; i < max; i++) {

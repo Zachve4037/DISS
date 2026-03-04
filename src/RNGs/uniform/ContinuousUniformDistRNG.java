@@ -9,7 +9,7 @@ public class ContinuousUniformDistRNG extends UniformGenerator {
         super(seedGenerator, interval);
     }
 
-    public double sample() {
+    public double generate() {
         return this.getValueGenerator().nextDouble(
                 this.getInterval().getLow(),
                 this.getInterval().getHigh()

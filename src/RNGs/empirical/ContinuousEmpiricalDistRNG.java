@@ -11,7 +11,7 @@ public class ContinuousEmpiricalDistRNG extends EmpiricGenerator {
     }
 
 
-    public double sample() {
+    public double generate() {
         double intervalProbability = this.getIntervalGenerator().nextDouble();
         int max = this.getIntervals().size();
         for (int i = 0; i < max; i++) {
