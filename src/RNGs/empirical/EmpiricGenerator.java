@@ -24,7 +24,7 @@ public abstract class EmpiricGenerator {
             cumulativeP += inte.getP();
             this.intervals.add(new EmpiricInterval(inte.getLow(), inte.getHigh(), cumulativeP));
         }
-        if (cumulativeP != 1) {
+        if (Math.abs(cumulativeP - 1.0) > 1e-9) {
             throw new IllegalArgumentException("The sum of probabilities must be 1");
         }
     }

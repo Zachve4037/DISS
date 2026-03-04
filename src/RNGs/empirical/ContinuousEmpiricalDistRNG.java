@@ -20,7 +20,7 @@ public class ContinuousEmpiricalDistRNG extends EmpiricGenerator {
                 return this.getValueGenerators()[i].nextDouble(row.getLow(), row.getHigh());
             }
         }
-        return this.getValueGenerators()[max].nextDouble(
+        return this.getValueGenerators()[max - 1].nextDouble(
                 this.getIntervals().getLast().getLow(), this.getIntervals().getLast().getHigh()
         );
     }
