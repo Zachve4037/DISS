@@ -90,4 +90,11 @@ GUI -> zadam zaciatocny cas len mi to vypise na kolko % som trafil, koncovy je p
 VLAKNA KUUUUUUUUUUUUUUUUUURWA
 1 na gui a 2 na simulaciu
 swing worker - na simulaciu, aby sa neblokoval gui thread, a potom cez publish a process posielam data do gui threadu, kde ich vykreslujem
+JFreeChart - vykreslovanie grafu
 viem si volit ktoru strategiu chcem pouzit, v grafe iba jedna ciara
+
+SimulationThread (SwingWorker)
+    → publish(averageTime) každých N replikácií
+
+EDT (GUI Thread)
+    → process() → series.add(replication, avgTime) → graf sa prekreslí
