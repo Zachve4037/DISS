@@ -81,3 +81,13 @@ ZDRSZ
 ZDSRZ
 ZRSDZ
 ZRDSZ
+
+najst najkratsiu moznu alternativu
+2.uloha -> kurier potrebuje byt v ZA najneskor 7:35. Kedy najneskor musi zo ZA vyrazit aby mal80% pravdepodobnost ze to stihne?
+pouzivam bisekciu, staci s presnostou na sekundy
+po ukonceni monte carla, vysledky utriedim a zoberiem 80% percentil, zo 100_000_000 bude 80_000_001 hodnota moja orientacna
+GUI -> zadam zaciatocny cas len mi to vypise na kolko % som trafil, koncovy je presne dany na 7:35
+VLAKNA KUUUUUUUUUUUUUUUUUURWA
+1 na gui a 2 na simulaciu
+swing worker - na simulaciu, aby sa neblokoval gui thread, a potom cez publish a process posielam data do gui threadu, kde ich vykreslujem
+viem si volit ktoru strategiu chcem pouzit, v grafe iba jedna ciara
