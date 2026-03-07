@@ -1,3 +1,6 @@
+import GUI.RouteGUI;
+
+import javax.swing.*;
 import java.util.Random;
 
 public class Main {
@@ -9,7 +12,11 @@ public class Main {
     private static final double LINE_SPACING = 2.0;
 
     public static void main(String[] args) {
-     buffonNeedle();
+//        buffonNeedle();
+        SwingUtilities.invokeLater(() -> {
+            RouteGUI frame = new RouteGUI();
+            frame.setVisible(true);
+        });
     }
 
     public static void buffonNeedle() {
