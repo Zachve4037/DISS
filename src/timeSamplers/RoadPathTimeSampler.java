@@ -1,4 +1,4 @@
-package timeSampler;
+package timeSamplers;
 
 import RNGs.empirical.ContinuousEmpiricalDistRNG;
 import RNGs.empirical.DiscreteEmpiricalDistRNG;
@@ -15,7 +15,7 @@ import RNGs.uniform.DiscreteUniformDistRNG;
 
 import java.util.Random;
 
-public class TimeSampler {
+public class RoadPathTimeSampler {
     private final Random SEED_GENERATOR = new Random();
     private final DiscreteUniformDistRNG red = new DiscreteUniformDistRNG(SEED_GENERATOR, Red.getIntervals().getFirst());
     private final ContinuousUniformDistRNG green = new ContinuousUniformDistRNG(SEED_GENERATOR, Green.getIntervals().getFirst());
@@ -24,7 +24,7 @@ public class TimeSampler {
     private final ContinuousUniformDistRNG k = new ContinuousUniformDistRNG(SEED_GENERATOR, new UniformInterval(10, 25));
     private final double K_TIME = 25.0;
 
-    public TimeSampler(){
+    public RoadPathTimeSampler() {
     }
 
     public double sampleRoadPathMinutes(RoadPath roadPath, double currentTime) {
@@ -33,7 +33,7 @@ public class TimeSampler {
             double speed = sampleSpeed(segment.getColor());
             if (segment.isK() && currentTime > K_TIME) {
                 double kNum = k.generate();
-                speed = speed*((100-kNum)/100);
+                speed = speed * ((100 - kNum) / 100);
             }
             double totalSegmentMinutes = (segment.getLength() / speed) * 60;
             totalTime += totalSegmentMinutes;
