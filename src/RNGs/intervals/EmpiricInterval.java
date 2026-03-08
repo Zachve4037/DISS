@@ -1,4 +1,4 @@
-package RNGs.sections.intervals;
+package RNGs.intervals;
 
 public class EmpiricInterval {
     private final int low;

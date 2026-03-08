@@ -1,6 +1,6 @@
 package RNGs.empirical;
 
-import RNGs.sections.intervals.EmpiricInterval;
+import RNGs.intervals.EmpiricInterval;
 
 import java.util.List;
 import java.util.Random;
