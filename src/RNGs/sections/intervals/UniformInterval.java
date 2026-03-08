@@ -1,4 +1,4 @@
-package sections.intervals;
+package RNGs.sections.intervals;
 
 public class UniformInterval {
     private final int low;

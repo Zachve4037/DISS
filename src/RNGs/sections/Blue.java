@@ -1,6 +1,6 @@
-package sections;
+package RNGs.sections;
 
-import sections.intervals.EmpiricInterval;
+import RNGs.sections.intervals.EmpiricInterval;
 
 import java.util.LinkedList;
 import java.util.List;

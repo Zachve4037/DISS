@@ -1,6 +1,6 @@
 package RNGs.uniform;
 
-import sections.intervals.UniformInterval;
+import RNGs.sections.intervals.UniformInterval;
 
 import java.util.Random;
 

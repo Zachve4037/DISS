@@ -17,7 +17,7 @@ public class RouteGUI extends JFrame {
     private JLabel avgTimeLabel;
     private ChartPanel chartPanel;
     private JComboBox routeComboBox;
-    private final XYSeries series = new XYSeries("Priemerný čas");
+    private final XYSeries series = new XYSeries("Average time");
 
     private static final String[] ROUTES = {
             "Ž→S→R→D→Ž",
@@ -30,7 +30,7 @@ public class RouteGUI extends JFrame {
 
 
     public RouteGUI() {
-        setTitle("Monte Carlo - priemery");
+        setTitle("Courier's Route Simulation");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         createUIComponents();
@@ -50,8 +50,8 @@ public class RouteGUI extends JFrame {
         XYSeriesCollection dataset = new XYSeriesCollection(series);
         JFreeChart chart = ChartFactory.createXYLineChart(
                 "Monte Carlo - priemery",
-                "Replikácia",
-                "Priemerný čas",
+                "Replications",
+                "Average Time",
                 dataset
         );
         chartPanel = new ChartPanel(chart);
@@ -66,15 +66,15 @@ public class RouteGUI extends JFrame {
     }
 
     public void updateRoute(String route) {
-        routeLabel.setText("Trasa: " + route);
+        routeLabel.setText("Route: " + route);
     }
 
     public void updateReplicationCount(int count) {
-        replicationLabel.setText("Počet replikácií: " + count);
+        replicationLabel.setText("Replications count: " + count);
     }
 
     public void updateAvgTime(String time) {
-        avgTimeLabel.setText("Priemerný čas: " + time);
+        avgTimeLabel.setText("Average time: " + time);
     }
 
     public String getSelectedRoute() {

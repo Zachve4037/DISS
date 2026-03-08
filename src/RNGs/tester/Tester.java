@@ -4,8 +4,8 @@ import RNGs.empirical.ContinuousEmpiricalDistRNG;
 import RNGs.empirical.DiscreteEmpiricalDistRNG;
 import RNGs.uniform.ContinuousUniformDistRNG;
 import RNGs.uniform.DiscreteUniformDistRNG;
-import sections.intervals.EmpiricInterval;
-import sections.intervals.UniformInterval;
+import RNGs.sections.intervals.EmpiricInterval;
+import RNGs.sections.intervals.UniformInterval;
 
 import java.util.LinkedList;
 import java.util.List;
