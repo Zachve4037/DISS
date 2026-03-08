@@ -41,7 +41,6 @@ public class TimeSampler {
         return totalTime - currentTime;
     }
 
-
     private double sampleSpeed(RoadColor color) {
         return switch (color) {
             case RED -> red.generate();
