@@ -33,7 +33,7 @@ public class Tester {
 
         DiscreteUniformDistRNG rng = new DiscreteUniformDistRNG(
                 new Random(SEED_RNG.nextInt()),
-                new UniformInterval(55, 75)
+                new UniformInterval(55, 76)
         );
 
         int[] counts = new int[76];

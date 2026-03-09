@@ -17,8 +17,8 @@ import java.util.Random;
 
 public class RoadPathTimeSampler {
     private final Random SEED_GENERATOR = new Random();
-    private final DiscreteUniformDistRNG red = new DiscreteUniformDistRNG(SEED_GENERATOR, Red.getIntervals().getFirst());
-    private final ContinuousUniformDistRNG green = new ContinuousUniformDistRNG(SEED_GENERATOR, Green.getIntervals().getFirst());
+    private final DiscreteUniformDistRNG red = new DiscreteUniformDistRNG(SEED_GENERATOR, Red.getIntervals().get(0));
+    private final ContinuousUniformDistRNG green = new ContinuousUniformDistRNG(SEED_GENERATOR, Green.getIntervals().get(0));
     private final ContinuousEmpiricalDistRNG black = new ContinuousEmpiricalDistRNG(SEED_GENERATOR, Black.getIntervals());
     private final DiscreteEmpiricalDistRNG blue = new DiscreteEmpiricalDistRNG(SEED_GENERATOR, Blue.getIntervals());
     private final ContinuousUniformDistRNG k = new ContinuousUniformDistRNG(SEED_GENERATOR, new UniformInterval(10, 25));

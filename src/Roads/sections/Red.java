@@ -9,7 +9,7 @@ public class Red {
     private static final List<UniformInterval> intervals = new LinkedList<>();
 
     public Red() {
-        intervals.add(new UniformInterval(55, 75));
+        intervals.add(new UniformInterval(55, 76));
     }
 
     public static List<UniformInterval> getIntervals() {
