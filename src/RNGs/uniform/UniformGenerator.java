@@ -13,11 +13,11 @@ public abstract class   UniformGenerator {
         this.interval = interval;
     }
 
-    public Random getValueGenerator() {
+    protected Random getValueGenerator() {
         return valueGenerator;
     }
 
-    public UniformInterval getInterval() {
+    protected UniformInterval getInterval() {
         return interval;
     }
 }
