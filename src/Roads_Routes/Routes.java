@@ -3,9 +3,8 @@ package Roads_Routes;
 import java.util.List;
 
 public class Routes {
-    public Routes() {}
 
-    public List<List<RoadPath>> Z_S_RT_D_Z() {
+    public static List<List<RoadPath>> Z_S_RT_D_Z() {
         return List.of(
                 Roads.Z_S(),
                 Roads.S_RT(),
@@ -14,7 +13,7 @@ public class Routes {
         );
     }
 
-    public List<List<RoadPath>> Z_S_D_RT_Z() {
+    public static List<List<RoadPath>> Z_S_D_RT_Z() {
         return List.of(
                 Roads.Z_S(),
                 Roads.S_D(),
@@ -23,7 +22,7 @@ public class Routes {
         );
     }
 
-    public List<List<RoadPath>> Z_RT_S_D_Z() {
+    public static List<List<RoadPath>> Z_RT_S_D_Z() {
         return List.of(
                 Roads.Z_RT(),
                 Roads.RT_S(),
@@ -32,7 +31,7 @@ public class Routes {
         );
     }
 
-    public List<List<RoadPath>> Z_RT_D_S_Z() {
+    public static List<List<RoadPath>> Z_RT_D_S_Z() {
         return List.of(
                 Roads.Z_RT(),
                 Roads.RT_D(),
@@ -41,7 +40,7 @@ public class Routes {
         );
     }
 
-    public List<List<RoadPath>> Z_D_S_RT_Z() {
+    public static List<List<RoadPath>> Z_D_S_RT_Z() {
         return List.of(
                 Roads.Z_D(),
                 Roads.D_S(),
@@ -50,7 +49,7 @@ public class Routes {
         );
     }
 
-    public List<List<RoadPath>> Z_D_RT_S_Z() {
+    public static List<List<RoadPath>> Z_D_RT_S_Z() {
         return List.of(
                 Roads.Z_D(),
                 Roads.D_RT(),

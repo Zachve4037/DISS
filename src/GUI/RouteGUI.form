@@ -13,7 +13,7 @@
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Vybrať trasu:"/>
+          <text value="Secelt route:"/>
         </properties>
       </component>
       <component id="e002" class="javax.swing.JComboBox" binding="routeComboBox">
@@ -29,7 +29,7 @@
           </grid>
         </constraints>
         <properties>
-          <text value="Štart"/>
+          <text value="Start"/>
         </properties>
       </component>
       <component id="aaa01" class="javax.swing.JLabel" binding="routeLabel">
@@ -37,7 +37,7 @@
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Trasa: -"/>
+          <text value="Route -"/>
         </properties>
       </component>
       <component id="aaa02" class="javax.swing.JLabel" binding="replicationLabel">
@@ -45,7 +45,7 @@
           <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Počet replikácií: 0"/>
+          <text value="Replication count: 0"/>
         </properties>
       </component>
       <component id="aaa03" class="javax.swing.JLabel" binding="avgTimeLabel">
@@ -53,7 +53,7 @@
           <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Priemerný čas: -"/>
+          <text value="Average time: -"/>
         </properties>
       </component>
       <component id="cafa6" class="javax.swing.JButton" binding="pauseButton">
@@ -63,7 +63,7 @@
           </grid>
         </constraints>
         <properties>
-          <text value="Pozastaviť"/>
+          <text value="Pause"/>
         </properties>
       </component>
       <component id="28346" class="javax.swing.JButton" binding="stopButton">
@@ -73,7 +73,7 @@
           </grid>
         </constraints>
         <properties>
-          <text value="Zastaviť"/>
+          <text value="Stop"/>
         </properties>
       </component>
       <component id="bbb01" class="org.jfree.chart.ChartPanel" binding="chartPanel" custom-create="true">
