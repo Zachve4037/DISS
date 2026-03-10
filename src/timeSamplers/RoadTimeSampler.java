@@ -1,6 +1,6 @@
 package timeSamplers;
 
-import Roads.RoadPath;
+import Roads_Routes.RoadPath;
 
 import java.util.List;
 

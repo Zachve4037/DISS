@@ -1,11 +1,11 @@
-package Roads;
+package Roads_Routes;
 
 import java.util.List;
 
 public class Roads {
     private static final String K = "k";
     private static final String SHARED = "shared";
-    private Roads() {
+    public Roads() {
     }
 //  Zilina -> Strecno
     public static List<RoadPath> Z_S() {
