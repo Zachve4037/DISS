@@ -5,8 +5,7 @@ import java.util.List;
 public class Roads {
     private static final String K = "k";
     private static final String SHARED = "shared";
-    public Roads() {
-    }
+
 //  Zilina -> Strecno
     public static List<RoadPath> Z_S() {
         return List.of(
