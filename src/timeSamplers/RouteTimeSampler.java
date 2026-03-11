@@ -14,7 +14,7 @@ public class RouteTimeSampler {
     }
 
     public double sampleRouteMinutes(TimeTracker currentTime, String route) {
-        List<List<RoadPath>> legs = switch (route) {
+        List<List<RoadPath>> paths = switch (route) {
             case "Z_S_RT_D_Z" -> Routes.Z_S_RT_D_Z();
             case "Z_S_D_RT_Z" -> Routes.Z_S_D_RT_Z();
             case "Z_RT_S_D_Z" -> Routes.Z_RT_S_D_Z();
@@ -27,10 +27,10 @@ public class RouteTimeSampler {
         double totalMinutes = 0.0;
         TimeTracker now = currentTime.copy();
 
-        for (List<RoadPath> leg : legs) {
-            double legMinutes = roadTimeSampler.sampleRoadMinutes(leg, now);
-            totalMinutes += legMinutes;
-            now.addMinutes(legMinutes);
+        for (List<RoadPath> path : paths) {
+            double pathMinutes = roadTimeSampler.sampleRoadMinutes(path, now);
+            totalMinutes += pathMinutes;
+            now.addMinutes(pathMinutes);
         }
 
         return totalMinutes;
