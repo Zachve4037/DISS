@@ -1,6 +1,6 @@
 package GUI;
 
-import MonteCarlo.RouteDeadlineAnalysisService;
+import MonteCarlo.RouteDeadlineSimCore;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,12 +21,12 @@ public class RouteDeadlineGUI extends JFrame {
     private final JButton latest80Button = new JButton("Najst najneskorsi start");
 
     private final JLabel deadlineLabel = new JLabel("Deadline: 07:35:00");
-    private final JLabel replicationsLabel = new JLabel("Replikacie: " + RouteDeadlineAnalysisService.REPLICATIONS);
+    private final JLabel replicationsLabel = new JLabel("Replikacie: " + RouteDeadlineSimCore.REPLICATIONS);
     private final JLabel probabilityLabel = new JLabel("Pravdepodobnost: -");
     private final JLabel latestStartLabel = new JLabel("Najneskorsi start pre 80%: -");
     private final JLabel statusLabel = new JLabel(" ");
 
-    private final RouteDeadlineAnalysisService service = new RouteDeadlineAnalysisService();
+    private final RouteDeadlineSimCore service = new RouteDeadlineSimCore();
 
     public RouteDeadlineGUI() {
         setTitle("Uloha 2 - Deadline 07:35");
@@ -92,7 +92,7 @@ public class RouteDeadlineGUI extends JFrame {
         final int startSeconds;
 
         try {
-            startSeconds = RouteDeadlineAnalysisService.parseTimeToSeconds(startTimeField.getText());
+            startSeconds = RouteDeadlineSimCore.parseTimeToSeconds(startTimeField.getText());
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Neplatny cas", JOptionPane.ERROR_MESSAGE);
             return;
@@ -113,7 +113,7 @@ public class RouteDeadlineGUI extends JFrame {
                     double p = get();
                     probabilityLabel.setText(String.format(
                             "Pravdepodobnost pre start %s: %.2f%%",
-                            RouteDeadlineAnalysisService.formatHHmmss(startSeconds),
+                            RouteDeadlineSimCore.formatHHmmss(startSeconds),
                             p * 100.0
                     ));
                     statusLabel.setText("Hotovo.");
@@ -133,24 +133,24 @@ public class RouteDeadlineGUI extends JFrame {
         setControlsEnabled(false);
         statusLabel.setText("Pocitam najneskorsi start cez P80 (bisekcia)...");
 
-        SwingWorker<RouteDeadlineAnalysisService.PercentileSearchResult, Void> worker = new SwingWorker<>() {
+        SwingWorker<RouteDeadlineSimCore.PercentileSearchResult, Void> worker = new SwingWorker<>() {
             @Override
-            protected RouteDeadlineAnalysisService.PercentileSearchResult doInBackground() {
-                return service.findLatestStartByPercentile(route, RouteDeadlineAnalysisService.TARGET_PROBABILITY);
+            protected RouteDeadlineSimCore.PercentileSearchResult doInBackground() {
+                return service.findLatestStartByPercentile(route, RouteDeadlineSimCore.TARGET_PROBABILITY);
             }
 
             @Override
             protected void done() {
                 try {
-                    RouteDeadlineAnalysisService.PercentileSearchResult result = get();
+                    RouteDeadlineSimCore.PercentileSearchResult result = get();
 
                     if (!result.exists()) {
                         latestStartLabel.setText("Najneskorsi start pre P80 <= 07:35:00: neexistuje.");
                     } else {
                         latestStartLabel.setText(String.format(
                                 "Najneskorsi start (P80): %s | P80 prichod: %s",
-                                RouteDeadlineAnalysisService.formatHHmmss(result.latestStartSeconds()),
-                                RouteDeadlineAnalysisService.formatHHmmss(result.percentileArrivalSeconds())
+                                RouteDeadlineSimCore.formatHHmmss(result.latestStartSeconds()),
+                                RouteDeadlineSimCore.formatHHmmss(result.percentileArrivalSeconds())
                         ));
                     }
 

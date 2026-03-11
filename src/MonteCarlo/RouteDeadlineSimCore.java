@@ -5,7 +5,7 @@ import timeTracker.TimeTracker;
 
 import java.util.Arrays;
 
-public class RouteDeadlineAnalysisService {
+public class RouteDeadlineSimCore {
     public static final int REPLICATIONS = 100_000;
     public static final int DEADLINE_SECONDS = 7 * 3600 + 35 * 60; // 07:35:00
     public static final double TARGET_PROBABILITY = 0.80;
