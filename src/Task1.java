@@ -3,7 +3,7 @@ import GUI.RouteGUI;
 import javax.swing.*;
 import java.util.Random;
 
-public class Main {
+public class Task1 {
     private static final Random seedRng = new Random();
     private static final Random distanceRng = new Random(seedRng.nextLong());
     private static final Random degreeRng = new Random(seedRng.nextLong());
