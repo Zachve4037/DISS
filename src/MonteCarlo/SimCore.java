@@ -1,22 +1,28 @@
 package MonteCarlo;
 
 public abstract class SimCore {
-    private boolean run = true;
+    private volatile boolean run = true;
 
-    public void runSimulation(int replicationCount) {
-        int currentReplication = 1;
+    public void runSimulation(long replicationCount) {
+        setRun(true);
         beforeSimulation();
-        while (currentReplication <= replicationCount && run) {
+        long i = 0;
+        while (isRun() && (replicationCount <= 0 || i < replicationCount)) {
             beforeReplication();
+            if (!isRun()) break;
             doReplication();
             afterReplication();
-            currentReplication++;
+            i++;
         }
         afterSimulation();
     }
 
     public void setRun(boolean run) {
         this.run = run;
+    }
+
+    protected boolean isRun() {
+        return this.run;
     }
 
     protected abstract void beforeSimulation();

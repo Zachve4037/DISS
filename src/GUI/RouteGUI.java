@@ -25,7 +25,7 @@ public class RouteGUI extends JFrame {
             "Z_D_RT_S_Z"
     };
 
-    private static final int REPLICATIONS = 10_000_000;
+    private static final int REPLICATIONS = 0;
     private static final int UI_PROGRESS_STEP = 10_000;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
