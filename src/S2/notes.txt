@@ -1,0 +1,53 @@
+novinovy stanok,
+rozdelenia len tie co su popisane,
+
+UDALOSTNE SIM JADRO
+- kalendar udalosti - prioritny front (java -> priority queue)
+- counter
+- aktualny simulacny cas
+
++ beforeSimRun()
++ while(counter < reps && !stop) {
+    - ziskaj udalost z kalendara
+    - aktualizuj simulacny cas
+    - vykonaj udalost
+    - pridaj nove udalosti do kalendara
+    - counter++
+    beforeRep()
+    simulate()
+    afterRep()
+}
+
++simulate() {
+    while(kalendar.notEmpty()) {
+        - ziskaj udalost z kalendara
+        - aktualizuj simulacny cas
+        - vykonaj udalost
+    }
+}
+
+EVENT abstract class
+- cas udalosti
+- simCore -> poslem ako parameter
++ execute()
+
+STATISTIKA abstractna trieda
+priemer, vazeny priemer, intervaly spolahlivosti
+jedna pre simulaciu a druha pre konkretnu simulaciu
+
+UDALOSTNY DIAGRAM - novinovy stanok
+prichod zakaznika
+zaciatok obsluhy
+koniec obsluhy
+
+exponencialne
+trojuholnikove
+rovnomerne
+tak ako na S1 aj s implementaciou
+
+statistike testy -> chi kvadrat test
+frdsa.fri.uniza.sk
+(mas)
+
+davat aj .jar
+
