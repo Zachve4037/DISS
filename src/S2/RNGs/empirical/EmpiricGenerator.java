@@ -1,6 +1,6 @@
 package S2.RNGs.empirical;
 
-import S1.RNGs.intervals.EmpiricInterval;
+import S2.RNGs.intervals.EmpiricInterval;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -19,8 +19,7 @@ public abstract class EmpiricGenerator {
         }
         this.intervals = new LinkedList<>();
         double cumulativeP = 0;
-        for (int i = 0; i < intervals.size(); i++) {
-            EmpiricInterval interval = intervals.get(i);
+        for (EmpiricInterval interval : intervals) {
             cumulativeP += interval.getP();
             this.intervals.add(new EmpiricInterval(interval.getLow(), interval.getHigh(), cumulativeP));
         }

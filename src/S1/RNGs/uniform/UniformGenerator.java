@@ -4,7 +4,7 @@ import S1.RNGs.intervals.UniformInterval;
 
 import java.util.Random;
 
-public abstract class   UniformGenerator {
+public abstract class UniformGenerator {
     private final Random valueGenerator;
     private final UniformInterval interval;
 

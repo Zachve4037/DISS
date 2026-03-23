@@ -33,7 +33,7 @@ EVENT abstract class
 
 STATISTIKA abstractna trieda
 priemer, vazeny priemer, intervaly spolahlivosti
-jedna pre simulaciu a druha pre konkretnu simulaciu
+jedna pre simulaciu a druha pre konkretnu replikaciu
 
 UDALOSTNY DIAGRAM - novinovy stanok
 prichod zakaznika
