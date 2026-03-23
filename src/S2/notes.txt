@@ -50,4 +50,3 @@ frdsa.fri.uniza.sk
 (mas)
 
 davat aj .jar
-
