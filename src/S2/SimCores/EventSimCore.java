@@ -7,7 +7,7 @@ import S2.Statistics.WeightedStatistic;
 import java.util.PriorityQueue;
 
 public abstract class EventSimCore extends SimCore {
-    private PriorityQueue<Event> eventCalendar = new PriorityQueue<>();
+    private final PriorityQueue<Event> eventCalendar = new PriorityQueue<>();
     private double currentTime;
     protected int servedCustomers = 0;
 
