@@ -9,6 +9,6 @@ public class ContinuousExponentialDistRNG extends ExponentialGenerator {
 
     public double generate() {
         double u = this.getValueGenerator().nextDouble();
-        return -Math.log(1 - u) / this.getLambda();
+        return -Math.log(u) / this.getLambda();
     }
 }

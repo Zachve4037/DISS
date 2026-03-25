@@ -19,11 +19,11 @@ public class Tester {
         System.out.println("S2 RNG TESTER - " + SAMPLES + " samples per generator");
         System.out.println();
 
-        testContinuousUniform();
+//        testContinuousUniform();
 //        System.out.println();
 //        testContinuousTriangular();
 //        System.out.println();
-//        testContinuousExponential();
+        testContinuousExponential();
     }
 
     private static void testContinuousUniform() {
