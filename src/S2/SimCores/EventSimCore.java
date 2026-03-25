@@ -9,8 +9,7 @@ import java.util.PriorityQueue;
 public abstract class EventSimCore extends SimCore {
     private PriorityQueue<Event> eventCalendar = new PriorityQueue<>();
     private double currentTime;
-    private volatile boolean paused = false;
-    private int servedCustomers = 0;
+    protected int servedCustomers = 0;
 
     //global
     private ArithmeticalStatistic avgTimeInQueueOverReps;
@@ -24,10 +23,8 @@ public abstract class EventSimCore extends SimCore {
     private double lastQueueLenChangeTime;
     private int queueLength;
 
-
-    private boolean shouldStop() {
-        return this.servedCustomers < 1000;
-    }
+    protected abstract boolean shouldStop();
+    protected abstract void initialEvents();
 
     @Override
     protected void beforeSimulation() {
@@ -40,6 +37,7 @@ public abstract class EventSimCore extends SimCore {
     protected void beforeReplication() {
         this.currentTime = 0;
         this.eventCalendar.clear();
+        this.servedCustomers = 0;
 
         repTimeInQueue = new ArithmeticalStatistic();
         repServiceTime = new ArithmeticalStatistic();
@@ -47,6 +45,8 @@ public abstract class EventSimCore extends SimCore {
 
         this.lastQueueLenChangeTime = 0;
         this.queueLength = 0;
+
+        this.initialEvents();
     }
 
     @Override
@@ -56,7 +56,6 @@ public abstract class EventSimCore extends SimCore {
             if (event == null) break;
             this.currentTime = event.getTimeOfTheEvent();
             event.execute();
-            //todo pridat nove eventy
         }
         double dt = currentTime - lastQueueLenChangeTime;
         if (dt > 0) {
@@ -79,7 +78,7 @@ public abstract class EventSimCore extends SimCore {
         System.out.println("Average service time: " + this.avgServiceTimeOverReps.getValue());
     }
 
-    protected void scheduleEvent(Event e) {
+    public void scheduleEvent(Event e) {
         this.eventCalendar.add(e);
     }
 
@@ -92,17 +91,12 @@ public abstract class EventSimCore extends SimCore {
         this.lastQueueLenChangeTime = currentTime;
     }
 
-    protected void customerLeftQueue(double seconds) {
+    public void customerLeftQueue(double seconds) {
         this.repTimeInQueue.addValue(seconds, 1.0);
     }
 
-    protected void customerServed(double serviceTime) {
+    public void customerServed(double serviceTime) {
         this.repServiceTime.addValue(serviceTime, 1.0);
         this.servedCustomers++;
     }
-
-    public PriorityQueue<Event> getEventCalendar() {
-        return eventCalendar;
-    }
-
 }

@@ -16,6 +16,7 @@ public abstract class SimCore {
             doReplication();
             afterReplication();
             i++;
+            System.out.println(i);
         }
         afterSimulation();
     }

@@ -3,7 +3,7 @@ package S2.RNGs.exponential;
 import java.util.Random;
 
 public class ContinuousExponentialDistRNG extends ExponentialGenerator {
-    public ContinuousExponentialDistRNG(Random seedGenerator, int lambda) {
+    public ContinuousExponentialDistRNG(Random seedGenerator, double lambda) {
         super(seedGenerator, lambda);
     }
 

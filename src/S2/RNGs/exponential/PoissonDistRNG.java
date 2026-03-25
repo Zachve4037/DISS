@@ -3,7 +3,7 @@ package S2.RNGs.exponential;
 import java.util.Random;
 
 public class PoissonDistRNG extends ExponentialGenerator {
-    public PoissonDistRNG(Random seedGenerator, int lambda) {
+    public PoissonDistRNG(Random seedGenerator, double lambda) {
         super(seedGenerator, lambda);
     }
 
@@ -13,7 +13,7 @@ public class PoissonDistRNG extends ExponentialGenerator {
         double p = 1.0;
         do {
             k++;
-            p *= this.getValueGenerator().nextInt();
+            p *= this.getValueGenerator().nextDouble();
         } while (p > L);
         return k - 1;
     }

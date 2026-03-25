@@ -4,9 +4,9 @@ import java.util.Random;
 
 public abstract class ExponentialGenerator {
     private final Random valueGenerator;
-    private final int lambda;
+    private final double lambda;
 
-    public ExponentialGenerator(Random seedGenerator, int lambda) {
+    public ExponentialGenerator(Random seedGenerator, double lambda) {
         this.valueGenerator = new Random(seedGenerator.nextInt());
         this.lambda = lambda;
     }
@@ -15,7 +15,7 @@ public abstract class ExponentialGenerator {
         return valueGenerator;
     }
 
-    public int getLambda() {
+    public double getLambda() {
         return lambda;
     }
 }
