@@ -13,7 +13,7 @@ public class PoissonDistRNG extends ExponentialGenerator {
         double p = 1.0;
         do {
             k++;
-            p *= this.getValueGenerator().nextDouble();
+            p *= this.getValueGenerator().nextInt();
         } while (p > L);
         return k - 1;
     }

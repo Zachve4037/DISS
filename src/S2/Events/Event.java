@@ -2,7 +2,7 @@ package S2.Events;
 
 import S2.SimCores.EventSimCore;
 
-public abstract class Event {
+public abstract class Event implements Comparable<Event> {
     private double timeOfTheEvent;
     private EventSimCore simCore;
 
@@ -27,7 +27,8 @@ public abstract class Event {
         return simCore;
     }
 
-    public void setSimCore(EventSimCore simCore) {
-        this.simCore = simCore;
+    @Override
+    public int compareTo(Event o) {
+        return Double.compare(this.timeOfTheEvent, o.timeOfTheEvent);
     }
 }
