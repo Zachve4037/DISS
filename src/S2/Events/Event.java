@@ -3,7 +3,7 @@ package S2.Events;
 import S2.SimCores.EventSimCore;
 
 public abstract class Event implements Comparable<Event> {
-    private double timeOfTheEvent;
+    private final double timeOfTheEvent;
     private final EventSimCore simCore;
 
     public Event(double timeOfTheEvent, EventSimCore simCore) {

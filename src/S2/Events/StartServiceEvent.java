@@ -1,9 +1,10 @@
 package S2.Events;
 
+import S2.SimCores.EventSimCore;
 import S2.SimCores.Stanok;
 
 public class StartServiceEvent extends Event {
-    public StartServiceEvent(double timeOfEvent, Stanok simCore) {
+    public StartServiceEvent(double timeOfEvent, EventSimCore simCore) {
         super(timeOfEvent, simCore);
     }
 

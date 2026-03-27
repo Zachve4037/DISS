@@ -1,10 +1,11 @@
 package S2.Events;
 
+import S2.SimCores.EventSimCore;
 import S2.SimCores.Stanok;
 
 public class EndServiceEvent extends Event {
     private final double serviceTime;
-    public EndServiceEvent(double timeofEvent, Stanok simCore, double serviceTime) {
+    public EndServiceEvent(double timeofEvent, EventSimCore simCore, double serviceTime) {
         super(timeofEvent, simCore);
         this.serviceTime = serviceTime;
     }

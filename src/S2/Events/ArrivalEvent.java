@@ -1,9 +1,10 @@
 package S2.Events;
 
+import S2.SimCores.EventSimCore;
 import S2.SimCores.Stanok;
 
 public class ArrivalEvent extends Event {
-    public ArrivalEvent(double timeOfEvent, Stanok simCore) {
+    public ArrivalEvent(double timeOfEvent, EventSimCore simCore) {
         super(timeOfEvent, simCore);
     }
 

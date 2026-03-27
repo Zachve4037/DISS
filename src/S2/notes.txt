@@ -50,3 +50,5 @@ frdsa.fri.uniza.sk
 (mas)
 
 davat aj .jar
+
+prerusovana ciara ku radom je farebne odlisena
