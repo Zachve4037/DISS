@@ -51,4 +51,19 @@ frdsa.fri.uniza.sk
 
 davat aj .jar
 
-prerusovana ciara ku radom je farebne odlisena
+STATISTIKY
+ REPLIKACIA
+    - pocet zakaznikov cakajucich v rade na vylozenie prepraviek
+    - zakanici cakajuci v rade na vylozenie prepraviek
+    - priemerna doba stravena zakaznikom v rade na vylozenie prepraviek
+    - pocet zakaznikov cakajucich v rade na detektor kovov
+    - zakanici cakajuci v rade na detektor kovov
+    - priemerna doba stravena zakaznikom v rade na detektor kov
+    - pocet prepraviek cakajucich v rade na rontgen
+    - prepravky cakajuce v rade na rontgen
+    - priemerna doba stravena prepravkou v rade na rontgen
+    - pocet prepraviek cakajucich v rade na odobratie po rontgene
+    - prepravky cakajuce v rade na odobratie po rontgene
+    - priemerna doba stravena prepravkou v rade na odobratie
+ SIMULACIA
+    - priemer cez vsetky replikacie

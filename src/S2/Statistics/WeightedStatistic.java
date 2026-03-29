@@ -5,6 +5,7 @@ public class WeightedStatistic extends Statistic {
     private double weightedSum;
 
     public WeightedStatistic() {
+        super();
         this.sumWeightedValues = 0;
         this.weightedSum = 0;
     }

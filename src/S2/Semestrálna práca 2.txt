@@ -1,0 +1,54 @@
+Pozastavenie, spomalenie simulacie
+EventCore {
+	doReplication() {
+		...
+		while() {
+			while(isPaused) {
+				sleep(100ms)
+			}
+		}
+		...
+	}
+}
+-nedava zmysel pozastavovat medzi replikáciami - dava zmysel iba v jednej replikacii
+-dva rezimi - jeden kde sa da spomalovat, zastavovat a druhy, ktory sa neda spomalovat (asi ani zastavovat)
+-pre uzivatela simulacia musi vyzerat spojito (aj ked je to diskretna simulacia)
+-pre spomalenie si pridame event (ja ako programator ho nepouzivam, pouziva ho iba jadro):
+public class EventSleep extends Event {
+	execute() {
+		naplanuje sameho seba a zavola sleep(A - milisekundy nasho casu)
+		planEvent(EventSleep v case B - simulacny cas)
+	}
+}
+-nejaky prepinac, ze ak pouzivatel sleduje tu simulaciu, tak sa planuje EventSleep
+-vytiahnut tie parametre na GUI (mozem B fixne a bude si menit iba A - pre sleep, nejaky slider na GUI, moze byt aj nejaky combo box pomeru A : B - tymto pomerom si viem nastavit pomer simulacneho casu na nas cas)
+-1 rezim kde uzivatel sleduje simulaciu, druhy rezim kde to ide maximalne rychlo
+-idu replikacie max rychlostou, zaskrtnem, ze chcem sa pozerat na simulaciu, jadro naplanuje ten EventSleep, potom to odskrtnem a znova to ide max rychlostou
+-v tom "turbo" rychlom rezime - nechcem nic zobrazovat ani refreshovat v replikacii, ak si to dam pausnut a nechat sledovanie, tak sa zobrazuju veci na GUI
+-ak mam turbo rezim, tak sa mi zobrazuju veci po replikaciach - ako v AnyLogic
+-v sledovacom rezime sa zobrazuju veci v replikacii
+-ten atribut B - chcem vediet pouzivat ako programator - cize vytiahnut to z tamadial pre programatora, nie pre uzivatela
+EventSleep planuje iba jadro, nic ine - getter, setter na naplanovanie tejto udalosti
+
+Ukoncenie - treba pridat do toho while v doReplication() aj to ze ci chce ukoncit tuto replikaciu - ale ak tuto replikaciu niekto ukonci predcasne, tak mat tam nejaky priznak, lebo tuto replikaciu nesmiem pridat do vysledkov - napr bezi 51 replikacii, 50 cele, pojde 51. seknem ju po par sekundach simulacneho behu, tak tuto replikaciu nemozem pridat do vysledkov - moze to riesit jadro, alebo v afterReplication napr. Z NEUPLNYCH REPLIKACII NEMOZEM ROBIT VYSLEDKY - pre tych viac replikacii, v jednej replikacii normalne mozem (asi)
+
+Prepojenie na GUI
+Simulacia ma notifikovat GUI o zmene - mozem obnovit vsetky veci - ze aktualizujem aj napr. tabulky pre prepravky, aj pre zakaznnikov, aj ked sa iba 1 vec zmenila
+-navrhovy vzor Observer
+-ked si pauznem simulaciu, tak sa GUI nerefreshuje
+-treba si dat pozor, ze ked si pauznem simulaciu, tak sa ten stav v jadre musi zobrazit na GUI
+-Riesenie 2 z prezentacie sa davaju Delegati do EventCore
+-vsetko co sa deje v simulacii, chcem vidiet na GUI, vsetky veci co sa tam deju vytiahneme na GUI - ako to implementujeme, tak to vytiahneme na gui - implementujem  front cakajucich cestujúcich - tak si ho dam na gui, je dobre si cestujúcich indexovat, taktiez Batozinu je dobre si indexovat (id) - mat ich navzájom prepojene - batozina s id ... patri ku cestujúcemu s id ..., cestujúcemu s id ... patria batoziny s id ...
+-nas hlavny debugovaci nastroj je GUI - hned ako si pridam do simulacie napr stav rontgenu, tak si to hned vytiahnem na gui - robim si GUI priebezne - neda sa to oddebuggovat na konzole
+-GUI si urobit kompletne, hned tam dat to spomalenie, zastavenie
+-ak mam vsetko urobene a neviem si poradit, tak si zacat fixovat generatory - napr vsetky generatory nahradim s fixnými cislami - ale prvy krok je najprv urobit gui a celu simulaciu
+-GUI urobit ako prvu vec
+
+simulaciu viem znova spustat tak ako v 1. semestralke
+
+Poziadavky zo 6. tyzdna - vytiahnut na GUI - s tymto sa bude experimentovat
+Priemerna doba stravena cestujucim na bezpecnostnej kontrole neprekroci 10 minut
+Priemerny pocet cestujúcich cakajucich na prevzatie batoziny neprekroci 10 osob - POZOR pocitas z oboch liniek tie fronty
+Priemerny pocet cestujúcich cakajucich na zaciatok bezpecnostej prehliadky neprekroci 20 osob - POZOR opat z oboch radov
+
+-nezohladnovat pri vybere radu to ci je rontgen volny - len cisto podla dlzky radu - ked su oba rady volne a jeden rontgen je zabrany, tak aj tak iba podla dlzky radu vyberat
