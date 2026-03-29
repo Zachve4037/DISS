@@ -1,6 +1,6 @@
 package S2.SimCores;
 
-import S2.Events.ArrivalEvent;
+import S2.Events.Example.ArrivalEvent;
 import S2.RNGs.exponential.ContinuousExponentialDistRNG;
 import S2.RNGs.intervals.TriangleInterval;
 import S2.RNGs.triangle.ContinuousTriangularDistRNG;

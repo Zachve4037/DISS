@@ -1,5 +1,6 @@
-package S2.Events;
+package S2.Events.Example;
 
+import S2.Events.Event;
 import S2.SimCores.EventSimCore;
 import S2.SimCores.Stanok;
 
