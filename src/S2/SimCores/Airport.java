@@ -23,10 +23,9 @@ public class Airport extends EventSimCore {
     private final ContinuousUniformDistRNG xrayTimeRNG2;
     private final ContinuousTriangularDistRNG securityCheckTimeRNG;
     private final DiscreteEmpiricalDistRNG numberOfCratesRNG;
-    private StatsForAirport stats = new StatsForAirport();
 
     //statistiky
-
+    private StatsForAirport stats = new StatsForAirport();
 
     public Airport(Random seed) {
         this.arrivalTimeRNG = new ContinuousExponentialDistRNG(seed, 1.0 / 60.0); // TODO: lambda
@@ -54,23 +53,7 @@ public class Airport extends EventSimCore {
         this.scheduleEvent(new ArrivalEvent(this.currentTime, this));
     }
 
-    public double sampleInterArrivalSeconds() {
-        return arrivalTimeRNG.generate();
-    }
-
-    public double sampleMetalServiceSeconds(int laneId) {
-        return laneId == 0 ? metalDetectorTimeRNG1.generate() : metalDetectorTimeRNG2.generate();
-    }
-
-    public double sampleXrayServiceSeconds(int laneId) {
-        return laneId == 0 ? xrayTimeRNG1.generate() : xrayTimeRNG2.generate();
-    }
-
-    public double sampleUnloadServiceSeconds() {
-        return securityCheckTimeRNG.generate();
-    }
-
-    public int sampleCratesCount() {
-        return numberOfCratesRNG.generate();
+    public StatsForAirport getStats() {
+        return stats;
     }
 }
