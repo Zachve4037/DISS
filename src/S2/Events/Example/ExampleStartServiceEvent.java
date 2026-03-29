@@ -4,8 +4,8 @@ import S2.Events.Event;
 import S2.SimCores.EventSimCore;
 import S2.SimCores.Stanok;
 
-public class StartServiceEvent extends Event {
-    public StartServiceEvent(double timeOfEvent, EventSimCore simCore) {
+public class ExampleStartServiceEvent extends Event {
+    public ExampleStartServiceEvent(double timeOfEvent, EventSimCore simCore) {
         super(timeOfEvent, simCore);
     }
 
@@ -24,6 +24,6 @@ public class StartServiceEvent extends Event {
 
         sim.setServiceBusy(true);
         double serviceTime = sim.sampleServiceSeconds();
-        sim.scheduleEvent(new EndServiceEvent(now + serviceTime, sim, serviceTime));
+        sim.scheduleEvent(new ExampleEndServiceEvent(now + serviceTime, sim, serviceTime));
     }
 }

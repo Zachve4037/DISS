@@ -1,6 +1,6 @@
 package S2.SimCores;
 
-import S2.Events.Example.ArrivalEvent;
+import S2.Events.Example.ExampleArrivalEvent;
 import S2.RNGs.exponential.ContinuousExponentialDistRNG;
 import S2.RNGs.intervals.TriangleInterval;
 import S2.RNGs.triangle.ContinuousTriangularDistRNG;
@@ -32,7 +32,7 @@ public class Stanok extends EventSimCore {
     protected void initialEvents() {
         this.waitingQueue.clear();
         this.serviceBusy = false;
-        scheduleEvent(new ArrivalEvent(0.0, this));
+        scheduleEvent(new ExampleArrivalEvent(0.0, this));
     }
 
     public double sampleInterArrivalSeconds() {

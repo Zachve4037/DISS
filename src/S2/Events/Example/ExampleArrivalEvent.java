@@ -4,8 +4,8 @@ import S2.Events.Event;
 import S2.SimCores.EventSimCore;
 import S2.SimCores.Stanok;
 
-public class ArrivalEvent extends Event {
-    public ArrivalEvent(double timeOfEvent, EventSimCore simCore) {
+public class ExampleArrivalEvent extends Event {
+    public ExampleArrivalEvent(double timeOfEvent, EventSimCore simCore) {
         super(timeOfEvent, simCore);
     }
 
@@ -18,11 +18,11 @@ public class ArrivalEvent extends Event {
 
         if (simCore.shouldStop()) {
             double nextArrivalTime = now + simCore.sampleInterArrivalSeconds();
-            simCore.scheduleEvent(new ArrivalEvent(nextArrivalTime, simCore));
+            simCore.scheduleEvent(new ExampleArrivalEvent(nextArrivalTime, simCore));
         }
 
         if (!simCore.isServiceBusy()) {
-            simCore.scheduleEvent(new StartServiceEvent(now, simCore));
+            simCore.scheduleEvent(new ExampleStartServiceEvent(now, simCore));
         }
     }
 }
