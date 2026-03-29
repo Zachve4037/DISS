@@ -10,7 +10,7 @@ import java.util.Queue;
 import java.util.Random;
 
 public class Stanok extends EventSimCore {
-    private final int SERVED_CUSTOMERS_LIMIT = 1000;
+    private final int TIME_LIMIT = 28_800; //sekundy
     private final ContinuousTriangularDistRNG serviceTimeRNG;
     private final ContinuousExponentialDistRNG arrivalTimeRNG;
 
@@ -25,7 +25,7 @@ public class Stanok extends EventSimCore {
 
     @Override
     public boolean shouldStop() {
-        return this.servedCustomers >= SERVED_CUSTOMERS_LIMIT;
+        return !(this.currentTime >= TIME_LIMIT);
     }
 
     @Override
@@ -61,8 +61,11 @@ public class Stanok extends EventSimCore {
     }
 
     public double dequeueCustomer() {
-        double t = this.waitingQueue.poll();
-        super.queueLengthChange(waitingQueue.size());
-        return t;
+        if (!this.waitingQueue.isEmpty()) {
+            double t = this.waitingQueue.poll();
+            super.queueLengthChange(waitingQueue.size());
+            return t;
+        }
+        return -1;
     }
 }

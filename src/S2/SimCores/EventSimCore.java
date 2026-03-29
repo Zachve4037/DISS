@@ -8,7 +8,7 @@ import java.util.PriorityQueue;
 
 public abstract class EventSimCore extends SimCore {
     private final PriorityQueue<Event> eventCalendar = new PriorityQueue<>();
-    private double currentTime;
+    protected double currentTime;
     protected int servedCustomers = 0;
 
     //global
@@ -51,7 +51,7 @@ public abstract class EventSimCore extends SimCore {
 
     @Override
     protected void doReplication() {
-        while (!this.eventCalendar.isEmpty() && !shouldStop()) {
+        while (!this.eventCalendar.isEmpty() && shouldStop()) {
             Event event = this.eventCalendar.poll();
             if (event == null) break;
             this.currentTime = event.getTimeOfTheEvent();
