@@ -1,6 +1,8 @@
 package S2.SimCores;
 
 import S2.Events.Airport.ArrivalEvent;
+import S2.Objects.Crate;
+import S2.Objects.Traveller;
 import S2.RNGs.empirical.DiscreteEmpiricalDistRNG;
 import S2.RNGs.exponential.ContinuousExponentialDistRNG;
 import S2.RNGs.intervals.EmpiricInterval;
@@ -10,8 +12,8 @@ import S2.RNGs.triangle.ContinuousTriangularDistRNG;
 import S2.RNGs.uniform.ContinuousUniformDistRNG;
 import S2.Statistics.StatsForAirport;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class Airport extends EventSimCore {
     private final int TIME_LIMIT = 86_400; // 24 hodin v sekundach
@@ -26,6 +28,18 @@ public class Airport extends EventSimCore {
 
     //statistiky
     private StatsForAirport stats = new StatsForAirport();
+
+    //rady
+    private final Queue<Crate>[] xrayEnqueueCrates = new ArrayBlockingQueue[]{new ArrayBlockingQueue<Traveller>(), new ArrayBlockingQueue()}; //TODO kapacita radov
+    private final Queue<Crate>[] xrayDequeueCrates = new ArrayBlockingQueue[]{new ArrayBlockingQueue<Traveller>(), new ArrayBlockingQueue()}; //TODO kapacita radov
+    private final Queue<Traveller>[] cratesUnloadPeople = new LinkedList[]{new LinkedList(), new LinkedList()};
+    private final Queue<Traveller>[] metalPeople = new LinkedList[]{new LinkedList(), new LinkedList()};
+    private final Queue<Traveller>[] checkedPeople = new LinkedList[]{new LinkedList(), new LinkedList()};
+
+    //obsluhy
+    private final boolean[] xrayBusy = new boolean[]{false, false};
+    private final boolean[] metalDetectorBusy = new boolean[]{false, false};
+    private final boolean securityCheckBusy = false;
 
     public Airport(Random seed) {
         this.arrivalTimeRNG = new ContinuousExponentialDistRNG(seed, 1.0 / 60.0); // TODO: lambda
@@ -51,6 +65,11 @@ public class Airport extends EventSimCore {
     @Override
     protected void initialEvents() {
         this.scheduleEvent(new ArrivalEvent(this.currentTime, this));
+    }
+
+    public void enqueueTraveller(Traveller traveller) {
+        int workplace = this.cratesUnloadPeople[1].size() <= this.cratesUnloadPeople[0].size() ? 0 : 1;
+        this.cratesUnloadPeople[workplace].add(traveller);
     }
 
     public StatsForAirport getStats() {

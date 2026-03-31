@@ -5,7 +5,7 @@ import S2.RNGs.exponential.ContinuousExponentialDistRNG;
 import S2.RNGs.intervals.TriangleInterval;
 import S2.RNGs.triangle.ContinuousTriangularDistRNG;
 
-import java.util.ArrayDeque;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 
@@ -14,7 +14,7 @@ public class Stanok extends EventSimCore {
     private final ContinuousTriangularDistRNG serviceTimeRNG;
     private final ContinuousExponentialDistRNG arrivalTimeRNG;
 
-    private final Queue<Double> waitingQueue = new ArrayDeque<>();
+    private final Queue<Double> waitingQueue = new PriorityQueue<>();
     private boolean serviceBusy;
 
     public Stanok(Random seed, int lambdaPerMinute, TriangleInterval serviceTimeInterval) {
