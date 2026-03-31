@@ -25,7 +25,7 @@ public class Stanok extends EventSimCore {
 
     @Override
     public boolean shouldStop() {
-        return !(this.currentTime >= TIME_LIMIT);
+        return (this.currentTime >= TIME_LIMIT);
     }
 
     @Override
