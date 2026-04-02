@@ -1,6 +1,7 @@
 package S2.SimCores;
 
 import S2.Events.Airport.ArrivalEvent;
+import S2.Objects.Crate;
 import S2.Objects.Traveller;
 import S2.RNGs.empirical.DiscreteEmpiricalDistRNG;
 import S2.RNGs.exponential.ContinuousExponentialDistRNG;
@@ -27,11 +28,11 @@ public class Airport extends EventSimCore {
     private StatsForAirport stats = new StatsForAirport();
 
     //rady
-    private final ArrayBlockingQueue[] xrayEnqueueCrates = new ArrayBlockingQueue[]{new ArrayBlockingQueue<Traveller>(), new ArrayBlockingQueue()}; //TODO kapacita radov
-    private final ArrayBlockingQueue[] xrayDequeueCrates = new ArrayBlockingQueue[]{new ArrayBlockingQueue<Traveller>(), new ArrayBlockingQueue()}; //TODO kapacita radov
-    private final LinkedList[] cratesUnloadPeople = new LinkedList[]{new LinkedList(), new LinkedList()};
-    private final LinkedList[] metalPeople = new LinkedList[]{new LinkedList(), new LinkedList()};
-    private final LinkedList[] checkedPeople = new LinkedList[]{new LinkedList(), new LinkedList()};
+    private final ArrayBlockingQueue<Crate>[] xrayEnqueueCratesQueue;
+    private final ArrayBlockingQueue<Crate>[] xrayDequeueCratesQueue;
+    private final LinkedList<Traveller>[] cratesUnloadPeopleQueue = new LinkedList[]{new LinkedList<Traveller>(), new LinkedList<Traveller>()};
+    private final LinkedList<Traveller>[] metalPeopleQueue = new LinkedList[]{new LinkedList<Traveller>(), new LinkedList<Traveller>()};
+    private final LinkedList<Traveller>[] checkedPeopleQueue = new LinkedList[]{new LinkedList<Traveller>(), new LinkedList<Traveller>()};
 
     //obsluhy
     private boolean[] xrayBusy = new boolean[]{false, false};
@@ -43,7 +44,7 @@ public class Airport extends EventSimCore {
     private final UniformInterval xrayTimeInterval = new UniformInterval(9, 46);
     private final UniformInterval metalTimeInterval = new UniformInterval(6, 27);
 
-    public Airport(Random seed) {
+    public Airport(Random seed, int cratesIn, int cratesOut) {
         this.arrivalTimeRNG = new ContinuousExponentialDistRNG(seed, 1.0 / 60.0); // TODO: lambda
         this.metalDetectorTimeRNGs = new ContinuousUniformDistRNG[]{
                 new ContinuousUniformDistRNG(seed, metalTimeInterval),
@@ -61,6 +62,9 @@ public class Airport extends EventSimCore {
                         new EmpiricInterval(2, 3, 0.17)
                 )
         );
+
+        this.xrayEnqueueCratesQueue = new ArrayBlockingQueue[]{new ArrayBlockingQueue<Crate>(cratesIn), new ArrayBlockingQueue<Crate>(cratesIn)}; //TODO kapacita radov
+        this.xrayDequeueCratesQueue = new ArrayBlockingQueue[]{new ArrayBlockingQueue<Crate>(cratesOut), new ArrayBlockingQueue<Crate>(cratesOut)}; //TODO kapacita radov
     }
 
     @Override
@@ -75,6 +79,11 @@ public class Airport extends EventSimCore {
 
     public StatsForAirport getStats() {
         return stats;
+    }
+
+    public void enqueTravellerForCratesUnload(Traveller traveller) {
+        int workplace = this.xrayEnqueueCratesQueue[0].size() < this.xrayEnqueueCratesQueue[1].size() ? 0 : 1;
+        this.cratesUnloadPeopleQueue[workplace].add(traveller);
     }
 
     public boolean isXrayBusy(int workplace) {
