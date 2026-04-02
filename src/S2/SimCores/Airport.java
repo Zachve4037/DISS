@@ -25,7 +25,7 @@ public class Airport extends EventSimCore {
     private final DiscreteEmpiricalDistRNG numberOfCratesRNG;
 
     //statistiky
-    private StatsForAirport stats = new StatsForAirport();
+    private StatsForAirport stats;
 
     //rady
     private final ArrayBlockingQueue<Crate>[] xrayEnqueueCratesQueue;
@@ -45,6 +45,7 @@ public class Airport extends EventSimCore {
     private final UniformInterval metalTimeInterval = new UniformInterval(6, 27);
 
     public Airport(Random seed, int cratesIn, int cratesOut) {
+        this.stats = new StatsForAirport();
         this.arrivalTimeRNG = new ContinuousExponentialDistRNG(seed, 1.0 / 60.0); // TODO: lambda
         this.metalDetectorTimeRNGs = new ContinuousUniformDistRNG[]{
                 new ContinuousUniformDistRNG(seed, metalTimeInterval),
@@ -128,5 +129,41 @@ public class Airport extends EventSimCore {
 
     public int sampleNumberOfCrates() {
         return this.numberOfCratesRNG.generate();
+    }
+
+    public double getCurrentTimeSeconds() {
+        return this.currentTime;
+    }
+
+    public List<Integer> getUnloadQueueTravellerIds() {
+        List<Integer> out = new ArrayList<>();
+        for (LinkedList<Traveller> q : cratesUnloadPeopleQueue) {
+            for (Traveller t : q) out.add(t.getId());
+        }
+        return out;
+    }
+
+    public List<Integer> getMetalQueueTravellerIds() {
+        List<Integer> out = new ArrayList<>();
+        for (LinkedList<Traveller> q : metalPeopleQueue) {
+            for (Traveller t : q) out.add(t.getId());
+        }
+        return out;
+    }
+
+    public List<Integer> getXrayEnqueueCrateIds() {
+        List<Integer> out = new ArrayList<>();
+        for (ArrayBlockingQueue<Crate> q : xrayEnqueueCratesQueue) {
+            for (Crate c : q) out.add(c.getId());
+        }
+        return out;
+    }
+
+    public List<Integer> getXrayDequeueCrateIds() {
+        List<Integer> out = new ArrayList<>();
+        for (ArrayBlockingQueue<Crate> q : xrayDequeueCratesQueue) {
+            for (Crate c : q) out.add(c.getId());
+        }
+        return out;
     }
 }

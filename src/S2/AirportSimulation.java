@@ -1,9 +1,9 @@
 package S2;
 
-import S2.GUI.Airport;
+import S2.GUI.GUI_Airport;
 
 public class AirportSimulation {
         public static void main(String[] args) {
-            Airport airport = new Airport();
+            GUI_Airport GUIAirport = new GUI_Airport();
         }
 }

@@ -1,7 +1,7 @@
 package S2.Statistics;
 
-import java.util.HashMap;
-import java.util.Map;
+import S2.SimCores.Airport;
+import java.util.*;
 
 public class StatsForAirport {
     // ---------- REPLIKACIA ----------
@@ -257,5 +257,21 @@ public class StatsForAirport {
         updateMetalQueueLen(metalQueueLen, now);
         updateXrayQueueLen(xrayQueueLen, now);
         updatePickupQueueLen(pickupQueueLen, now);
+    }
+
+    public long getRepCustomersEnteredUnloadQueue() {
+        return repCustomersEnteredUnloadQueue;
+    }
+
+    public long getRepCustomersEnteredMetalQueue() {
+        return repCustomersEnteredMetalQueue;
+    }
+
+    public long getRepCratesEnteredXrayQueue() {
+        return repCratesEnteredXrayQueue;
+    }
+
+    public long getRepCratesEnteredPickupQueue() {
+        return repCratesEnteredPickupQueue;
     }
 }
