@@ -42,8 +42,8 @@ public class GUI_Airport {
         controls.setLayout(new BoxLayout(controls, BoxLayout.Y_AXIS));
 
         JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        cratesInCombo = new JComboBox<>(new Integer[]{1, 2, 3, 4, 5, 6, 7, 8});
-        cratesOutCombo = new JComboBox<>(new Integer[]{1, 2, 3, 4, 5, 6, 7, 8});
+        cratesInCombo = new JComboBox<>(new Integer[]{1, 2, 3, 4});
+        cratesOutCombo = new JComboBox<>(new Integer[]{1, 2, 3, 4, 5});
         startSimButton = new JButton("Start Simulation");
         stopSimButton = new JButton("Stop");
         stopSimButton.setEnabled(false);
@@ -66,7 +66,7 @@ public class GUI_Airport {
         timeScaleSlider.setPaintLabels(true);
 
         maxSpeedCheckBox = new JCheckBox("Max speed (no delay)");
-        simTimeLabel = new JLabel("Sim time: 06:00:00");
+        simTimeLabel = new JLabel("Sim time: 00:00:00");
 
         row2.add(new JLabel("Speed factor:"));
         row2.add(timeScaleSlider);
@@ -151,6 +151,11 @@ public class GUI_Airport {
         addRow("Sim: avg wait pickup (s)", "-", "-");
         addRow("Sim: avg customer system time (s)", "-", "-");
 
+        // --- NOVE KPI PODLA ZADANIA ---
+        addRow("KPI: avg security time <= 10 min", "-", "limit: 600 s");
+        addRow("KPI: avg waiting for baggage pickup <= 10", "-", "limit: 10 persons");
+        addRow("KPI: avg waiting for security start <= 20", "-", "limit: 20 persons");
+
         addRow("Queue NOW: unload people size", "-", "-");
         addRow("Queue NOW: unload people elements", "-", "-");
         addRow("Queue NOW: metal people size", "-", "-");
@@ -168,7 +173,7 @@ public class GUI_Airport {
 
         // Cas
         int secFromZero = (int) Math.round(airport.getCurrentTimeSeconds());
-        simTimeLabel.setText("Sim time: " + formatFrom0600(secFromZero));
+        simTimeLabel.setText("Sim time: " + formatFrom0000(secFromZero));
 
         StatsForAirport s = airport.getStats();
 
@@ -198,20 +203,33 @@ public class GUI_Airport {
         setValue(20, safeDouble(s.getSimAvgWaitPickup().getValue()), "-");
         setValue(21, safeDouble(s.getSimAvgCustomerSystemTime().getValue()), "-");
 
+        // --- NOVE KPI ---
+        double avgSecurityTimeSec = s.getSimAvgCustomerSystemTime().getValue();
+        double avgPickupWaitingPersons = s.getSimAvgPickupQueueLen().getValue(); // agregovane cez obe linky
+        double avgSecurityStartWaitingPersons = s.getSimAvgMetalQueueLen().getValue(); // agregovane cez obe rady
+
+        setValue(22, safeDouble(avgSecurityTimeSec),
+                avgSecurityTimeSec <= 600.0 ? "OK" : "NOK");
+        setValue(23, safeDouble(avgPickupWaitingPersons),
+                avgPickupWaitingPersons <= 10.0 ? "OK" : "NOK");
+        setValue(24, safeDouble(avgSecurityStartWaitingPersons),
+                avgSecurityStartWaitingPersons <= 20.0 ? "OK" : "NOK");
+
         // Stav radov + prvky
         List<Integer> unloadIds = airport.getUnloadQueueTravellerIds();
         List<Integer> metalIds = airport.getMetalQueueTravellerIds();
         List<Integer> xrayEnqueueIds = airport.getXrayEnqueueCrateIds();
         List<Integer> xrayDequeueIds = airport.getXrayDequeueCrateIds();
 
-        setValue(22, unloadIds.size(), "-");
-        setValue(23, unloadIds.toString(), "traveller IDs");
-        setValue(24, metalIds.size(), "-");
-        setValue(25, metalIds.toString(), "traveller IDs");
-        setValue(26, xrayEnqueueIds.size(), "-");
-        setValue(27, xrayEnqueueIds.toString(), "crate IDs");
-        setValue(28, xrayDequeueIds.size(), "-");
-        setValue(29, xrayDequeueIds.toString(), "crate IDs");
+        // POSUNUTE INDEXY O +3
+        setValue(25, unloadIds.size(), "-");
+        setValue(26, unloadIds.toString(), "traveller IDs");
+        setValue(27, metalIds.size(), "-");
+        setValue(28, metalIds.toString(), "traveller IDs");
+        setValue(29, xrayEnqueueIds.size(), "-");
+        setValue(30, xrayEnqueueIds.toString(), "crate IDs");
+        setValue(31, xrayDequeueIds.size(), "-");
+        setValue(32, xrayDequeueIds.toString(), "crate IDs");
     }
 
     private void addRow(String metric, Object value, String detail) {
@@ -232,8 +250,8 @@ public class GUI_Airport {
         return String.valueOf(v);
     }
 
-    private String formatFrom0600(int secondsFromStart) {
-        int total = 6 * 3600 + Math.max(secondsFromStart, 0);
+    private String formatFrom0000(int secondsFromStart) {
+        int total = Math.max(secondsFromStart, 0);
         int hh = (total / 3600) % 24;
         int mm = (total % 3600) / 60;
         int ss = total % 60;

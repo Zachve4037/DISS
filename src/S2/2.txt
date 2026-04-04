@@ -1,0 +1,45 @@
+Režimy:
+	1. Debugovací
+	2. Replikácie - maximálne rýchlo, GUI sa refreshuje až po celej replikácii
+	3. Popísaný nižšie
+
+Štatistiky
+	-ak cestujúci nešiel do queue, tak sa započíta do štatistiky, že tam strávil nulový čas
+	-interval spoľahlivosti nerobím z jednej replikácie
+	-potrebujem si pridať sumu druhých mocnín
+	-pridať si tam smerodajnú odchýlku a výberovú smerodajnú odchýlku
+	-ak mám replikácií viac (rovné?) 30, tak až vtedy budem vyhodnocovať interval spoľahlivosti (alebo si pridám tabuľku aj ak bude hodnôt menej (rovné?) ako 30)
+	-v 1, móde vypisujem aj priebežné štatistiky - bez intervalov spoľahlivosti
+	-v 2. móde si vypisujem aj interval spoľahlivosti
+	-budem mať 2 inštancie pre štatistiky - jeden pre 1. mód, 2. pre druhý mód - do štatistík pre 2. mód vkladám priemer z replikácie
+	-všetky štatistiky pre 2. mód sú diskrétne štatistiky
+	-nemusím dávať pre spojitú štatistiku interval spoľahlivosti
+	
+3. Režim - Vyhodnotenie citlivosti:
+	-vyšetriť citlivosť na vstupný tok pasažierov
+	-na x osi bude kapacita a na y osi bude čas na bezpečnostnej kontrole
+	-našou úlohou je zistiť doporučenú kapacitu
+	-zadám si kapacitu, ktorú si chcem preveriť a +- 10% okolo toho a zadám počet hodnôt, ktoré chcem preveriť
+		-čiže napr. 1000 a 5, tak preverujem 900, 950, 1000, 1050, 1100
+		-vyšetruje sa to z replikácií	
+	
+-zistiť si kapacitu terminálu vo for - for (int kapacita...)
+-môže byť aj 4. režim, ktorý sám nájde to optimálne riešenie
+-tabuľka čo si exportnem do excelu, tak tú tabuľku dať do dokumentácie (časť, nemusím celý, ale okolie toho riešenia) - farebne
+
+-vstup do GUI je kapacita terminálu - čiže počet ľudí čo prejde terminálom za 24 hod - potom si to prepočítam na lambdu (na 24 hodín - môže byť kontrola, že počet ľudí čo prešlo za 24 hodín), možno aj dĺžka zahrievania by mohla byť vstup do GUI
+
+Dokumentácia:
+	-do dokumentácie dám graf z toho 4. režimu
+	-AI
+	-udalostný diagram, popis udalostí
+	-zdôvodniť zmeny, stačí nový diagram
+	-zahrievanie simulácie popísať
+	-vyhodnotenie - ako som sa dopracoval ku výsledkom - tabuľky - číselné výsledky nedokumentovať obrázkom - čiže odpísať hodnoty, iba grafy si môžem odfotiť
+
+Zahrievanie:
+	-použiť nejakú metódu z prednášky
+	-nejako to aj zdokumentovať
+	-môže byť udalosť koniec zahrievania - resetovanie štatistík
+
+Pre tie dva rady rátam jednu štatistiku - suma z oboch radov - čiže počet ľudí v tej rade
