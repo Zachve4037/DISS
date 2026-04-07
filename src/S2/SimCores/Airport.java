@@ -232,4 +232,46 @@ public class Airport extends EventSimCore {
         }
         return null;
     }
+
+    private void validateWorkplace(int workplace) {
+        if (workplace < 0 || workplace >= 2) {
+            throw new IllegalArgumentException("workplace must be 0 or 1");
+        }
+    }
+
+    public List<Integer> getUnloadQueueTravellerIds(int workplace) {
+        validateWorkplace(workplace);
+        List<Integer> out = new ArrayList<>();
+        for (Traveller t : cratesUnloadPeopleQueue[workplace]) {
+            out.add(t.getId());
+        }
+        return out;
+    }
+
+    public List<Integer> getMetalQueueTravellerIds(int workplace) {
+        validateWorkplace(workplace);
+        List<Integer> out = new ArrayList<>();
+        for (Traveller t : metalPeopleQueue[workplace]) {
+            out.add(t.getId());
+        }
+        return out;
+    }
+
+    public List<Integer> getXrayEnqueueCrateIds(int workplace) {
+        validateWorkplace(workplace);
+        List<Integer> out = new ArrayList<>();
+        for (Crate c : xrayCratesQueue[workplace]) {
+            out.add(c.getId());
+        }
+        return out;
+    }
+
+    public List<Integer> getXrayDequeueCrateIds(int workplace) {
+        validateWorkplace(workplace);
+        List<Integer> out = new ArrayList<>();
+        for (Crate c : xrayDequeueCratesQueue[workplace]) {
+            out.add(c.getId());
+        }
+        return out;
+    }
 }

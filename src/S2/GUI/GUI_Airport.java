@@ -156,14 +156,30 @@ public class GUI_Airport {
         addRow("KPI: avg waiting for baggage pickup <= 10", "-", "limit: 10 persons");
         addRow("KPI: avg waiting for security start <= 20", "-", "limit: 20 persons");
 
-        addRow("Queue NOW: unload people size", "-", "-");
-        addRow("Queue NOW: unload people elements", "-", "-");
-        addRow("Queue NOW: metal people size", "-", "-");
-        addRow("Queue NOW: metal people elements", "-", "-");
-        addRow("Queue NOW: xray enqueue crates size", "-", "-");
-        addRow("Queue NOW: xray enqueue crates elements", "-", "-");
-        addRow("Queue NOW: xray dequeue crates size", "-", "-");
-        addRow("Queue NOW: xray dequeue crates elements", "-", "-");
+        // Detail radov po pracoviskach
+        addRow("Queue NOW W0: unload people size", "-", "-");
+        addRow("Queue NOW W0: unload people elements", "-", "-");
+        addRow("Queue NOW W1: unload people size", "-", "-");
+        addRow("Queue NOW W1: unload people elements", "-", "-");
+
+        addRow("Queue NOW W0: metal people size", "-", "-");
+        addRow("Queue NOW W0: metal people elements", "-", "-");
+        addRow("Queue NOW W1: metal people size", "-", "-");
+        addRow("Queue NOW W1: metal people elements", "-", "-");
+
+        addRow("Queue NOW W0: xray enqueue crates size", "-", "-");
+        addRow("Queue NOW W0: xray enqueue crates elements", "-", "-");
+        addRow("Queue NOW W1: xray enqueue crates size", "-", "-");
+        addRow("Queue NOW W1: xray enqueue crates elements", "-", "-");
+
+        addRow("Queue NOW W0: xray dequeue crates size", "-", "-");
+        addRow("Queue NOW W0: xray dequeue crates elements", "-", "-");
+        addRow("Queue NOW W1: xray dequeue crates size", "-", "-");
+        addRow("Queue NOW W1: xray dequeue crates elements", "-", "-");
+
+        // Volitelne: stav pracovisk
+        addRow("Workplace W0 busy", "-", "metal/xray/inspect");
+        addRow("Workplace W1 busy", "-", "metal/xray/inspect");
     }
 
     private void refreshFromAirport() {
@@ -215,21 +231,51 @@ public class GUI_Airport {
         setValue(24, safeDouble(avgSecurityStartWaitingPersons),
                 avgSecurityStartWaitingPersons <= 20.0 ? "OK" : "NOK");
 
-        // Stav radov + prvky
-        List<Integer> unloadIds = airport.getUnloadQueueTravellerIds();
-        List<Integer> metalIds = airport.getMetalQueueTravellerIds();
-        List<Integer> xrayEnqueueIds = airport.getXrayEnqueueCrateIds();
-        List<Integer> xrayDequeueIds = airport.getXrayDequeueCrateIds();
+        // Stav radov + prvky po pracoviskach
+        List<Integer> unloadW0 = airport.getUnloadQueueTravellerIds(0);
+        List<Integer> unloadW1 = airport.getUnloadQueueTravellerIds(1);
 
-        // POSUNUTE INDEXY O +3
-        setValue(25, unloadIds.size(), "-");
-        setValue(26, unloadIds.toString(), "traveller IDs");
-        setValue(27, metalIds.size(), "-");
-        setValue(28, metalIds.toString(), "traveller IDs");
-        setValue(29, xrayEnqueueIds.size(), "-");
-        setValue(30, xrayEnqueueIds.toString(), "crate IDs");
-        setValue(31, xrayDequeueIds.size(), "-");
-        setValue(32, xrayDequeueIds.toString(), "crate IDs");
+        List<Integer> metalW0 = airport.getMetalQueueTravellerIds(0);
+        List<Integer> metalW1 = airport.getMetalQueueTravellerIds(1);
+
+        List<Integer> xrayInW0 = airport.getXrayEnqueueCrateIds(0);
+        List<Integer> xrayInW1 = airport.getXrayEnqueueCrateIds(1);
+
+        List<Integer> xrayOutW0 = airport.getXrayDequeueCrateIds(0);
+        List<Integer> xrayOutW1 = airport.getXrayDequeueCrateIds(1);
+
+        // Indexy od 25 dalej
+        setValue(25, unloadW0.size(), "-");
+        setValue(26, unloadW0.toString(), "traveller IDs");
+        setValue(27, unloadW1.size(), "-");
+        setValue(28, unloadW1.toString(), "traveller IDs");
+
+        setValue(29, metalW0.size(), "-");
+        setValue(30, metalW0.toString(), "traveller IDs");
+        setValue(31, metalW1.size(), "-");
+        setValue(32, metalW1.toString(), "traveller IDs");
+
+        setValue(33, xrayInW0.size(), "-");
+        setValue(34, xrayInW0.toString(), "crate IDs");
+        setValue(35, xrayInW1.size(), "-");
+        setValue(36, xrayInW1.toString(), "crate IDs");
+
+        setValue(37, xrayOutW0.size(), "-");
+        setValue(38, xrayOutW0.toString(), "crate IDs");
+        setValue(39, xrayOutW1.size(), "-");
+        setValue(40, xrayOutW1.toString(), "crate IDs");
+
+        // busy status
+        String busyW0 = "metal=" + airport.isMetalDetectorBusy(0)
+                + ", xray=" + airport.isXrayBusy(0)
+                + ", inspect=" + airport.isSecurityCheckBusy(0);
+        String busyW1 = "metal=" + airport.isMetalDetectorBusy(1)
+                + ", xray=" + airport.isXrayBusy(1)
+                + ", inspect=" + airport.isSecurityCheckBusy(1);
+
+        setValue(41, "-", busyW0);
+        setValue(42, "-", busyW1);
+
     }
 
     private void addRow(String metric, Object value, String detail) {
