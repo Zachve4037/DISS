@@ -16,10 +16,24 @@ public class XrayEndEvent extends Event {
         Airport sim = (Airport) getSimCore();
         double now = getTimeOfTheEvent();
 
-        sim.enqueueCrateForXrayDequeue(sim.pollCrateForXray(workplace), workplace);
+        Crate processed = sim.pollCrateForXrayInput(workplace);
+        if (processed != null) {
+            sim.enqueueCrateForXrayDequeue(processed, workplace, now);
+            sim.markCrateReadyForOwner(processed);
+        }
 
-        if (sim.hasWaitingCratesForXray(workplace)) {
+        sim.setXrayBusy(workplace, false);
+
+        if (sim.hasWaitingCratesForXray(workplace) && !sim.isXrayOutputFull(workplace)) {
             sim.scheduleEvent(new XrayStartEvent(now, sim, workplace));
+        }
+
+        if (sim.hasWaitingCheckedTraveller(workplace)) {
+            sim.scheduleEvent(new CratesTakeEvent(now, sim, workplace, sim.peekCheckedTraveller(workplace)));
+        }
+
+        if (sim.hasWaitingUnloadTraveller(workplace) && sim.canPutCrateOnXrayInput(workplace)) {
+            sim.scheduleEvent(new CratesUnloadEvent(now, sim, workplace));
         }
     }
 }

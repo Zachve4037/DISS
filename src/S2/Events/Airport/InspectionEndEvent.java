@@ -20,7 +20,10 @@ public class InspectionEndEvent extends Event {
         double now = getTimeOfTheEvent();
 
         sim.setSecurityCheckBusy(workplace, false);
-        sim.enqueueCheckedTraveller(this.t, workplace);
+        sim.setMetalDetectorBusy(workplace, false);
+
+        sim.markTravellerAfterSecurity(t, now);
+        sim.enqueueCheckedTraveller(t, workplace);
         if (sim.hasWaitingMetalTraveller(workplace)){
             sim.scheduleEvent(new MetalStartEvent(now, sim, workplace, sim.pollMetalTraveller(workplace)));
         }

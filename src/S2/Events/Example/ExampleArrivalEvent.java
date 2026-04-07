@@ -16,7 +16,7 @@ public class ExampleArrivalEvent extends Event {
 
         simCore.enqueueCustomer(now);
 
-        if (simCore.shouldStop()) {
+        if (!simCore.shouldStop()) {
             double nextArrivalTime = now + simCore.sampleInterArrivalSeconds();
             simCore.scheduleEvent(new ExampleArrivalEvent(nextArrivalTime, simCore));
         }

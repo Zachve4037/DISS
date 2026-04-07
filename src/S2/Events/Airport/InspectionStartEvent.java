@@ -22,6 +22,7 @@ public class InspectionStartEvent extends Event {
         double now = getTimeOfTheEvent();
 
         sim.setSecurityCheckBusy(workplace, true);
+        sim.setMetalDetectorBusy(workplace, true);
         sim.scheduleEvent(new InspectionEndEvent(now + inspectionTime, sim, workplace, t));
     }
 }

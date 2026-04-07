@@ -51,7 +51,7 @@ public abstract class EventSimCore extends SimCore {
 
     @Override
     protected void doReplication() {
-        while (!this.eventCalendar.isEmpty() && shouldStop()) {
+        while (!this.eventCalendar.isEmpty() && !shouldStop()) {
             Event event = this.eventCalendar.poll();
             if (event == null) break;
             this.currentTime = event.getTimeOfTheEvent();

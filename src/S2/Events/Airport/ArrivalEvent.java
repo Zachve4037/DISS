@@ -15,17 +15,13 @@ public class ArrivalEvent extends Event {
         Airport sim = (Airport) getSimCore();
         double now = getTimeOfTheEvent();
 
-        Traveller t = sim.createNewTraveller();
-
-        int workplace = sim.enqueTravellerForCratesUnload(t);
+        Traveller t = sim.createNewTraveller(now);
+        int workplace = sim.enqueTravellerForCratesUnload(t, now);
 
         if (!sim.shouldStop()) {
-            double nextArrivalTime = now + sim.sampleArrivalTime();
-            sim.scheduleEvent(new ArrivalEvent(nextArrivalTime, sim));
-        } else {
-            //TODO: stop replication
+            sim.scheduleEvent(new ArrivalEvent(now + sim.sampleArrivalTime(), sim));
         }
 
-        sim.scheduleEvent(new CratesUnloadEvent(now, sim, workplace, t));
+        sim.scheduleEvent(new CratesUnloadEvent(now, sim, workplace));
     }
 }

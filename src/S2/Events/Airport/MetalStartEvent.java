@@ -19,14 +19,11 @@ public class MetalStartEvent extends Event {
         Airport sim = (Airport) getSimCore();
         double now = getTimeOfTheEvent();
 
-        if (sim.isMetalDetectorBusy(workplace) || !sim.hasWaitingMetalTraveller(workplace)) {
+        if (sim.isMetalDetectorBusy(workplace) || !sim.hasWaitingMetalTraveller(workplace) || sim.isSecurityCheckBusy(workplace)) {
             return;
         }
 
-//        double arrivalTime = ; //TODO
-//        double timeInQueue = now - arrivalTime;
-//        sim.getStats.(timeInQueue); //TODO
-
+        Traveller t = sim.pollMetalTraveller(workplace);
         sim.setMetalDetectorBusy(workplace, true);
         sim.scheduleEvent(new MetalEndEvent(now + sim.sampleMetalDetectorTime(workplace), sim, workplace, t));
     }

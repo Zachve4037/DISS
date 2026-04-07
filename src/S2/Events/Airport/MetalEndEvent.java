@@ -19,23 +19,20 @@ public class MetalEndEvent extends Event {
         Airport sim = (Airport) getSimCore();
         double now = getTimeOfTheEvent();
 
-        sim.setMetalDetectorBusy(workplace, false);
-
-        double inspectionTime = 0;
         if (Math.random() <= 0.19) {
-            inspectionTime = sim.sampleSecurityCheckTime(workplace);
-            sim.scheduleEvent(new InspectionStartEvent(now, sim, workplace, t, inspectionTime));
+            sim.scheduleEvent(new InspectionStartEvent(now, sim, workplace, t, sim.sampleSecurityCheckTime(workplace)));
             return;
         }
 
+        sim.setMetalDetectorBusy(workplace, false);
+
+        sim.markTravellerAfterSecurity(t, now);
+        sim.enqueueCheckedTraveller(t, workplace);
+
         if (sim.hasWaitingMetalTraveller(workplace)) {
-            sim.scheduleEvent(new MetalStartEvent(now + inspectionTime, sim, workplace, sim.pollMetalTraveller(workplace)));
+            sim.scheduleEvent(new MetalStartEvent(now, sim, workplace, sim.pollMetalTraveller(workplace)));
         }
 
-        sim.enqueueCheckedTraveller(this.t, workplace);
-
-        if (!sim.isXrayDequeueBusy(workplace)) {
-            sim.scheduleEvent(new CratesTakeEvent(now, sim, workplace, t));
-        }
+        sim.scheduleEvent(new CratesTakeEvent(now, sim, workplace, t));
     }
 }
