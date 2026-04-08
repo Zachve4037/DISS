@@ -5,6 +5,7 @@ import java.util.LinkedList;
 public class Traveller {
     private final int Id;
     private final LinkedList<Crate> crates;
+    private int nextCrateToUnload = 0;
 
     public Traveller(int id, int numOfCrates, int startCrateId) {
         this.Id = id;
@@ -20,5 +21,18 @@ public class Traveller {
 
     public LinkedList<Crate> getCrates() {
         return crates;
+    }
+
+    public boolean hasRemainingCratesToUnload() {
+        return nextCrateToUnload < crates.size();
+    }
+
+    public Crate unloadNextCrate() {
+        if (!hasRemainingCratesToUnload()) {
+            return null;
+        }
+        Crate c = crates.get(nextCrateToUnload);
+        nextCrateToUnload++;
+        return c;
     }
 }

@@ -4,6 +4,7 @@ package S2.SimCores;
 public abstract class SimCore {
     private volatile boolean run = true;
     private long replications;
+    private Runnable onReplicationFinished;
 
     public void runSimulation(long replicationCount) {
         this.replications = replicationCount;
@@ -16,7 +17,10 @@ public abstract class SimCore {
             doReplication();
             afterReplication();
             i++;
-            System.out.println(i);
+
+            if (onReplicationFinished != null) {
+                onReplicationFinished.run();
+            }
         }
         afterSimulation();
     }
@@ -42,4 +46,9 @@ public abstract class SimCore {
     public long getReplications() {
         return replications;
     }
+
+    public void setOnReplicationFinished(Runnable onReplicationFinished) {
+        this.onReplicationFinished = onReplicationFinished;
+    }
+
 }

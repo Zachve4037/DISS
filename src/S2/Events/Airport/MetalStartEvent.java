@@ -7,11 +7,10 @@ import S2.SimCores.EventSimCore;
 
 public class MetalStartEvent extends Event {
     private final int workplace;
-    private final Traveller t;
-    public MetalStartEvent(double timeOfTheEvent, EventSimCore simCore, int workplace, Traveller t) {
+
+    public MetalStartEvent(double timeOfTheEvent, EventSimCore simCore, int workplace) {
         super(timeOfTheEvent, simCore);
         this.workplace = workplace;
-        this.t = t;
     }
 
     @Override

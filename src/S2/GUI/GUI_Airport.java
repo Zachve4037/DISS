@@ -42,8 +42,8 @@ public class GUI_Airport {
         controls.setLayout(new BoxLayout(controls, BoxLayout.Y_AXIS));
 
         JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        cratesInCombo = new JComboBox<>(new Integer[]{1, 2, 3, 4});
-        cratesOutCombo = new JComboBox<>(new Integer[]{1, 2, 3, 4, 5});
+        cratesInCombo = new JComboBox<>(new Integer[]{4, 3, 2, 1});
+        cratesOutCombo = new JComboBox<>(new Integer[]{5, 4, 3, 2, 1});
         startSimButton = new JButton("Start Simulation");
         stopSimButton = new JButton("Stop");
         stopSimButton.setEnabled(false);
@@ -121,7 +121,13 @@ public class GUI_Airport {
     }
 
     private void initRefreshTimer() {
-        uiRefreshTimer = new Timer(200, e -> refreshFromAirport());
+        uiRefreshTimer = new javax.swing.Timer(1000, e -> {
+            try {
+                refreshFromAirport();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
         uiRefreshTimer.start();
     }
 
@@ -180,6 +186,9 @@ public class GUI_Airport {
         // Volitelne: stav pracovisk
         addRow("Workplace W0 busy", "-", "metal/xray/inspect");
         addRow("Workplace W1 busy", "-", "metal/xray/inspect");
+
+        addRow("Rep: customers served", "-", "-");
+        addRow("Sim: avg customers served / replication", "-", "-");
     }
 
     private void refreshFromAirport() {
@@ -276,6 +285,10 @@ public class GUI_Airport {
         setValue(41, "-", busyW0);
         setValue(42, "-", busyW1);
 
+        setValue(43, airport.getServedCustomers(), "-");
+        setValue(44, safeDouble(airport.getAvgServedCustomers()),
+                "total=" + airport.getTotalServedCustomers()
+                        + ", reps=" + airport.getCompletedReplications());
     }
 
     private void addRow(String metric, Object value, String detail) {
@@ -332,4 +345,13 @@ public class GUI_Airport {
     public JButton getStopSimButton() {
         return stopSimButton;
     }
+
+    public void requestRefresh() {
+        if (SwingUtilities.isEventDispatchThread()) {
+            refreshFromAirport();
+        } else {
+            SwingUtilities.invokeLater(this::refreshFromAirport);
+        }
+    }
+
 }

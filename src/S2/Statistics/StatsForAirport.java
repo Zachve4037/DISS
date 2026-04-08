@@ -168,6 +168,7 @@ public class StatsForAirport {
         simAvgWaitPickup = new ArithmeticalStatistic();
 
         simAvgCustomerSystemTime = new ArithmeticalStatistic();
+        beforeRep();
     }
 
     public void beforeRep() {
@@ -222,6 +223,77 @@ public class StatsForAirport {
         simAvgWaitPickup.addValue(repWaitPickup.getValue(), 1.0);
 
         simAvgCustomerSystemTime.addValue(repCustomerSystemTime.getValue(), 1.0);
+    }
+
+    public void finalizeReplication(double now) {
+        closeQueueLengthStatsAt(now);
+    }
+
+    public void onCustomerEnteredSystem(long customerId, double now) {
+        customerEnterSystemAt.put(customerId, now);
+    }
+
+    public void onCustomerFinishedSystem(long customerId, double now) {
+        Double enter = customerEnterSystemAt.remove(customerId);
+        if (enter != null) {
+            repCustomerSystemTime.addValue(now - enter, 1.0);
+        }
+    }
+
+    public void onCustomerEnteredUnloadQueue(long customerId, double now, int newQueueLen) {
+        repCustomersEnteredUnloadQueue++;
+        customerEnterUnloadQueueAt.put(customerId, now);
+        updateUnloadQueueLen(newQueueLen, now);
+    }
+
+    public void onCustomerLeftUnloadQueue(long customerId, double now, int newQueueLen) {
+        Double enter = customerEnterUnloadQueueAt.remove(customerId);
+        if (enter != null) {
+            repWaitUnload.addValue(now - enter, 1.0);
+        }
+        updateUnloadQueueLen(newQueueLen, now);
+    }
+
+    public void onCustomerEnteredMetalQueue(long customerId, double now, int newQueueLen) {
+        repCustomersEnteredMetalQueue++;
+        customerEnterMetalQueueAt.put(customerId, now);
+        updateMetalQueueLen(newQueueLen, now);
+    }
+
+    public void onCustomerLeftMetalQueue(long customerId, double now, int newQueueLen) {
+        Double enter = customerEnterMetalQueueAt.remove(customerId);
+        if (enter != null) {
+            repWaitMetal.addValue(now - enter, 1.0);
+        }
+        updateMetalQueueLen(newQueueLen, now);
+    }
+
+    public void onCrateEnteredXrayQueue(long crateId, double now, int newQueueLen) {
+        repCratesEnteredXrayQueue++;
+        crateEnterXrayQueueAt.put(crateId, now);
+        updateXrayQueueLen(newQueueLen, now);
+    }
+
+    public void onCrateLeftXrayQueue(long crateId, double now, int newQueueLen) {
+        Double enter = crateEnterXrayQueueAt.remove(crateId);
+        if (enter != null) {
+            repWaitXray.addValue(now - enter, 1.0);
+        }
+        updateXrayQueueLen(newQueueLen, now);
+    }
+
+    public void onCrateEnteredPickupQueue(long crateId, double now, int newQueueLen) {
+        repCratesEnteredPickupQueue++;
+        crateEnterPickupQueueAt.put(crateId, now);
+        updatePickupQueueLen(newQueueLen, now);
+    }
+
+    public void onCrateLeftPickupQueue(long crateId, double now, int newQueueLen) {
+        Double enter = crateEnterPickupQueueAt.remove(crateId);
+        if (enter != null) {
+            repWaitPickup.addValue(now - enter, 1.0);
+        }
+        updatePickupQueueLen(newQueueLen, now);
     }
 
     private void updateUnloadQueueLen(int newLen, double now) {

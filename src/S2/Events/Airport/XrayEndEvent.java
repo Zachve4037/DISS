@@ -1,6 +1,7 @@
 package S2.Events.Airport;
 
 import S2.Events.Event;
+import S2.Objects.Crate;
 import S2.SimCores.Airport;
 import S2.SimCores.EventSimCore;
 

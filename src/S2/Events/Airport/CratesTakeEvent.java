@@ -27,9 +27,18 @@ public class CratesTakeEvent extends Event {
             return;
         }
 
-        sim.removeTravellerFromCheckedQueue(t, workplace);
+        // Traveller berie vsetky svoje prepravky, ktore su aktualne na vystupe.
         sim.takeAllTravellerCratesFromOutput(t, workplace, now);
-        sim.finishTraveller(t, now);
+
+        if (sim.hasTravellerCollectedAllCrates(t)) {
+            sim.removeTravellerFromCheckedQueue(t, workplace);
+            sim.finishTraveller(t, now);
+        } else {
+            // Este caka na zvysne prepravky z RTG.
+            if (!sim.isTravellerAlreadyInCheckedQueue(t, workplace)) {
+                sim.enqueueCheckedTraveller(t, workplace);
+            }
+        }
 
         // Uvolnenie vystupu moze odblokovat RTG.
         if (!sim.isXrayBusy(workplace) && sim.hasWaitingCratesForXray(workplace) && !sim.isXrayOutputFull(workplace)) {
@@ -46,6 +55,5 @@ public class CratesTakeEvent extends Event {
         if (next != null) {
             sim.scheduleEvent(new CratesTakeEvent(now, sim, workplace, next));
         }
-
     }
 }

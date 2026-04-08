@@ -19,7 +19,7 @@ public class MetalEndEvent extends Event {
         Airport sim = (Airport) getSimCore();
         double now = getTimeOfTheEvent();
 
-        if (Math.random() <= 0.19) {
+        if (sim.needsInspection()) {
             sim.scheduleEvent(new InspectionStartEvent(now, sim, workplace, t, sim.sampleSecurityCheckTime(workplace)));
             return;
         }
@@ -30,7 +30,7 @@ public class MetalEndEvent extends Event {
         sim.enqueueCheckedTraveller(t, workplace);
 
         if (sim.hasWaitingMetalTraveller(workplace)) {
-            sim.scheduleEvent(new MetalStartEvent(now, sim, workplace, sim.pollMetalTraveller(workplace)));
+            sim.scheduleEvent(new MetalStartEvent(now, sim, workplace));
         }
 
         sim.scheduleEvent(new CratesTakeEvent(now, sim, workplace, t));

@@ -5,11 +5,16 @@ import S2.Statistics.ArithmeticalStatistic;
 import S2.Statistics.WeightedStatistic;
 
 import java.util.PriorityQueue;
+import java.util.function.BooleanSupplier;
+import java.util.function.IntSupplier;
 
 public abstract class EventSimCore extends SimCore {
     private final PriorityQueue<Event> eventCalendar = new PriorityQueue<>();
     protected double currentTime;
     protected int servedCustomers = 0;
+
+    private volatile BooleanSupplier maxSpeedSupplier = () -> true;
+    private volatile IntSupplier speedFactorSupplier = () -> 200;
 
     //global
     private ArithmeticalStatistic avgTimeInQueueOverReps;
@@ -22,6 +27,8 @@ public abstract class EventSimCore extends SimCore {
     private WeightedStatistic repQueueLengthTimeWeighted;
     private double lastQueueLenChangeTime;
     private int queueLength;
+    private int completedReps;
+    private Long totalServedCustomers = 0L;
 
     protected abstract boolean shouldStop();
     protected abstract void initialEvents();
@@ -31,6 +38,8 @@ public abstract class EventSimCore extends SimCore {
         this.avgTimeInQueueOverReps = new ArithmeticalStatistic();
         this.avgQueueLengthOverReps = new ArithmeticalStatistic();
         this.avgServiceTimeOverReps = new ArithmeticalStatistic();
+        this.totalServedCustomers = 0L;
+        this.completedReps = 0;
     }
 
     @Override
@@ -51,10 +60,15 @@ public abstract class EventSimCore extends SimCore {
 
     @Override
     protected void doReplication() {
-        while (!this.eventCalendar.isEmpty() && !shouldStop()) {
+        while (isRun() && !this.eventCalendar.isEmpty() && !shouldStop()) {
             Event event = this.eventCalendar.poll();
             if (event == null) break;
-            this.currentTime = event.getTimeOfTheEvent();
+
+            double nextEventTime = event.getTimeOfTheEvent();
+            double simDelta = nextEventTime - this.currentTime;
+            applyRealtimePacing(simDelta);
+
+            this.currentTime = nextEventTime;
             event.execute();
         }
         double dt = currentTime - lastQueueLenChangeTime;
@@ -68,6 +82,7 @@ public abstract class EventSimCore extends SimCore {
         this.avgTimeInQueueOverReps.addValue(repTimeInQueue.getValue(), 1);
         this.avgServiceTimeOverReps.addValue(repServiceTime.getValue(), 1);
         this.avgQueueLengthOverReps.addValue(repQueueLengthTimeWeighted.getValue(), 1);
+        this.completedReps++;
     }
 
     @Override
@@ -76,6 +91,30 @@ public abstract class EventSimCore extends SimCore {
         System.out.println("Average time in queue: " + this.avgTimeInQueueOverReps.getValue());
         System.out.println("Average queue length: " + this.avgQueueLengthOverReps.getValue());
         System.out.println("Average service time: " + this.avgServiceTimeOverReps.getValue());
+    }
+
+    private void applyRealtimePacing(double simDeltaSeconds) {
+        if (simDeltaSeconds <= 0.0) return;
+        if (maxSpeedSupplier.getAsBoolean()) return;
+
+        int factor = Math.max(1, speedFactorSupplier.getAsInt()); // 1..200
+        long totalNanos = Math.round((simDeltaSeconds * 1_000_000_000.0) / factor);
+        if (totalNanos <= 0) return;
+
+        long millis = totalNanos / 1_000_000L;
+        int nanos = (int) (totalNanos % 1_000_000L);
+
+        try {
+            Thread.sleep(millis, nanos);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            setRun(false);
+        }
+    }
+
+    public void setPacingSuppliers(BooleanSupplier maxSpeedSupplier, IntSupplier speedFactorSupplier) {
+        this.maxSpeedSupplier = (maxSpeedSupplier != null) ? maxSpeedSupplier : () -> true;
+        this.speedFactorSupplier = (speedFactorSupplier != null) ? speedFactorSupplier : () -> 200;
     }
 
     public void scheduleEvent(Event e) {
@@ -98,5 +137,23 @@ public abstract class EventSimCore extends SimCore {
     public void customerServed(double serviceTime) {
         this.repServiceTime.addValue(serviceTime, 1.0);
         this.servedCustomers++;
+        this.totalServedCustomers++;
+    }
+
+    public int getServedCustomers() {
+        return servedCustomers;
+    }
+
+    public double getAvgServedCustomers() {
+        if (this.completedReps == 0) return 0.0;
+        return (double) totalServedCustomers / this.completedReps;
+    }
+
+    public long getTotalServedCustomers() {
+        return totalServedCustomers;
+    }
+
+    public long getCompletedReplications() {
+        return completedReps;
     }
 }

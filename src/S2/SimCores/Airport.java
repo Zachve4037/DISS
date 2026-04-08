@@ -14,11 +14,14 @@ import S2.Statistics.StatsForAirport;
 
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Airport extends EventSimCore {
     private final int TIME_LIMIT = 86_400; // 24 hodin v sekundach
     private int travellerIdCounter = 0;
     private int crateIdCounter = 0;
+    private final Map<Integer, Integer> remainingCratesByTravellerId = new HashMap<>();
+
     //generatory
     private final ContinuousExponentialDistRNG arrivalTimeRNG;
     private final ContinuousUniformDistRNG[] metalDetectorTimeRNGs;
@@ -32,9 +35,15 @@ public class Airport extends EventSimCore {
     //rady
     private final ArrayBlockingQueue<Crate>[] xrayCratesQueue;
     private final ArrayBlockingQueue<Crate>[] xrayDequeueCratesQueue;
-    private final LinkedList<Traveller>[] cratesUnloadPeopleQueue = new LinkedList[]{new LinkedList<Traveller>(), new LinkedList<Traveller>()};
-    private final LinkedList<Traveller>[] metalPeopleQueue = new LinkedList[]{new LinkedList<Traveller>(), new LinkedList<Traveller>()};
-    private final LinkedList<Traveller>[] checkedPeopleQueue = new LinkedList[]{new LinkedList<Traveller>(), new LinkedList<Traveller>()};
+    private final Queue<Traveller>[] cratesUnloadPeopleQueue = new Queue[]{
+            new ConcurrentLinkedQueue<>(), new ConcurrentLinkedQueue<>()
+    };
+    private final Queue<Traveller>[] metalPeopleQueue = new Queue[]{
+            new ConcurrentLinkedQueue<>(), new ConcurrentLinkedQueue<>()
+    };
+    private final Queue<Traveller>[] checkedPeopleQueue = new Queue[]{
+            new ConcurrentLinkedQueue<>(), new ConcurrentLinkedQueue<>()
+    };
 
     //obsluhy
     private boolean[] xrayBusy = new boolean[]{false, false};
@@ -47,9 +56,16 @@ public class Airport extends EventSimCore {
     private final UniformInterval xrayTimeInterval = new UniformInterval(9, 46);
     private final UniformInterval metalTimeInterval = new UniformInterval(6, 27);
 
+    private final Random routingRng;
+    private final Set<Integer> securityClearedTravellerIds = new HashSet<>();
+    private final Map<Integer, Integer> readyCratesByTravellerId = new HashMap<>();
+    private final Map<Integer, Double> travellerEnterSystemAt = new HashMap<>();
+
+
     public Airport(Random seed, int cratesIn, int cratesOut) {
+        this.routingRng = new Random(seed.nextLong());
         this.stats = new StatsForAirport();
-        this.arrivalTimeRNG = new ContinuousExponentialDistRNG(seed, 1.0 / 60.0); // TODO: lambda
+        this.arrivalTimeRNG = new ContinuousExponentialDistRNG(seed, 1.0 / 14.9); // TODO: lambda
         this.metalDetectorTimeRNGs = new ContinuousUniformDistRNG[]{
                 new ContinuousUniformDistRNG(seed, metalTimeInterval),
                 new ContinuousUniformDistRNG(seed, metalTimeInterval)
@@ -81,43 +97,24 @@ public class Airport extends EventSimCore {
 
     @Override
     protected void initialEvents() {
+        resetReplicationState();
+        stats.beforeRep();
         this.scheduleEvent(new ArrivalEvent(this.currentTime, this));
+    }
+
+    @Override
+    protected void afterReplication() {
+        stats.finalizeReplication(currentTime);
+        stats.afterRep();
+        super.afterReplication();
     }
 
     public StatsForAirport getStats() {
         return stats;
     }
 
-    public int enqueTravellerForCratesUnload(Traveller traveller) {
-        int workplace;
-        if (this.cratesUnloadPeopleQueue[0].size() == this.cratesUnloadPeopleQueue[1].size()) {
-            workplace = new Random().nextInt(2);
-        } else {
-            workplace = this.cratesUnloadPeopleQueue[0].size() < this.cratesUnloadPeopleQueue[1].size() ? 0 : 1;
-        }
-        this.cratesUnloadPeopleQueue[workplace].add(traveller);
-        return workplace;
-    }
-
     public void enqueueCheckedTraveller(Traveller traveller, int workplace) {
         this.checkedPeopleQueue[workplace].add(traveller);
-    }
-
-    public void enqueueCrateForXrayEnqueue(Crate crate, int workplace) {
-        this.xrayCratesQueue[workplace].add(crate);
-    }
-
-    public void enqueueCrateForXrayDequeue(Crate crate, int workplace) {
-        this.xrayDequeueCratesQueue[workplace].add(crate);
-    }
-
-    public void enqueueTravellerForMetal(Traveller traveller, int workplace) {
-        this.metalPeopleQueue[workplace].add(traveller);
-    }
-
-    public Traveller createNewTraveller() {
-        this.crateIdCounter += 3;
-        return new Traveller(this.travellerIdCounter++, sampleNumberOfCrates(), this.crateIdCounter);
     }
 
     public boolean isXrayBusy(int workplace) {
@@ -178,7 +175,7 @@ public class Airport extends EventSimCore {
 
     public List<Integer> getUnloadQueueTravellerIds() {
         List<Integer> out = new ArrayList<>();
-        for (LinkedList<Traveller> q : cratesUnloadPeopleQueue) {
+        for (Queue<Traveller> q : cratesUnloadPeopleQueue) {
             for (Traveller t : q) out.add(t.getId());
         }
         return out;
@@ -186,7 +183,7 @@ public class Airport extends EventSimCore {
 
     public List<Integer> getMetalQueueTravellerIds() {
         List<Integer> out = new ArrayList<>();
-        for (LinkedList<Traveller> q : metalPeopleQueue) {
+        for (Queue<Traveller> q : metalPeopleQueue) {
             for (Traveller t : q) out.add(t.getId());
         }
         return out;
@@ -212,35 +209,167 @@ public class Airport extends EventSimCore {
         return !this.xrayCratesQueue[workplace].isEmpty();
     }
 
-    public boolean hasWaitingCratesForXrayDequeue(int workplace) {
-        return !this.xrayDequeueCratesQueue[workplace].isEmpty();
+    public Traveller pollMetalTraveller(int workplace) {
+        Traveller t = metalPeopleQueue[workplace].poll();
+        if (t != null) {
+            stats.onCustomerLeftMetalQueue(t.getId(), currentTime, metalPeopleQueue[workplace].size());
+        }
+        return t;
+    }
+
+    public Traveller createNewTraveller(double now) {
+        int id = travellerIdCounter++;
+        int crateCount = sampleNumberOfCrates();
+        Traveller t = new Traveller(id, crateCount, crateIdCounter);
+        crateIdCounter += crateCount;
+
+        remainingCratesByTravellerId.put(id, crateCount);
+        travellerEnterSystemAt.put(id, now);
+        readyCratesByTravellerId.put(id, 0);
+        stats.onCustomerEnteredSystem(id, now);
+        return t;
+    }
+
+    public int enqueTravellerForCratesUnload(Traveller traveller, double now) {
+        int size0 = cratesUnloadPeopleQueue[0].size();
+        int size1 = cratesUnloadPeopleQueue[1].size();
+        int workplace;
+        if (size0 < size1) workplace = 0;
+        else if (size1 < size0) workplace = 1;
+        else workplace = routingRng.nextBoolean() ? 0 : 1;
+
+        cratesUnloadPeopleQueue[workplace].add(traveller);
+        stats.onCustomerEnteredUnloadQueue(traveller.getId(), now, cratesUnloadPeopleQueue[workplace].size());
+        return workplace;
+    }
+
+    public boolean hasWaitingUnloadTraveller(int workplace) {
+        return !cratesUnloadPeopleQueue[workplace].isEmpty();
+    }
+
+    public Traveller peekUnloadTraveller(int workplace) {
+        return cratesUnloadPeopleQueue[workplace].peek();
+    }
+
+    public Traveller pollUnloadTraveller(int workplace) {
+        Traveller t = cratesUnloadPeopleQueue[workplace].poll();
+        if (t != null) {
+            stats.onCustomerLeftUnloadQueue(t.getId(), currentTime, cratesUnloadPeopleQueue[workplace].size());
+        }
+        return t;
+    }
+
+    public void enqueueCrateForXrayEnqueue(Crate crate, int workplace, double now) {
+        if (!xrayCratesQueue[workplace].offer(crate)) {
+            throw new IllegalStateException("Xray input belt is full for workplace " + workplace);
+        }
+        stats.onCrateEnteredXrayQueue(crate.getId(), now, xrayCratesQueue[workplace].size());
+    }
+
+    public void enqueueCrateForXrayDequeue(Crate crate, int workplace, double now) {
+        if (!xrayDequeueCratesQueue[workplace].offer(crate)) {
+            throw new IllegalStateException("Xray output belt is full for workplace " + workplace);
+        }
+        stats.onCrateEnteredPickupQueue(crate.getId(), now, xrayDequeueCratesQueue[workplace].size());
+    }
+
+    public Crate pollCrateForXrayInput(int workplace) {
+        Crate c = xrayCratesQueue[workplace].poll();
+        if (c != null) {
+            stats.onCrateLeftXrayQueue(c.getId(), currentTime, xrayCratesQueue[workplace].size());
+        }
+        return c;
+    }
+
+    public boolean canPutCrateOnXrayInput(int workplace) {
+        return xrayCratesQueue[workplace].remainingCapacity() > 0;
+    }
+
+    public boolean isXrayOutputFull(int workplace) {
+        return xrayDequeueCratesQueue[workplace].remainingCapacity() == 0;
+    }
+
+    public void enqueueTravellerForMetal(Traveller traveller, int workplace, double now) {
+        this.metalPeopleQueue[workplace].add(traveller);
+        stats.onCustomerEnteredMetalQueue(traveller.getId(), now, metalPeopleQueue[workplace].size());
     }
 
     public boolean hasWaitingMetalTraveller(int workplace) {
         return !this.metalPeopleQueue[workplace].isEmpty();
     }
 
-    public Traveller pollMetalTraveller(int workplace) {
-        return this.metalPeopleQueue[workplace].poll();
+    public boolean needsInspection() {
+        return routingRng.nextDouble() < 0.19;
     }
 
-    public Crate pollCrateForXray(int workplace) {
-        if (!this.xrayCratesQueue[workplace].isEmpty()) {
-            return this.xrayCratesQueue[workplace].poll();
-        } else if (!this.xrayDequeueCratesQueue[workplace].isEmpty()) {
-            return this.xrayDequeueCratesQueue[workplace].poll();
-        }
-        return null;
+    public void markCrateReadyForOwner(Crate c) {
+        readyCratesByTravellerId.merge(c.gettId(), 1, Integer::sum);
     }
 
-    private void validateWorkplace(int workplace) {
-        if (workplace < 0 || workplace >= 2) {
-            throw new IllegalArgumentException("workplace must be 0 or 1");
+    public void markTravellerAfterSecurity(Traveller t, double now) {
+        securityClearedTravellerIds.add(t.getId());
+    }
+
+    public boolean isTravellerReadyToTakeCrates(Traveller t, int workplace) {
+        if (!securityClearedTravellerIds.contains(t.getId())) return false;
+
+        int remaining = remainingCratesByTravellerId.getOrDefault(t.getId(), 0);
+        int ready = readyCratesByTravellerId.getOrDefault(t.getId(), 0);
+
+        return remaining == 0 || ready > 0;
+    }
+
+    public boolean isTravellerAlreadyInCheckedQueue(Traveller t, int workplace) {
+        return checkedPeopleQueue[workplace].contains(t);
+    }
+
+    public void removeTravellerFromCheckedQueue(Traveller t, int workplace) {
+        checkedPeopleQueue[workplace].remove(t);
+    }
+
+    public void takeAllTravellerCratesFromOutput(Traveller t, int workplace, double now) {
+        int removed = 0;
+        Iterator<Crate> it = xrayDequeueCratesQueue[workplace].iterator();
+        while (it.hasNext()) {
+            Crate c = it.next();
+            if (c.gettId() == t.getId()) {
+                it.remove();
+                removed++;
+                stats.onCrateLeftPickupQueue(c.getId(), now, xrayDequeueCratesQueue[workplace].size());
+            }
         }
+
+        if (removed > 0) {
+            readyCratesByTravellerId.merge(t.getId(), -removed, Integer::sum);
+            remainingCratesByTravellerId.merge(t.getId(), -removed, Integer::sum);
+        }
+    }
+
+    public void finishTraveller(Traveller t, double now) {
+        securityClearedTravellerIds.remove(t.getId());
+        readyCratesByTravellerId.remove(t.getId());
+
+        Double enter = travellerEnterSystemAt.remove(t.getId());
+        if (enter != null) {
+            customerServed(now - enter);
+        }
+        stats.onCustomerFinishedSystem(t.getId(), now);
+        remainingCratesByTravellerId.remove(t.getId());
+    }
+
+    public Traveller peekCheckedTraveller(int workplace) {
+        return checkedPeopleQueue[workplace].peek();
+    }
+
+    public boolean hasWaitingCheckedTraveller(int workplace) {
+        return !checkedPeopleQueue[workplace].isEmpty();
+    }
+
+    public boolean hasTravellerCollectedAllCrates(Traveller t) {
+        return remainingCratesByTravellerId.getOrDefault(t.getId(), 0) <= 0;
     }
 
     public List<Integer> getUnloadQueueTravellerIds(int workplace) {
-        validateWorkplace(workplace);
         List<Integer> out = new ArrayList<>();
         for (Traveller t : cratesUnloadPeopleQueue[workplace]) {
             out.add(t.getId());
@@ -249,7 +378,6 @@ public class Airport extends EventSimCore {
     }
 
     public List<Integer> getMetalQueueTravellerIds(int workplace) {
-        validateWorkplace(workplace);
         List<Integer> out = new ArrayList<>();
         for (Traveller t : metalPeopleQueue[workplace]) {
             out.add(t.getId());
@@ -258,7 +386,6 @@ public class Airport extends EventSimCore {
     }
 
     public List<Integer> getXrayEnqueueCrateIds(int workplace) {
-        validateWorkplace(workplace);
         List<Integer> out = new ArrayList<>();
         for (Crate c : xrayCratesQueue[workplace]) {
             out.add(c.getId());
@@ -267,11 +394,36 @@ public class Airport extends EventSimCore {
     }
 
     public List<Integer> getXrayDequeueCrateIds(int workplace) {
-        validateWorkplace(workplace);
         List<Integer> out = new ArrayList<>();
         for (Crate c : xrayDequeueCratesQueue[workplace]) {
             out.add(c.getId());
         }
         return out;
+    }
+
+    private void resetReplicationState() {
+        travellerIdCounter = 0;
+        crateIdCounter = 0;
+
+        cratesUnloadPeopleQueue[0].clear();
+        cratesUnloadPeopleQueue[1].clear();
+        metalPeopleQueue[0].clear();
+        metalPeopleQueue[1].clear();
+        checkedPeopleQueue[0].clear();
+        checkedPeopleQueue[1].clear();
+
+        xrayCratesQueue[0].clear();
+        xrayCratesQueue[1].clear();
+        xrayDequeueCratesQueue[0].clear();
+        xrayDequeueCratesQueue[1].clear();
+
+        xrayBusy[0] = xrayBusy[1] = false;
+        metalDetectorBusy[0] = metalDetectorBusy[1] = false;
+        securityCheckBusy[0] = securityCheckBusy[1] = false;
+
+        securityClearedTravellerIds.clear();
+        readyCratesByTravellerId.clear();
+        travellerEnterSystemAt.clear();
+        remainingCratesByTravellerId.clear();
     }
 }

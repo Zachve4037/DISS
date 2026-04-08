@@ -25,7 +25,7 @@ public class InspectionEndEvent extends Event {
         sim.markTravellerAfterSecurity(t, now);
         sim.enqueueCheckedTraveller(t, workplace);
         if (sim.hasWaitingMetalTraveller(workplace)){
-            sim.scheduleEvent(new MetalStartEvent(now, sim, workplace, sim.pollMetalTraveller(workplace)));
+            sim.scheduleEvent(new MetalStartEvent(now, sim, workplace));
         }
         sim.scheduleEvent(new CratesTakeEvent(now, sim, workplace, t));
     }
