@@ -17,7 +17,11 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Airport extends EventSimCore {
-    private final int TIME_LIMIT = 86_400; // 24 hodin v sekundach
+    private static final double DAY_SECONDS = 86_400.0;
+    private static final double WARMUP_SECONDS = 0 * DAY_SECONDS; // 1 den na rozbeh a zahriatie simulacie, potom sa zacnu merat statistiky
+    private static final double MEASURE_SECONDS = DAY_SECONDS;
+    private boolean measurementStarted = false;
+
     private int travellerIdCounter = 0;
     private int crateIdCounter = 0;
     private final Map<Integer, Integer> remainingCratesByTravellerId = new HashMap<>();
@@ -31,6 +35,10 @@ public class Airport extends EventSimCore {
 
     //statistiky
     private StatsForAirport stats;
+    private int totalUnloadQueueLen() { return cratesUnloadPeopleQueue[0].size() + cratesUnloadPeopleQueue[1].size(); }
+    private int totalMetalQueueLen()  { return metalPeopleQueue[0].size() + metalPeopleQueue[1].size(); }
+    private int totalXrayQueueLen()   { return xrayCratesQueue[0].size() + xrayCratesQueue[1].size(); }
+    private int totalPickupQueueLen() { return xrayDequeueCratesQueue[0].size() + xrayDequeueCratesQueue[1].size(); }
 
     //rady
     private final ArrayBlockingQueue<Crate>[] xrayCratesQueue;
@@ -92,20 +100,23 @@ public class Airport extends EventSimCore {
 
     @Override
     public boolean shouldStop() {
-        return this.currentTime >= TIME_LIMIT;
+        return this.currentTime >= (WARMUP_SECONDS + MEASURE_SECONDS);
     }
 
     @Override
     protected void initialEvents() {
         resetReplicationState();
+        measurementStarted = false;
         stats.beforeRep();
         this.scheduleEvent(new ArrivalEvent(this.currentTime, this));
     }
 
     @Override
     protected void afterReplication() {
-        stats.finalizeReplication(currentTime);
-        stats.afterRep();
+        if (measurementStarted) {
+            stats.finalizeReplication(currentTime);
+            stats.afterRep();
+        }
         super.afterReplication();
     }
 
@@ -173,36 +184,21 @@ public class Airport extends EventSimCore {
         return this.getVisualTimeSeconds();
     }
 
-    public List<Integer> getUnloadQueueTravellerIds() {
-        List<Integer> out = new ArrayList<>();
-        for (Queue<Traveller> q : cratesUnloadPeopleQueue) {
-            for (Traveller t : q) out.add(t.getId());
-        }
-        return out;
+    private boolean isInMeasurementWindow(double now) {
+        return now >= WARMUP_SECONDS;
     }
 
-    public List<Integer> getMetalQueueTravellerIds() {
-        List<Integer> out = new ArrayList<>();
-        for (Queue<Traveller> q : metalPeopleQueue) {
-            for (Traveller t : q) out.add(t.getId());
+    private void ensureMeasurementStarted(double now) {
+        if (!measurementStarted && isInMeasurementWindow(now)) {
+            stats.beginMeasuredWindow(
+                    now,
+                    totalUnloadQueueLen(),
+                    totalMetalQueueLen(),
+                    totalXrayQueueLen(),
+                    totalPickupQueueLen()
+            );
+            measurementStarted = true;
         }
-        return out;
-    }
-
-    public List<Integer> getXrayEnqueueCrateIds() {
-        List<Integer> out = new ArrayList<>();
-        for (ArrayBlockingQueue<Crate> q : xrayCratesQueue) {
-            for (Crate c : q) out.add(c.getId());
-        }
-        return out;
-    }
-
-    public List<Integer> getXrayDequeueCrateIds() {
-        List<Integer> out = new ArrayList<>();
-        for (ArrayBlockingQueue<Crate> q : xrayDequeueCratesQueue) {
-            for (Crate c : q) out.add(c.getId());
-        }
-        return out;
     }
 
     public boolean hasWaitingCratesForXray(int workplace) {
@@ -212,7 +208,10 @@ public class Airport extends EventSimCore {
     public Traveller pollMetalTraveller(int workplace) {
         Traveller t = metalPeopleQueue[workplace].poll();
         if (t != null) {
-            stats.onCustomerLeftMetalQueue(t.getId(), currentTime, metalPeopleQueue[workplace].size());
+            ensureMeasurementStarted(currentTime);
+            if (measurementStarted) {
+                stats.onCustomerLeftMetalQueue(t.getId(), currentTime, totalMetalQueueLen());
+            }
         }
         return t;
     }
@@ -226,7 +225,10 @@ public class Airport extends EventSimCore {
         remainingCratesByTravellerId.put(id, crateCount);
         travellerEnterSystemAt.put(id, now);
         readyCratesByTravellerId.put(id, 0);
-        stats.onCustomerEnteredSystem(id, now);
+        ensureMeasurementStarted(now);
+        if (measurementStarted) {
+            stats.onCustomerEnteredSystem(id, now);
+        }
         return t;
     }
 
@@ -239,7 +241,10 @@ public class Airport extends EventSimCore {
         else workplace = routingRng.nextBoolean() ? 0 : 1;
 
         cratesUnloadPeopleQueue[workplace].add(traveller);
-        stats.onCustomerEnteredUnloadQueue(traveller.getId(), now, cratesUnloadPeopleQueue[workplace].size());
+        ensureMeasurementStarted(now);
+        if (measurementStarted) {
+            stats.onCustomerEnteredUnloadQueue(traveller.getId(), now, totalUnloadQueueLen());
+        }
         return workplace;
     }
 
@@ -254,7 +259,10 @@ public class Airport extends EventSimCore {
     public Traveller pollUnloadTraveller(int workplace) {
         Traveller t = cratesUnloadPeopleQueue[workplace].poll();
         if (t != null) {
-            stats.onCustomerLeftUnloadQueue(t.getId(), currentTime, cratesUnloadPeopleQueue[workplace].size());
+            ensureMeasurementStarted(currentTime);
+            if (measurementStarted) {
+                stats.onCustomerLeftUnloadQueue(t.getId(), currentTime, totalUnloadQueueLen());
+            }
         }
         return t;
     }
@@ -263,20 +271,29 @@ public class Airport extends EventSimCore {
         if (!xrayCratesQueue[workplace].offer(crate)) {
             throw new IllegalStateException("Xray input belt is full for workplace " + workplace);
         }
-        stats.onCrateEnteredXrayQueue(crate.getId(), now, xrayCratesQueue[workplace].size());
+        ensureMeasurementStarted(now);
+        if (measurementStarted) {
+            stats.onCrateEnteredXrayQueue(crate.getId(), now, totalXrayQueueLen());
+        }
     }
 
     public void enqueueCrateForXrayDequeue(Crate crate, int workplace, double now) {
         if (!xrayDequeueCratesQueue[workplace].offer(crate)) {
             throw new IllegalStateException("Xray output belt is full for workplace " + workplace);
         }
-        stats.onCrateEnteredPickupQueue(crate.getId(), now, xrayDequeueCratesQueue[workplace].size());
+        ensureMeasurementStarted(now);
+        if (measurementStarted) {
+            stats.onCrateEnteredPickupQueue(crate.getId(), now, totalPickupQueueLen());
+        }
     }
 
     public Crate pollCrateForXrayInput(int workplace) {
         Crate c = xrayCratesQueue[workplace].poll();
         if (c != null) {
-            stats.onCrateLeftXrayQueue(c.getId(), currentTime, xrayCratesQueue[workplace].size());
+            ensureMeasurementStarted(currentTime);
+            if (measurementStarted) {
+                stats.onCrateLeftXrayQueue(c.getId(), currentTime, totalXrayQueueLen());
+            }
         }
         return c;
     }
@@ -291,7 +308,10 @@ public class Airport extends EventSimCore {
 
     public void enqueueTravellerForMetal(Traveller traveller, int workplace, double now) {
         this.metalPeopleQueue[workplace].add(traveller);
-        stats.onCustomerEnteredMetalQueue(traveller.getId(), now, metalPeopleQueue[workplace].size());
+        ensureMeasurementStarted(now);
+        if (measurementStarted) {
+            stats.onCustomerEnteredMetalQueue(traveller.getId(), now, totalMetalQueueLen());
+        }
     }
 
     public boolean hasWaitingMetalTraveller(int workplace) {
@@ -335,7 +355,10 @@ public class Airport extends EventSimCore {
             if (c.gettId() == t.getId()) {
                 it.remove();
                 removed++;
-                stats.onCrateLeftPickupQueue(c.getId(), now, xrayDequeueCratesQueue[workplace].size());
+                ensureMeasurementStarted(now);
+                if (measurementStarted) {
+                    stats.onCrateLeftPickupQueue(c.getId(), now, totalPickupQueueLen());
+                }
             }
         }
 
@@ -353,7 +376,10 @@ public class Airport extends EventSimCore {
         if (enter != null) {
             customerServed(now - enter);
         }
-        stats.onCustomerFinishedSystem(t.getId(), now);
+        ensureMeasurementStarted(now);
+        if (measurementStarted) {
+            stats.onCustomerFinishedSystem(t.getId(), now);
+        }
         remainingCratesByTravellerId.remove(t.getId());
     }
 

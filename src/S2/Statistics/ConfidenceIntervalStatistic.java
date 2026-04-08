@@ -16,6 +16,11 @@ public class ConfidenceIntervalStatistic extends Statistic {
         this.mean += delta / this.getCounter();
         this.m2 += delta * (value - this.mean);
 
+        if (this.getCounter() < 2) {
+            this.setValue(Double.NaN);
+            return;
+        }
+
         double variance = m2 / (this.getCounter() - 1);
         double stdev = Math.sqrt(variance);
 

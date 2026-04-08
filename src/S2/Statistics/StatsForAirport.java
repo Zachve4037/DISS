@@ -1,6 +1,5 @@
 package S2.Statistics;
 
-import S2.SimCores.Airport;
 import java.util.*;
 
 public class StatsForAirport {
@@ -47,6 +46,12 @@ public class StatsForAirport {
     // ---------- SIMULACIA (priemer cez replikacie) ----------
     private ArithmeticalStatistic simCustomersEnteredUnloadQueue;
     private ArithmeticalStatistic simCustomersEnteredMetalQueue;
+
+    //intervaly spolahlivosti
+    private ConfidenceIntervalStatistic ciAvgCustomerSystemTime;
+    private ConfidenceIntervalStatistic ciAvgPickupQueueLen;
+    private ConfidenceIntervalStatistic ciAvgMetalQueueLen;
+
 
     public ArithmeticalStatistic getSimAvgCustomerSystemTime() {
         return simAvgCustomerSystemTime;
@@ -136,6 +141,18 @@ public class StatsForAirport {
         return repCustomerSystemTime;
     }
 
+    public ConfidenceIntervalStatistic getCiAvgCustomerSystemTime() {
+        return ciAvgCustomerSystemTime;
+    }
+
+    public ConfidenceIntervalStatistic getCiAvgPickupQueueLen() {
+        return ciAvgPickupQueueLen;
+    }
+
+    public ConfidenceIntervalStatistic getCiAvgMetalQueueLen() {
+        return ciAvgMetalQueueLen;
+    }
+
     private ArithmeticalStatistic simCratesEnteredXrayQueue;
     private ArithmeticalStatistic simCratesEnteredPickupQueue;
 
@@ -168,6 +185,11 @@ public class StatsForAirport {
         simAvgWaitPickup = new ArithmeticalStatistic();
 
         simAvgCustomerSystemTime = new ArithmeticalStatistic();
+
+        ciAvgCustomerSystemTime = new ConfidenceIntervalStatistic();
+        ciAvgPickupQueueLen = new ConfidenceIntervalStatistic();
+        ciAvgMetalQueueLen = new ConfidenceIntervalStatistic();
+
         beforeRep();
     }
 
@@ -223,6 +245,24 @@ public class StatsForAirport {
         simAvgWaitPickup.addValue(repWaitPickup.getValue(), 1.0);
 
         simAvgCustomerSystemTime.addValue(repCustomerSystemTime.getValue(), 1.0);
+
+        ciAvgCustomerSystemTime.addValue(repCustomerSystemTime.getValue(), 1.0);
+        ciAvgPickupQueueLen.addValue(repPickupQueueLen.getValue(), 1.0);
+        ciAvgMetalQueueLen.addValue(repMetalQueueLen.getValue(), 1.0);
+    }
+
+    public void beginMeasuredWindow(double now, int unloadLen, int metalLen, int xrayLen, int pickupLen) {
+        beforeRep();
+
+        this.unloadQueueLen = unloadLen;
+        this.metalQueueLen = metalLen;
+        this.xrayQueueLen = xrayLen;
+        this.pickupQueueLen = pickupLen;
+
+        this.lastUnloadLenChangeTime = now;
+        this.lastMetalLenChangeTime = now;
+        this.lastXrayLenChangeTime = now;
+        this.lastPickupLenChangeTime = now;
     }
 
     public void finalizeReplication(double now) {

@@ -189,6 +189,11 @@ public class GUI_Airport {
 
         addRow("Rep: customers served", "-", "-");
         addRow("Sim: avg customers served / replication", "-", "-");
+
+        addRow("CI95 half-width: avg security time (s)", "-", "-");
+        addRow("CI95 half-width: avg waiting for baggage pickup (persons)", "-", "-");
+        addRow("CI95 half-width: avg waiting for security start (persons)", "-", "-");
+
     }
 
     private void refreshFromAirport() {
@@ -289,6 +294,19 @@ public class GUI_Airport {
         setValue(44, safeDouble(airport.getAvgServedCustomers()),
                 "total=" + airport.getTotalServedCustomers()
                         + ", reps=" + airport.getCompletedReplications());
+
+        double meanSec = s.getSimAvgCustomerSystemTime().getValue();
+        double halfSec = s.getCiAvgCustomerSystemTime().getValue();
+
+        double meanPickup = s.getSimAvgPickupQueueLen().getValue();
+        double halfPickup = s.getCiAvgPickupQueueLen().getValue();
+
+        double meanMetal = s.getSimAvgMetalQueueLen().getValue();
+        double halfMetal = s.getCiAvgMetalQueueLen().getValue();
+
+        setValue(45, safeDouble(halfSec), ciDetail(meanSec, halfSec, 600.0, "s"));
+        setValue(46, safeDouble(halfPickup), ciDetail(meanPickup, halfPickup, 10.0, "persons"));
+        setValue(47, safeDouble(halfMetal), ciDetail(meanMetal, halfMetal, 20.0, "persons"));
     }
 
     private void addRow(String metric, Object value, String detail) {
@@ -315,6 +333,16 @@ public class GUI_Airport {
         int mm = (total % 3600) / 60;
         int ss = total % 60;
         return String.format("%02d:%02d:%02d", hh, mm, ss);
+    }
+
+    private String ciDetail(double mean, double half, double limit, String unit) {
+        if (Double.isNaN(mean) || Double.isInfinite(mean) || Double.isNaN(half) || Double.isInfinite(half)) {
+            return "-";
+        }
+        double low = mean - half;
+        double high = mean + half;
+        String verdict = (high <= limit) ? "OK95" : "NOK95";
+        return String.format("[%.4f, %.4f] %s", low, high, verdict);
     }
 
     // ---- API pre napojenie simulacie ----
