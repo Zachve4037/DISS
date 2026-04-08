@@ -20,7 +20,7 @@ public class Airport extends EventSimCore {
     private static final double DAY_SECONDS = 86_400.0;
     private static final double WARMUP_SECONDS = 7 * DAY_SECONDS; // 7 dni na zahriatie
     private static final double MEASURE_SECONDS = DAY_SECONDS;
-    private static final double DEFAULT_ARRIVAL_LAMBDA = 1.0 / 15.0;
+    private static final double DEFAULT_ARRIVAL_LAMBDA = 1.0 / 21.2;
     private boolean measurementStarted = false;
 
     private int travellerIdCounter = 0;
