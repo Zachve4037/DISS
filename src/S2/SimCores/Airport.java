@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Airport extends EventSimCore {
     private static final double DAY_SECONDS = 86_400.0;
-    private static final double WARMUP_SECONDS = 0 * DAY_SECONDS; // 1 den na rozbeh a zahriatie simulacie, potom sa zacnu merat statistiky
+    private static final double WARMUP_SECONDS = 7 * DAY_SECONDS; // 1 den na rozbeh a zahriatie simulacie, potom sa zacnu merat statistiky
     private static final double MEASURE_SECONDS = DAY_SECONDS;
     private boolean measurementStarted = false;
 
@@ -55,7 +55,6 @@ public class Airport extends EventSimCore {
 
     //obsluhy
     private final boolean[] xrayBusy = new boolean[]{false, false};
-    private final boolean[] xrayDequeue = new boolean[]{false, false};
     private final boolean[] metalDetectorBusy = new boolean[]{false, false};
     private final boolean[] securityCheckBusy = new boolean[]{false, false};
 
@@ -73,7 +72,7 @@ public class Airport extends EventSimCore {
     public Airport(Random seed, int cratesIn, int cratesOut) {
         this.routingRng = new Random(seed.nextLong());
         this.stats = new StatsForAirport();
-        this.arrivalTimeRNG = new ContinuousExponentialDistRNG(seed, 1.0 / 15.0); // TODO: lambda
+        this.arrivalTimeRNG = new ContinuousExponentialDistRNG(seed, 1.0 / 15.0);
         this.metalDetectorTimeRNGs = new ContinuousUniformDistRNG[]{
                 new ContinuousUniformDistRNG(seed, metalTimeInterval),
                 new ContinuousUniformDistRNG(seed, metalTimeInterval)
@@ -94,8 +93,8 @@ public class Airport extends EventSimCore {
                 )
         );
 
-        this.xrayCratesQueue = new ArrayBlockingQueue[]{new ArrayBlockingQueue<Crate>(cratesIn), new ArrayBlockingQueue<Crate>(cratesIn)}; //TODO kapacita radov
-        this.xrayDequeueCratesQueue = new ArrayBlockingQueue[]{new ArrayBlockingQueue<Crate>(cratesOut), new ArrayBlockingQueue<Crate>(cratesOut)}; //TODO kapacita radov
+        this.xrayCratesQueue = new ArrayBlockingQueue[]{new ArrayBlockingQueue<Crate>(cratesIn), new ArrayBlockingQueue<Crate>(cratesIn)};
+        this.xrayDequeueCratesQueue = new ArrayBlockingQueue[]{new ArrayBlockingQueue<Crate>(cratesOut), new ArrayBlockingQueue<Crate>(cratesOut)};
     }
 
     @Override
@@ -248,7 +247,7 @@ public class Airport extends EventSimCore {
         return cratesUnloadPeopleQueue[workplace].peek();
     }
 
-    public Traveller pollUnloadTraveller(int workplace) {
+    public void pollUnloadTraveller(int workplace) {
         Traveller t = cratesUnloadPeopleQueue[workplace].poll();
         if (t != null) {
             ensureMeasurementStarted(currentTime);
@@ -256,7 +255,6 @@ public class Airport extends EventSimCore {
                 stats.onCustomerLeftUnloadQueue(t.getId(), currentTime, totalUnloadQueueLen());
             }
         }
-        return t;
     }
 
     public void enqueueCrateForXrayEnqueue(Crate crate, int workplace, double now) {
@@ -332,7 +330,7 @@ public class Airport extends EventSimCore {
     }
 
     public boolean isTravellerAlreadyInCheckedQueue(Traveller t, int workplace) {
-        return checkedPeopleQueue[workplace].contains(t);
+        return !checkedPeopleQueue[workplace].contains(t);
     }
 
     public void removeTravellerFromCheckedQueue(Traveller t, int workplace) {
@@ -364,14 +362,14 @@ public class Airport extends EventSimCore {
         securityClearedTravellerIds.remove(t.getId());
         readyCratesByTravellerId.remove(t.getId());
 
-        Double enter = travellerEnterSystemAt.remove(t.getId());
-        if (enter != null) {
-            customerServed(now - enter);
-        }
         ensureMeasurementStarted(now);
-        if (measurementStarted) {
+
+        Double enter = travellerEnterSystemAt.remove(t.getId());
+        if (enter != null && measurementStarted) {
+            customerServed(now - enter);
             stats.onCustomerFinishedSystem(t.getId(), now);
         }
+
         remainingCratesByTravellerId.remove(t.getId());
     }
 

@@ -21,7 +21,7 @@ public class CratesTakeEvent extends Event {
         double now = getTimeOfTheEvent();
 
         if (!sim.isTravellerReadyToTakeCrates(t)) {
-            if (!sim.isTravellerAlreadyInCheckedQueue(t, workplace)) {
+            if (sim.isTravellerAlreadyInCheckedQueue(t, workplace)) {
                 sim.enqueueCheckedTraveller(t, workplace);
             }
             return;
@@ -33,7 +33,7 @@ public class CratesTakeEvent extends Event {
             sim.removeTravellerFromCheckedQueue(t, workplace);
             sim.finishTraveller(t, now);
         } else {
-            if (!sim.isTravellerAlreadyInCheckedQueue(t, workplace)) {
+            if (sim.isTravellerAlreadyInCheckedQueue(t, workplace)) {
                 sim.enqueueCheckedTraveller(t, workplace);
             }
         }
