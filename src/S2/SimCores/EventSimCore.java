@@ -15,6 +15,7 @@ public abstract class EventSimCore extends SimCore {
 
     private volatile BooleanSupplier maxSpeedSupplier = () -> true;
     private volatile IntSupplier speedFactorSupplier = () -> 200;
+    private volatile double visualTimeSeconds = 0.0;
 
     //global
     private ArithmeticalStatistic avgTimeInQueueOverReps;
@@ -47,6 +48,7 @@ public abstract class EventSimCore extends SimCore {
         this.currentTime = 0;
         this.eventCalendar.clear();
         this.servedCustomers = 0;
+        this.visualTimeSeconds = 0.0;
 
         repTimeInQueue = new ArithmeticalStatistic();
         repServiceTime = new ArithmeticalStatistic();
@@ -69,6 +71,7 @@ public abstract class EventSimCore extends SimCore {
             applyRealtimePacing(simDelta);
 
             this.currentTime = nextEventTime;
+            this.visualTimeSeconds = this.currentTime;
             event.execute();
         }
         double dt = currentTime - lastQueueLenChangeTime;
@@ -95,20 +98,42 @@ public abstract class EventSimCore extends SimCore {
 
     private void applyRealtimePacing(double simDeltaSeconds) {
         if (simDeltaSeconds <= 0.0) return;
-        if (maxSpeedSupplier.getAsBoolean()) return;
 
-        int factor = Math.max(1, speedFactorSupplier.getAsInt()); // 1..200
-        long totalNanos = Math.round((simDeltaSeconds * 1_000_000_000.0) / factor);
-        if (totalNanos <= 0) return;
+        // max speed: bez cakania, GUI cas preskoci na dalsi event
+        if (maxSpeedSupplier.getAsBoolean()) {
+            visualTimeSeconds += simDeltaSeconds;
+            return;
+        }
 
-        long millis = totalNanos / 1_000_000L;
-        int nanos = (int) (totalNanos % 1_000_000L);
+        double remainingSim = simDeltaSeconds;
+        final double realStepSeconds = 0.05; // 50 ms, dobra odozva GUI/checkboxu
 
-        try {
-            Thread.sleep(millis, nanos);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            setRun(false);
+        while (remainingSim > 1e-9 && isRun()) {
+            if (maxSpeedSupplier.getAsBoolean()) {
+                visualTimeSeconds += remainingSim;
+                return;
+            }
+
+            int factor = Math.max(1, speedFactorSupplier.getAsInt()); // 1..200
+            double simStep = realStepSeconds * factor;
+            if (simStep > remainingSim) {
+                simStep = remainingSim;
+            }
+
+            long sleepNanos = Math.round((simStep / factor) * 1_000_000_000.0);
+            long millis = sleepNanos / 1_000_000L;
+            int nanos = (int) (sleepNanos % 1_000_000L);
+
+            try {
+                Thread.sleep(millis, nanos);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                setRun(false);
+                return;
+            }
+
+            visualTimeSeconds += simStep;
+            remainingSim -= simStep;
         }
     }
 
@@ -155,5 +180,9 @@ public abstract class EventSimCore extends SimCore {
 
     public long getCompletedReplications() {
         return completedReps;
+    }
+
+    public double getVisualTimeSeconds() {
+        return visualTimeSeconds;
     }
 }

@@ -65,7 +65,7 @@ public class Airport extends EventSimCore {
     public Airport(Random seed, int cratesIn, int cratesOut) {
         this.routingRng = new Random(seed.nextLong());
         this.stats = new StatsForAirport();
-        this.arrivalTimeRNG = new ContinuousExponentialDistRNG(seed, 1.0 / 14.9); // TODO: lambda
+        this.arrivalTimeRNG = new ContinuousExponentialDistRNG(seed, 1.0 / 15.0); // TODO: lambda
         this.metalDetectorTimeRNGs = new ContinuousUniformDistRNG[]{
                 new ContinuousUniformDistRNG(seed, metalTimeInterval),
                 new ContinuousUniformDistRNG(seed, metalTimeInterval)
@@ -170,7 +170,7 @@ public class Airport extends EventSimCore {
     }
 
     public double getCurrentTimeSeconds() {
-        return this.currentTime;
+        return this.getVisualTimeSeconds();
     }
 
     public List<Integer> getUnloadQueueTravellerIds() {
