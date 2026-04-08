@@ -2,11 +2,16 @@ package S2.GUI;
 
 import S2.SimCores.Airport;
 import S2.Statistics.StatsForAirport;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
+import java.util.Map;
 
 public class GUI_Airport {
 
@@ -21,6 +26,15 @@ public class GUI_Airport {
 
     private final DefaultTableModel statsModel;
 
+    private final JTextField sensitivityBaseCapacityField;
+    private final JTextField sensitivityClassesField;
+    private final JTextField sensitivityReplicationsField;
+    private final JButton sensitivityRunButton;
+    private final JLabel sensitivityResultLabel;
+
+    private final DefaultCategoryDataset sensitivityDataset;
+    private final JLabel sensitivityProgressLabel;
+
     private Airport airport;
 
     public GUI_Airport() {
@@ -32,7 +46,6 @@ public class GUI_Airport {
 
         JPanel simulationTab = new JPanel(new BorderLayout());
 
-        // Top controls
         JPanel controls = new JPanel();
         controls.setLayout(new BoxLayout(controls, BoxLayout.Y_AXIS));
 
@@ -91,10 +104,43 @@ public class GUI_Airport {
         simulationTab.add(tableScroll, BorderLayout.CENTER);
 
         JPanel throughputTab = new JPanel(new BorderLayout());
-        throughputTab.add(new JLabel("Priepustnost - TODO"), BorderLayout.CENTER);
+
+        JPanel sensitivityControls = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        sensitivityBaseCapacityField = new JTextField("1000", 8);
+        sensitivityClassesField = new JTextField("5", 5);
+        sensitivityReplicationsField = new JTextField("100", 6);
+        sensitivityRunButton = new JButton("Run sensitivity");
+        sensitivityResultLabel = new JLabel("Recommended capacity: -");
+
+        sensitivityControls.add(new JLabel("Capacity/day:"));
+        sensitivityControls.add(sensitivityBaseCapacityField);
+        sensitivityControls.add(new JLabel("Classes:"));
+        sensitivityControls.add(sensitivityClassesField);
+        sensitivityControls.add(new JLabel("Replications per point:"));
+        sensitivityControls.add(sensitivityReplicationsField);
+        sensitivityControls.add(sensitivityRunButton);
+        sensitivityControls.add(Box.createHorizontalStrut(12));
+        sensitivityControls.add(sensitivityResultLabel);
+        sensitivityProgressLabel = new JLabel("Progress: -");
+        sensitivityControls.add(Box.createHorizontalStrut(12));
+        sensitivityControls.add(sensitivityProgressLabel);
+
+
+        sensitivityDataset = new DefaultCategoryDataset();
+        JFreeChart sensitivityChart = ChartFactory.createBarChart(
+                "Sensitivity: avg security time vs terminal capacity",
+                "Terminal capacity per 24h",
+                "Average security time (s)",
+                sensitivityDataset
+        );
+        ChartPanel sensitivityChartPanel = new ChartPanel(sensitivityChart);
+
+        throughputTab.add(sensitivityControls, BorderLayout.NORTH);
+        throughputTab.add(sensitivityChartPanel, BorderLayout.CENTER);
+
 
         tabbedPane1.addTab("Simulacia", simulationTab);
-        tabbedPane1.addTab("Priepustnost", throughputTab);
+        tabbedPane1.addTab("Citlivost", throughputTab);
 
         panel1.add(tabbedPane1, BorderLayout.CENTER);
         frame.setContentPane(panel1);
@@ -188,6 +234,7 @@ public class GUI_Airport {
         addRow("CI95 half-width: avg security time (s)", "-", "-");
         addRow("CI95 half-width: avg waiting for baggage pickup (persons)", "-", "-");
         addRow("CI95 half-width: avg waiting for security start (persons)", "-", "-");
+        addRow("Sim: completed replications", "-", "-");
 
     }
 
@@ -302,6 +349,7 @@ public class GUI_Airport {
         setValue(45, safeDouble(halfSec), ciDetail(meanSec, halfSec, 600.0, "seconds"));
         setValue(46, safeDouble(halfPickup), ciDetail(meanPickup, halfPickup, 10.0, "persons"));
         setValue(47, safeDouble(halfMetal), ciDetail(meanMetal, halfMetal, 20.0, "persons"));
+        setValue(48, airport.getCompletedReplications(), "-");
     }
 
     private void addRow(String metric, Object value, String detail) {
@@ -316,6 +364,10 @@ public class GUI_Airport {
     private String safeDouble(double v) {
         if (Double.isNaN(v) || Double.isInfinite(v)) return "-";
         return String.format("%.4f", v);
+    }
+
+    public void setSensitivityProgress(String text) {
+        sensitivityProgressLabel.setText(text);
     }
 
     private String safeNum(long v) {
@@ -375,5 +427,43 @@ public class GUI_Airport {
         } else {
             SwingUtilities.invokeLater(this::refreshFromAirport);
         }
+    }
+
+    public JButton getSensitivityRunButton() {
+        return sensitivityRunButton;
+    }
+
+    public int getSensitivityBaseCapacity() {
+        return Integer.parseInt(sensitivityBaseCapacityField.getText().trim());
+    }
+
+    public int getSensitivityClasses() {
+        return Integer.parseInt(sensitivityClassesField.getText().trim());
+    }
+
+    public int getSensitivityReplications() {
+        return Integer.parseInt(sensitivityReplicationsField.getText().trim());
+    }
+
+    public void setSensitivityControlsEnabled(boolean enabled) {
+        sensitivityBaseCapacityField.setEnabled(enabled);
+        sensitivityClassesField.setEnabled(enabled);
+        sensitivityReplicationsField.setEnabled(enabled);
+        sensitivityRunButton.setEnabled(enabled);
+        if (enabled) {
+            sensitivityProgressLabel.setText("Progress: -");
+        }
+    }
+
+    public void updateSensitivityHistogram(Map<Integer, Double> avgTimeByCapacity, Integer recommendedCapacity) {
+        sensitivityDataset.clear();
+        for (Map.Entry<Integer, Double> e : avgTimeByCapacity.entrySet()) {
+            sensitivityDataset.addValue(e.getValue(), "Avg security time", String.valueOf(e.getKey()));
+        }
+        sensitivityResultLabel.setText(
+                recommendedCapacity == null
+                        ? "Recommended capacity: none "
+                        : "Recommended capacity: " + recommendedCapacity
+        );
     }
 }

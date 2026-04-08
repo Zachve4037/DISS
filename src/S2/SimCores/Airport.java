@@ -18,8 +18,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Airport extends EventSimCore {
     private static final double DAY_SECONDS = 86_400.0;
-    private static final double WARMUP_SECONDS = 7 * DAY_SECONDS; // 1 den na rozbeh a zahriatie simulacie, potom sa zacnu merat statistiky
+    private static final double WARMUP_SECONDS = 7 * DAY_SECONDS; // 7 dni na zahriatie
     private static final double MEASURE_SECONDS = DAY_SECONDS;
+    private static final double DEFAULT_ARRIVAL_LAMBDA = 1.0 / 15.0;
     private boolean measurementStarted = false;
 
     private int travellerIdCounter = 0;
@@ -68,11 +69,14 @@ public class Airport extends EventSimCore {
     private final Map<Integer, Integer> readyCratesByTravellerId = new HashMap<>();
     private final Map<Integer, Double> travellerEnterSystemAt = new HashMap<>();
 
-
     public Airport(Random seed, int cratesIn, int cratesOut) {
+        this(seed, cratesIn, cratesOut, DEFAULT_ARRIVAL_LAMBDA);
+    }
+
+    public Airport(Random seed, int cratesIn, int cratesOut, double arrivalLambda) {
         this.routingRng = new Random(seed.nextLong());
         this.stats = new StatsForAirport();
-        this.arrivalTimeRNG = new ContinuousExponentialDistRNG(seed, 1.0 / 15.0);
+        this.arrivalTimeRNG = new ContinuousExponentialDistRNG(seed, arrivalLambda);
         this.metalDetectorTimeRNGs = new ContinuousUniformDistRNG[]{
                 new ContinuousUniformDistRNG(seed, metalTimeInterval),
                 new ContinuousUniformDistRNG(seed, metalTimeInterval)
@@ -95,6 +99,13 @@ public class Airport extends EventSimCore {
 
         this.xrayCratesQueue = new ArrayBlockingQueue[]{new ArrayBlockingQueue<Crate>(cratesIn), new ArrayBlockingQueue<Crate>(cratesIn)};
         this.xrayDequeueCratesQueue = new ArrayBlockingQueue[]{new ArrayBlockingQueue<Crate>(cratesOut), new ArrayBlockingQueue<Crate>(cratesOut)};
+    }
+
+    public static double capacityPerDayToLambda(int capacityPerDay) {
+        if (capacityPerDay <= 0) {
+            throw new IllegalArgumentException("capacityPerDay must be > 0");
+        }
+        return capacityPerDay / DAY_SECONDS;
     }
 
     @Override
