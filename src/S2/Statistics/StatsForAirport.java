@@ -3,14 +3,12 @@ package S2.Statistics;
 import java.util.*;
 
 public class StatsForAirport {
-    // ---------- REPLIKACIA ----------
-    // pocet (kumulativny)
     private long repCustomersEnteredUnloadQueue;
     private long repCustomersEnteredMetalQueue;
     private long repCratesEnteredXrayQueue;
     private long repCratesEnteredPickupQueue;
 
-    // priemerna dlzka radu (time-weighted)
+    //priemerna dlzka radu
     private WeightedStatistic repUnloadQueueLen;
     private WeightedStatistic repMetalQueueLen;
     private WeightedStatistic repXrayQueueLen;

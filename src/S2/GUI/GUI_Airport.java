@@ -86,7 +86,6 @@ public class GUI_Airport {
         controls.add(row1);
         controls.add(row2);
 
-        // Stats table
         statsModel = new DefaultTableModel(new Object[]{"Metric", "Value", "Detail"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -198,7 +197,6 @@ public class GUI_Airport {
         addRow("Sim: avg wait pickup (s)", "-", "-");
         addRow("Sim: avg customer system time (s)", "-", "-");
 
-        // --- NOVE KPI PODLA ZADANIA ---
         addRow("KPI: avg security time <= 10 min", "-", "limit: 600 s");
         addRow("KPI: avg waiting for baggage pickup <= 10", "-", "limit: 10 persons");
         addRow("KPI: avg waiting for security start <= 20", "-", "limit: 20 persons");
@@ -243,7 +241,6 @@ public class GUI_Airport {
             return;
         }
 
-        // Cas
         int secFromZero = (int) Math.round(airport.getCurrentTimeSeconds());
         simTimeLabel.setText("Sim time: " + formatFrom0000(secFromZero));
 
@@ -275,10 +272,9 @@ public class GUI_Airport {
         setValue(20, safeDouble(s.getSimAvgWaitPickup().getValue()), "-");
         setValue(21, safeDouble(s.getSimAvgCustomerSystemTime().getValue()), "-");
 
-        // --- NOVE KPI ---
         double avgSecurityTimeSec = s.getSimAvgCustomerSystemTime().getValue();
-        double avgPickupWaitingPersons = s.getSimAvgPickupQueueLen().getValue(); // agregovane cez obe linky
-        double avgSecurityStartWaitingPersons = s.getSimAvgMetalQueueLen().getValue(); // agregovane cez obe rady
+        double avgPickupWaitingPersons = s.getSimAvgPickupQueueLen().getValue();
+        double avgSecurityStartWaitingPersons = s.getSimAvgMetalQueueLen().getValue();
 
         setValue(22, safeDouble(avgSecurityTimeSec),
                 avgSecurityTimeSec <= 600.0 ? "OK" : "NOK");
@@ -300,7 +296,6 @@ public class GUI_Airport {
         List<Integer> xrayOutW0 = airport.getXrayDequeueCrateIds(0);
         List<Integer> xrayOutW1 = airport.getXrayDequeueCrateIds(1);
 
-        // Indexy od 25 dalej
         setValue(25, unloadW0.size(), "-");
         setValue(26, unloadW0.toString(), "traveller IDs");
         setValue(27, unloadW1.size(), "-");
@@ -321,7 +316,6 @@ public class GUI_Airport {
         setValue(39, xrayOutW1.size(), "-");
         setValue(40, xrayOutW1.toString(), "crate IDs");
 
-        // busy status
         String busyW0 = "metal=" + airport.isMetalDetectorBusy(0)
                 + ", xray=" + airport.isXrayBusy(0)
                 + ", inspect=" + airport.isSecurityCheckBusy(0);
@@ -392,7 +386,6 @@ public class GUI_Airport {
         return String.format("[%.4f, %.4f] %s %s", low, high, verdict, unit);
     }
 
-    // ---- API pre napojenie simulacie ----
     public void bindAirport(Airport airport) {
         this.airport = airport;
     }

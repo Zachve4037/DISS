@@ -121,7 +121,6 @@ public class AirportSimulation {
 
                         final int totalPoints = capacities.size();
 
-                        // submit all points in parallel
                         Random seed = new Random();
                         int pointIndex = 0;
                         for (int cap : capacities) {
@@ -133,7 +132,6 @@ public class AirportSimulation {
                                 double lambda = Airport.capacityPerDayToLambda(cap);
                                 Airport local = new Airport(new Random(pointSeed), cratesIn, cratesOut, lambda);
 
-                                // sensitivity mode always max speed
                                 local.setPacingSuppliers(() -> true, () -> 200);
 
                                 local.setOnReplicationFinished(() -> {
@@ -144,7 +142,6 @@ public class AirportSimulation {
                                         liveAvgByCapacity.put(cap, partialAvg);
                                     }
 
-                                    // best capacity according to already finished points only
                                     Integer currentBest = computeBestCapacity(liveAvgByCapacity, kpiByCapacity);
 
                                     Map<Integer, Double> snapshot = new LinkedHashMap<>(new TreeMap<>(liveAvgByCapacity));
@@ -166,7 +163,6 @@ public class AirportSimulation {
                             });
                         }
 
-                        // collect finished points
                         for (int done = 1; done <= capacities.size(); done++) {
                             Future<SensitivityPointResult> f = completion.take();
                             SensitivityPointResult r = f.get();
@@ -221,7 +217,7 @@ public class AirportSimulation {
         for (Map.Entry<Integer, Boolean> e : kpiByCap.entrySet()) {
             if (Boolean.TRUE.equals(e.getValue()) && avgByCap.containsKey(e.getKey())) {
                 if (best == null || e.getKey() > best) {
-                    best = e.getKey(); // rule A: highest satisfying all KPI
+                    best = e.getKey();
                 }
             }
         }
@@ -243,7 +239,6 @@ public class AirportSimulation {
                 out.add((int) Math.round(v));
             }
         } else {
-            // even => base is lower middle point
             int lowerMiddle = classes / 2 - 1;
             for (int i = 0; i <= lowerMiddle; i++) {
                 double v = (lowerMiddle == 0)

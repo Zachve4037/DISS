@@ -99,14 +99,13 @@ public abstract class EventSimCore extends SimCore {
     private void applyRealtimePacing(double simDeltaSeconds) {
         if (simDeltaSeconds <= 0.0) return;
 
-        // max speed: bez cakania, GUI cas preskoci na dalsi event
         if (maxSpeedSupplier.getAsBoolean()) {
             visualTimeSeconds += simDeltaSeconds;
             return;
         }
 
         double remainingSim = simDeltaSeconds;
-        final double realStepSeconds = 0.05; // 50 ms, dobra odozva GUI/checkboxu
+        final double realStepSeconds = 0.05;
 
         while (remainingSim > 1e-9 && isRun()) {
             if (maxSpeedSupplier.getAsBoolean()) {
