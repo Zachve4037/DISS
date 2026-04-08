@@ -110,27 +110,6 @@ public class RouteDeadlineSimCore {
         return h * 3600 + m * 60 + s;
     }
 
-    public static final class PercentileSearchResult {
-        private final boolean exists;
-        private final int latestStartSeconds;
-        private final int percentileArrivalSeconds;
-
-        public PercentileSearchResult(boolean exists, int latestStartSeconds, int percentileArrivalSeconds) {
-            this.exists = exists;
-            this.latestStartSeconds = latestStartSeconds;
-            this.percentileArrivalSeconds = percentileArrivalSeconds;
-        }
-
-        public boolean exists() {
-            return exists;
-        }
-
-        public int latestStartSeconds() {
-            return latestStartSeconds;
-        }
-
-        public int percentileArrivalSeconds() {
-            return percentileArrivalSeconds;
-        }
+    public record PercentileSearchResult(boolean exists, int latestStartSeconds, int percentileArrivalSeconds) {
     }
 }

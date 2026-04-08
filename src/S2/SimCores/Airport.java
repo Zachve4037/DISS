@@ -34,7 +34,7 @@ public class Airport extends EventSimCore {
     private final DiscreteEmpiricalDistRNG numberOfCratesRNG;
 
     //statistiky
-    private StatsForAirport stats;
+    private final StatsForAirport stats;
     private int totalUnloadQueueLen() { return cratesUnloadPeopleQueue[0].size() + cratesUnloadPeopleQueue[1].size(); }
     private int totalMetalQueueLen()  { return metalPeopleQueue[0].size() + metalPeopleQueue[1].size(); }
     private int totalXrayQueueLen()   { return xrayCratesQueue[0].size() + xrayCratesQueue[1].size(); }
@@ -54,10 +54,10 @@ public class Airport extends EventSimCore {
     };
 
     //obsluhy
-    private boolean[] xrayBusy = new boolean[]{false, false};
-    private boolean[] xrayDequeue = new boolean[]{false, false};
-    private boolean[] metalDetectorBusy = new boolean[]{false, false};
-    private boolean[] securityCheckBusy = new boolean[]{false, false};
+    private final boolean[] xrayBusy = new boolean[]{false, false};
+    private final boolean[] xrayDequeue = new boolean[]{false, false};
+    private final boolean[] metalDetectorBusy = new boolean[]{false, false};
+    private final boolean[] securityCheckBusy = new boolean[]{false, false};
 
     //intervaly
     private final TriangleInterval securityCheckTimeInterval = new TriangleInterval(10, 35, 120);
@@ -134,14 +134,6 @@ public class Airport extends EventSimCore {
 
     public void setXrayBusy(int workplace, boolean busy) {
         this.xrayBusy[workplace] = busy;
-    }
-
-    public boolean isXrayDequeueBusy(int workplace) {
-        return xrayDequeue[workplace];
-    }
-
-    public void setXrayDequeue(int workplace, boolean busy) {
-        this.xrayDequeue[workplace] = busy;
     }
 
     public boolean isMetalDetectorBusy(int workplace) {
@@ -273,7 +265,7 @@ public class Airport extends EventSimCore {
         }
         ensureMeasurementStarted(now);
         if (measurementStarted) {
-            stats.onCrateEnteredXrayQueue(crate.getId(), now, totalXrayQueueLen());
+            stats.onCrateEnteredXrayQueue(crate.id(), now, totalXrayQueueLen());
         }
     }
 
@@ -283,7 +275,7 @@ public class Airport extends EventSimCore {
         }
         ensureMeasurementStarted(now);
         if (measurementStarted) {
-            stats.onCrateEnteredPickupQueue(crate.getId(), now, totalPickupQueueLen());
+            stats.onCrateEnteredPickupQueue(crate.id(), now, totalPickupQueueLen());
         }
     }
 
@@ -292,7 +284,7 @@ public class Airport extends EventSimCore {
         if (c != null) {
             ensureMeasurementStarted(currentTime);
             if (measurementStarted) {
-                stats.onCrateLeftXrayQueue(c.getId(), currentTime, totalXrayQueueLen());
+                stats.onCrateLeftXrayQueue(c.id(), currentTime, totalXrayQueueLen());
             }
         }
         return c;
@@ -323,14 +315,14 @@ public class Airport extends EventSimCore {
     }
 
     public void markCrateReadyForOwner(Crate c) {
-        readyCratesByTravellerId.merge(c.gettId(), 1, Integer::sum);
+        readyCratesByTravellerId.merge(c.tId(), 1, Integer::sum);
     }
 
-    public void markTravellerAfterSecurity(Traveller t, double now) {
+    public void markTravellerAfterSecurity(Traveller t) {
         securityClearedTravellerIds.add(t.getId());
     }
 
-    public boolean isTravellerReadyToTakeCrates(Traveller t, int workplace) {
+    public boolean isTravellerReadyToTakeCrates(Traveller t) {
         if (!securityClearedTravellerIds.contains(t.getId())) return false;
 
         int remaining = remainingCratesByTravellerId.getOrDefault(t.getId(), 0);
@@ -352,12 +344,12 @@ public class Airport extends EventSimCore {
         Iterator<Crate> it = xrayDequeueCratesQueue[workplace].iterator();
         while (it.hasNext()) {
             Crate c = it.next();
-            if (c.gettId() == t.getId()) {
+            if (c.tId() == t.getId()) {
                 it.remove();
                 removed++;
                 ensureMeasurementStarted(now);
                 if (measurementStarted) {
-                    stats.onCrateLeftPickupQueue(c.getId(), now, totalPickupQueueLen());
+                    stats.onCrateLeftPickupQueue(c.id(), now, totalPickupQueueLen());
                 }
             }
         }
@@ -414,7 +406,7 @@ public class Airport extends EventSimCore {
     public List<Integer> getXrayEnqueueCrateIds(int workplace) {
         List<Integer> out = new ArrayList<>();
         for (Crate c : xrayCratesQueue[workplace]) {
-            out.add(c.getId());
+            out.add(c.id());
         }
         return out;
     }
@@ -422,7 +414,7 @@ public class Airport extends EventSimCore {
     public List<Integer> getXrayDequeueCrateIds(int workplace) {
         List<Integer> out = new ArrayList<>();
         for (Crate c : xrayDequeueCratesQueue[workplace]) {
-            out.add(c.getId());
+            out.add(c.id());
         }
         return out;
     }

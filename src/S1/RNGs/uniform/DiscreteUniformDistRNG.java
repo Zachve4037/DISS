@@ -11,8 +11,8 @@ public class DiscreteUniformDistRNG extends UniformGenerator {
 
     public int generate() {
         return this.getValueGenerator().nextInt(
-                this.getInterval().getLow(),
-                this.getInterval().getHigh()
+                this.getInterval().low(),
+                this.getInterval().high()
         );
     }
 }

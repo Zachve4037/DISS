@@ -10,9 +10,9 @@ public class ContinuousTriangularDistRNG extends TriangleGenerator {
     }
 
     public double generate() {
-        double a = this.getInterval().getLow();
-        double b = this.getInterval().getHigh();
-        double c = this.getInterval().getMid();
+        double a = this.getInterval().low();
+        double b = this.getInterval().high();
+        double c = this.getInterval().mid();
 
         double F = (c - a) / (b - a);
         double rand = this.getValueGenerator().nextDouble();

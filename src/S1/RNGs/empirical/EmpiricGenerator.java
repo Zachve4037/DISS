@@ -19,10 +19,9 @@ public abstract class EmpiricGenerator {
         }
         this.intervals = new LinkedList<>();
         double cumulativeP = 0;
-        for (int i = 0; i < intervals.size(); i++) {
-            EmpiricInterval interval = intervals.get(i);
-            cumulativeP += interval.getP();
-            this.intervals.add(new EmpiricInterval(interval.getLow(), interval.getHigh(), cumulativeP));
+        for (EmpiricInterval interval : intervals) {
+            cumulativeP += interval.p();
+            this.intervals.add(new EmpiricInterval(interval.low(), interval.high(), cumulativeP));
         }
         if (Math.abs(cumulativeP - 1.0) > 1e-9) {
             throw new IllegalArgumentException("The sum of probabilities must be 1");

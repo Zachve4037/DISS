@@ -11,8 +11,8 @@ public class ContinuousUniformDistRNG extends UniformGenerator {
 
     public double generate() {
         return this.getValueGenerator().nextDouble(
-                this.getInterval().getLow(),
-                this.getInterval().getHigh()
+                this.getInterval().low(),
+                this.getInterval().high()
         );
     }
 }

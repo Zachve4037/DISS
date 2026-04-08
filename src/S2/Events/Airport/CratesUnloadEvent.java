@@ -28,13 +28,11 @@ public class CratesUnloadEvent extends Event {
             return;
         }
 
-        // Vykladanie po jednej prepravke, kym je volno na vstupnom pase RTG.
         while (head.hasRemainingCratesToUnload() && sim.canPutCrateOnXrayInput(workplace)) {
             Crate c = head.unloadNextCrate();
             sim.enqueueCrateForXrayEnqueue(c, workplace, now);
         }
 
-        // Ak cestujuci vylozil vsetko, odchadza do radu na detektor.
         if (!head.hasRemainingCratesToUnload()) {
             sim.pollUnloadTraveller(workplace);
             sim.enqueueTravellerForMetal(head, workplace, now);
@@ -47,10 +45,8 @@ public class CratesUnloadEvent extends Event {
             sim.scheduleEvent(new MetalStartEvent(now, sim, workplace));
         }
 
-        // Ak sme uvolnili miesto v unload rade, skus pokracovat aj pre dalsieho.
         if (sim.hasWaitingUnloadTraveller(workplace) && sim.canPutCrateOnXrayInput(workplace)) {
             sim.scheduleEvent(new CratesUnloadEvent(now, sim, workplace));
         }
     }
-
 }

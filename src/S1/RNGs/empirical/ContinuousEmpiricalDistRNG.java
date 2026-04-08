@@ -14,13 +14,13 @@ public class ContinuousEmpiricalDistRNG extends EmpiricGenerator {
         double intervalProbability = this.getIntervalGenerator().nextDouble();
         for (int i = 0; i < this.getIntervals().size(); i++) {
             EmpiricInterval row = this.getIntervals().get(i);
-            if (intervalProbability < row.getP()) {
-                return this.getValueGenerators()[i].nextDouble(row.getLow(), row.getHigh());
+            if (intervalProbability < row.p()) {
+                return this.getValueGenerators()[i].nextDouble(row.low(), row.high());
             }
         }
         EmpiricInterval last = this.getIntervals().get(this.getIntervals().size() - 1);
         return this.getValueGenerators()[this.getIntervals().size() - 1].nextDouble(
-                last.getLow(), last.getHigh()
+                last.low(), last.high()
         );
     }
 }

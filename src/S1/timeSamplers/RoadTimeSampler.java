@@ -17,7 +17,7 @@ public class RoadTimeSampler {
     public double sampleRoadMinutes(List<RoadPath> road, TimeTracker currentTime) {
         int startIndex = 0;
         double sharedTime = 0.0;
-        if (SHARED.equals(road.get(0).getName())) {
+        if (SHARED.equals(road.get(0).name())) {
             sharedTime = sampleRoadPathMinutes(road.get(0), currentTime.copy());
             startIndex = 1;
         }
@@ -26,7 +26,7 @@ public class RoadTimeSampler {
             RoadPath roadPath = road.get(i);
             double totalTime;
 
-            if (K.equals(roadPath.getName())) {
+            if (K.equals(roadPath.name())) {
                 totalTime = sampleRoadPathMinutes(roadPath, currentTime.copy());
             } else {
                 TimeTracker afterShared = currentTime.copy();

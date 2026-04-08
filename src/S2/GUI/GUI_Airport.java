@@ -10,30 +10,25 @@ import java.util.List;
 
 public class GUI_Airport {
 
-    private JPanel panel1;
-    private JTabbedPane tabbedPane1;
+    private final JComboBox<Integer> cratesInCombo;
+    private final JComboBox<Integer> cratesOutCombo;
+    private final JButton startSimButton;
+    private final JButton stopSimButton;
 
-    private JComboBox<Integer> cratesInCombo;
-    private JComboBox<Integer> cratesOutCombo;
-    private JButton startSimButton;
-    private JButton stopSimButton;
+    private final JSlider timeScaleSlider;
+    private final JCheckBox maxSpeedCheckBox;
+    private final JLabel simTimeLabel;
 
-    private JSlider timeScaleSlider;
-    private JCheckBox maxSpeedCheckBox;
-    private JLabel simTimeLabel;
+    private final DefaultTableModel statsModel;
 
-    private JTable statsTable;
-    private DefaultTableModel statsModel;
-
-    private Timer uiRefreshTimer;
     private Airport airport;
 
     public GUI_Airport() {
         JFrame frame = new JFrame("Airport");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        panel1 = new JPanel(new BorderLayout());
-        tabbedPane1 = new JTabbedPane();
+        JPanel panel1 = new JPanel(new BorderLayout());
+        JTabbedPane tabbedPane1 = new JTabbedPane();
 
         JPanel simulationTab = new JPanel(new BorderLayout());
 
@@ -86,7 +81,7 @@ public class GUI_Airport {
             }
         };
 
-        statsTable = new JTable(statsModel);
+        JTable statsTable = new JTable(statsModel);
         statsTable.setFillsViewportHeight(true);
         statsTable.setRowHeight(22);
 
@@ -121,7 +116,7 @@ public class GUI_Airport {
     }
 
     private void initRefreshTimer() {
-        uiRefreshTimer = new javax.swing.Timer(1000, e -> {
+        Timer uiRefreshTimer = new Timer(1000, e -> {
             try {
                 refreshFromAirport();
             } catch (Exception ex) {
@@ -304,7 +299,7 @@ public class GUI_Airport {
         double meanMetal = s.getSimAvgMetalQueueLen().getValue();
         double halfMetal = s.getCiAvgMetalQueueLen().getValue();
 
-        setValue(45, safeDouble(halfSec), ciDetail(meanSec, halfSec, 600.0, "s"));
+        setValue(45, safeDouble(halfSec), ciDetail(meanSec, halfSec, 600.0, "seconds"));
         setValue(46, safeDouble(halfPickup), ciDetail(meanPickup, halfPickup, 10.0, "persons"));
         setValue(47, safeDouble(halfMetal), ciDetail(meanMetal, halfMetal, 20.0, "persons"));
     }
@@ -342,7 +337,7 @@ public class GUI_Airport {
         double low = mean - half;
         double high = mean + half;
         String verdict = (high <= limit) ? "OK95" : "NOK95";
-        return String.format("[%.4f, %.4f] %s", low, high, verdict);
+        return String.format("[%.4f, %.4f] %s %s", low, high, verdict, unit);
     }
 
     // ---- API pre napojenie simulacie ----
@@ -381,5 +376,4 @@ public class GUI_Airport {
             SwingUtilities.invokeLater(this::refreshFromAirport);
         }
     }
-
 }

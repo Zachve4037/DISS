@@ -44,13 +44,13 @@ public class StatsForAirport {
     private final Map<Long, Double> crateEnterPickupQueueAt = new HashMap<>();
 
     // ---------- SIMULACIA (priemer cez replikacie) ----------
-    private ArithmeticalStatistic simCustomersEnteredUnloadQueue;
-    private ArithmeticalStatistic simCustomersEnteredMetalQueue;
+    private final ArithmeticalStatistic simCustomersEnteredUnloadQueue;
+    private final ArithmeticalStatistic simCustomersEnteredMetalQueue;
 
     //intervaly spolahlivosti
-    private ConfidenceIntervalStatistic ciAvgCustomerSystemTime;
-    private ConfidenceIntervalStatistic ciAvgPickupQueueLen;
-    private ConfidenceIntervalStatistic ciAvgMetalQueueLen;
+    private final ConfidenceIntervalStatistic ciAvgCustomerSystemTime;
+    private final ConfidenceIntervalStatistic ciAvgPickupQueueLen;
+    private final ConfidenceIntervalStatistic ciAvgMetalQueueLen;
 
 
     public ArithmeticalStatistic getSimAvgCustomerSystemTime() {
@@ -105,22 +105,6 @@ public class StatsForAirport {
         return simCustomersEnteredUnloadQueue;
     }
 
-    public WeightedStatistic getRepUnloadQueueLen() {
-        return repUnloadQueueLen;
-    }
-
-    public WeightedStatistic getRepMetalQueueLen() {
-        return repMetalQueueLen;
-    }
-
-    public WeightedStatistic getRepXrayQueueLen() {
-        return repXrayQueueLen;
-    }
-
-    public WeightedStatistic getRepPickupQueueLen() {
-        return repPickupQueueLen;
-    }
-
     public ArithmeticalStatistic getRepWaitUnload() {
         return repWaitUnload;
     }
@@ -153,20 +137,20 @@ public class StatsForAirport {
         return ciAvgMetalQueueLen;
     }
 
-    private ArithmeticalStatistic simCratesEnteredXrayQueue;
-    private ArithmeticalStatistic simCratesEnteredPickupQueue;
+    private final ArithmeticalStatistic simCratesEnteredXrayQueue;
+    private final ArithmeticalStatistic simCratesEnteredPickupQueue;
 
-    private ArithmeticalStatistic simAvgUnloadQueueLen;
-    private ArithmeticalStatistic simAvgMetalQueueLen;
-    private ArithmeticalStatistic simAvgXrayQueueLen;
-    private ArithmeticalStatistic simAvgPickupQueueLen;
+    private final ArithmeticalStatistic simAvgUnloadQueueLen;
+    private final ArithmeticalStatistic simAvgMetalQueueLen;
+    private final ArithmeticalStatistic simAvgXrayQueueLen;
+    private final ArithmeticalStatistic simAvgPickupQueueLen;
 
-    private ArithmeticalStatistic simAvgWaitUnload;
-    private ArithmeticalStatistic simAvgWaitMetal;
-    private ArithmeticalStatistic simAvgWaitXray;
-    private ArithmeticalStatistic simAvgWaitPickup;
+    private final ArithmeticalStatistic simAvgWaitUnload;
+    private final ArithmeticalStatistic simAvgWaitMetal;
+    private final ArithmeticalStatistic simAvgWaitXray;
+    private final ArithmeticalStatistic simAvgWaitPickup;
 
-    private ArithmeticalStatistic simAvgCustomerSystemTime;
+    private final ArithmeticalStatistic simAvgCustomerSystemTime;
 
     public StatsForAirport() {
         simCustomersEnteredUnloadQueue = new ArithmeticalStatistic();

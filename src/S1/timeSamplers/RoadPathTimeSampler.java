@@ -30,13 +30,13 @@ public class RoadPathTimeSampler {
     public double sampleRoadPathMinutes(RoadPath roadPath, TimeTracker timeTracker) {
         TimeTracker current = timeTracker.copy();
         double totalTime = 0;
-        for (RoadSegment segment : roadPath.getSegments()) {
-            double speed = sampleSpeed(segment.getColor());
-            if (segment.isK() && current.isAfter(6, 30, 0)) {
+        for (RoadSegment segment : roadPath.segments()) {
+            double speed = sampleSpeed(segment.color());
+            if (segment.k() && current.isAfter(6, 30, 0)) {
                 double kNum = k.generate();
                 speed = speed * ((100 - kNum) / 100);
             }
-            double totalSegmentMinutes = (segment.getLength() / speed) * 60;
+            double totalSegmentMinutes = (segment.length() / speed) * 60;
             totalTime += totalSegmentMinutes;
             current.addMinutes(totalSegmentMinutes);
         }

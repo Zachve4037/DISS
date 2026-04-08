@@ -26,7 +26,7 @@ public class MetalEndEvent extends Event {
 
         sim.setMetalDetectorBusy(workplace, false);
 
-        sim.markTravellerAfterSecurity(t, now);
+        sim.markTravellerAfterSecurity(t);
         sim.enqueueCheckedTraveller(t, workplace);
 
         if (sim.hasWaitingMetalTraveller(workplace)) {
