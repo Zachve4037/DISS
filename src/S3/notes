@@ -2,4 +2,29 @@
 - spravit ababuilder model
 - urcite zalohovat kody
 - pozriet priklady
--
+
+2 vstupy -> samostatne a sanitkou
+    - lisia sa narocnostou osetrenia
+pacient vstupi do cakacieho priestoru
+    - podla poradia, prednost maju pacienti zo sanitky
+vstupne vysetrenie:
+    - evidencia pacienta
+    - posudenie jeho stavu
+    - priprava na dalsie osetrenie
+   ?- potrebna dostupnost ambulancie a zdravotnej sestry
+pridelenie priority pacientovi 1 najmenej a 5 najviac. Nizsia je vyssia
+zaradenie sa do typu fronty podla priority:
+typ A: - pacienti s prioritou 1 a 2
+typ A | B: - pacienti s prioritou 3 a 4
+typ B: - pacienti s prioritou 5
+
+
+
+OTAZKY
+=======================================================
+Na realizáciu tohto procesu je potrebná súčasná dostupnosť dvoch zdrojov:
+• ambulancie,
+• zdravotnej sestry
+-> toto sa vztahuje k vstupnemu vysetreniu, alebo naslednemu osetreniu?
+
+ako to je s vstupnym vysetrenim a typom B?
