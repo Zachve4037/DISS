@@ -18,6 +18,31 @@ typ A: - pacienti s prioritou 1 a 2
 typ A | B: - pacienti s prioritou 3 a 4
 typ B: - pacienti s prioritou 5
 
+GUI - animacia
+- hociako spravit, len nech tam nieco je, je to len na ukazku
+- uplne jednoducho, kludne len geometricke tvary
+- treba animovat pohyb, nemozu sa teleportovat
+- as fast as possible nema animator, inak si viem vybrat ci ano alebo nie
+- pridat zobrazovanie aj ktory den aktualne prebieha
+
+VYHODNOCOVANIE
+- vsetko co mi napadne zobrazujem na gui v nejakej tabulke
+- pre vsetky statistiky zobrazujem 95% interval spolahlivosti
+- dat vyhodnotenia do tabulky v dokumentacii
+- kludne nejaky exporter spravit na export statistik
+
+EXPERIMENTY
+- pridelovanie personalu
+    - zakladny variant: vysetrenie ma prednost pred vstupnym vysetrenim
+    - rozne skusat varianty
+- kludne mozem jedneho lekara nechat iba pre tych zo sanitky a naopak
+- skusat rozne pomery personalu ku danej strategii
+- strategie mat v gui uz nastavene, aby sa dali iba vyberat
+
+presun z cakacieho priestoru do ambulancie
+- 0 cas
+- ak idem do radu tak 0 cas
+- ak idem do ambulancie, tak cas prechodu medzi ambulanciami
 
 
 OTAZKY
@@ -26,5 +51,6 @@ Na realizáciu tohto procesu je potrebná súčasná dostupnosť dvoch zdrojov:
 • ambulancie,
 • zdravotnej sestry
 -> toto sa vztahuje k vstupnemu vysetreniu, alebo naslednemu osetreniu?
+   - evidencia
 
 ako to je s vstupnym vysetrenim a typom B?
