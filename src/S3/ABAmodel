@@ -2,59 +2,11 @@
 <ABAsim>
   <Agents>
     <Agent>
-      <SimId>14</SimId>
-      <InternalId>61</InternalId>
-      <Name>AgentResources</Name>
-      <Bounds>784,1096,180,180</Bounds>
-      <Reasoner>ManagerResources</Reasoner>
-      <ReasonerBounds>74,25,32,25</ReasonerBounds>
-      <UsePetriNet>false</UsePetriNet>
-    </Agent>
-    <Agent>
-      <SimId>15</SimId>
-      <InternalId>62</InternalId>
-      <Name>AgentPatients</Name>
-      <Bounds>1470,1403,180,180</Bounds>
-      <Reasoner>ManagerPatients</Reasoner>
-      <ReasonerBounds>74,25,32,25</ReasonerBounds>
-      <UsePetriNet>false</UsePetriNet>
-    </Agent>
-    <Agent>
-      <SimId>3</SimId>
-      <InternalId>4</InternalId>
-      <Name>AgentHospital</Name>
-      <Bounds>1463,748,180,180</Bounds>
-      <Reasoner>ManagerHospital</Reasoner>
-      <ReasonerBounds>74,25,32,25</ReasonerBounds>
-      <UsePetriNet>false</UsePetriNet>
-      <Components>
-        <Process>
-          <SimId>1004</SimId>
-          <InternalId>41</InternalId>
-          <Name>ProcessDoctorsExamination</Name>
-          <Bounds>8,77,35,18</Bounds>
-        </Process>
-        <Process>
-          <SimId>1003</SimId>
-          <InternalId>39</InternalId>
-          <Name>ProcessInitialExamintation</Name>
-          <Bounds>8,54,35,18</Bounds>
-        </Process>
-        <Action>
-          <SimId>1005</SimId>
-          <InternalId>43</InternalId>
-          <Name>ActionHandlePatient</Name>
-          <Bounds>130,66,35,18</Bounds>
-        </Action>
-      </Components>
-    </Agent>
-    <Agent>
-      <SimId>1</SimId>
-      <InternalId>2</InternalId>
-      <Name>AgentBoss</Name>
-      <Bounds>1091,352,180,180</Bounds>
-      <Reasoner>ManagerBoss</Reasoner>
-      <ReasonerBounds>74,25,32,25</ReasonerBounds>
+      <SimId>16</SimId>
+      <InternalId>63</InternalId>
+      <Name>AgentMovement</Name>
+      <Bounds>2240,759,180,180</Bounds>
+      <Reasoner>ManagerMovement</Reasoner>
       <UsePetriNet>false</UsePetriNet>
     </Agent>
     <Agent>
@@ -81,15 +33,79 @@
       </Components>
     </Agent>
     <Agent>
-      <SimId>16</SimId>
-      <InternalId>63</InternalId>
-      <Name>AgentMovement</Name>
-      <Bounds>2240,759,180,180</Bounds>
-      <Reasoner>ManagerMovement</Reasoner>
+      <SimId>14</SimId>
+      <InternalId>61</InternalId>
+      <Name>AgentResources</Name>
+      <Bounds>784,1096,180,180</Bounds>
+      <Reasoner>ManagerResources</Reasoner>
+      <ReasonerBounds>74,25,32,25</ReasonerBounds>
+      <UsePetriNet>false</UsePetriNet>
+    </Agent>
+    <Agent>
+      <SimId>3</SimId>
+      <InternalId>4</InternalId>
+      <Name>AgentHospital</Name>
+      <Bounds>1447,750,180,180</Bounds>
+      <Reasoner>ManagerHospital</Reasoner>
+      <ReasonerBounds>74,25,32,25</ReasonerBounds>
+      <UsePetriNet>false</UsePetriNet>
+      <Components>
+        <Process>
+          <SimId>1003</SimId>
+          <InternalId>39</InternalId>
+          <Name>ProcessInitialExamintation</Name>
+          <Bounds>8,54,35,18</Bounds>
+        </Process>
+        <Process>
+          <SimId>1004</SimId>
+          <InternalId>41</InternalId>
+          <Name>ProcessDoctorsExamination</Name>
+          <Bounds>8,77,35,18</Bounds>
+        </Process>
+        <Action>
+          <SimId>1005</SimId>
+          <InternalId>43</InternalId>
+          <Name>ActionHandlePatient</Name>
+          <Bounds>130,66,35,18</Bounds>
+        </Action>
+      </Components>
+    </Agent>
+    <Agent>
+      <SimId>15</SimId>
+      <InternalId>62</InternalId>
+      <Name>AgentPatients</Name>
+      <Bounds>1470,1403,180,180</Bounds>
+      <Reasoner>ManagerPatients</Reasoner>
+      <ReasonerBounds>74,25,32,25</ReasonerBounds>
+      <UsePetriNet>false</UsePetriNet>
+    </Agent>
+    <Agent>
+      <SimId>1</SimId>
+      <InternalId>2</InternalId>
+      <Name>AgentBoss</Name>
+      <Bounds>1091,352,180,180</Bounds>
+      <Reasoner>ManagerBoss</Reasoner>
+      <ReasonerBounds>74,25,32,25</ReasonerBounds>
       <UsePetriNet>false</UsePetriNet>
     </Agent>
   </Agents>
   <Messages>
+    <Message>
+      <SimId>1010</SimId>
+      <InternalId>32</InternalId>
+      <Name>patientDeparture</Name>
+      <Type>Notice</Type>
+      <Source>2</Source>
+      <Destination>3</Destination>
+    </Message>
+    <Message>
+      <SimId>1011</SimId>
+      <InternalId>33</InternalId>
+      <Name>handlePatient</Name>
+      <Type>RequestResponse</Type>
+      <Source>2</Source>
+      <Destination>4</Destination>
+    </Message>
     <Message>
       <InternalId>66</InternalId>
       <Type>Parent</Type>
@@ -147,6 +163,12 @@
       <Destination>63</Destination>
     </Message>
     <Message>
+      <InternalId>40</InternalId>
+      <Type>StartFinish</Type>
+      <Source>4</Source>
+      <Destination>39</Destination>
+    </Message>
+    <Message>
       <InternalId>9</InternalId>
       <Type>Parent</Type>
       <Source>4</Source>
@@ -169,6 +191,12 @@
       <Destination>63</Destination>
     </Message>
     <Message>
+      <InternalId>42</InternalId>
+      <Type>StartFinish</Type>
+      <Source>4</Source>
+      <Destination>41</Destination>
+    </Message>
+    <Message>
       <SimId>1021</SimId>
       <InternalId>75</InternalId>
       <Name>handleLeavingPatient</Name>
@@ -183,6 +211,12 @@
       <Type>RequestResponse</Type>
       <Source>4</Source>
       <Destination>63</Destination>
+    </Message>
+    <Message>
+      <InternalId>44</InternalId>
+      <Type>Execute</Type>
+      <Source>4</Source>
+      <Destination>43</Destination>
     </Message>
     <Message>
       <SimId>1023</SimId>
@@ -213,6 +247,14 @@
       <Destination>17</Destination>
     </Message>
     <Message>
+      <SimId>1025</SimId>
+      <InternalId>84</InternalId>
+      <Name>putPatient</Name>
+      <Type>Notice</Type>
+      <Source>4</Source>
+      <Destination>62</Destination>
+    </Message>
+    <Message>
       <SimId>1002</SimId>
       <InternalId>23</InternalId>
       <Name>patientArrival</Name>
@@ -220,40 +262,6 @@
       <Source>3</Source>
       <Destination>2</Destination>
     </Message>
-    <Message>
-      <SimId>1010</SimId>
-      <InternalId>32</InternalId>
-      <Name>patientDeparture</Name>
-      <Type>Notice</Type>
-      <Source>2</Source>
-      <Destination>3</Destination>
-    </Message>
-    <Message>
-      <SimId>1011</SimId>
-      <InternalId>33</InternalId>
-      <Name>handlePatient</Name>
-      <Type>RequestResponse</Type>
-      <Source>2</Source>
-      <Destination>4</Destination>
-    </Message>
-    <Message>
-      <InternalId>40</InternalId>
-      <Type>StartFinish</Type>
-      <Source>4</Source>
-      <Destination>39</Destination>
-    </Message>
-    <Message>
-      <InternalId>42</InternalId>
-      <Type>StartFinish</Type>
-      <Source>4</Source>
-      <Destination>41</Destination>
-    </Message>
-    <Message>
-      <InternalId>44</InternalId>
-      <Type>Execute</Type>
-      <Source>4</Source>
-      <Destination>43</Destination>
-    </Message>
   </Messages>
-  <IID>80</IID>
+  <IID>85</IID>
 </ABAsim>

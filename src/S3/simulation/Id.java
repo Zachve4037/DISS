@@ -17,10 +17,10 @@ public class Id extends OSPABA.IdList
 	public static final int managerResources = 114;
 	public static final int managerPatients = 115;
 	public static final int managerMovement = 116;
+	public static final int schedulerThemselves = 1002;
 	public static final int processInitialExamintation = 1003;
 	public static final int processDoctorsExamination = 1004;
 	public static final int actionHandlePatient = 1005;
 	public static final int schedulerAmbulance = 1001;
-	public static final int schedulerThemselves = 1002;
 	//meta! tag="end"
 }

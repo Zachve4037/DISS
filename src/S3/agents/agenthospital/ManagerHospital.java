@@ -107,61 +107,61 @@ public class ManagerHospital extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
-		case Mc.getPatientForDoctorsExamination:
-			processGetPatientForDoctorsExamination(message);
+		case Mc.handeDoctorsMovement:
+			processHandeDoctorsMovement(message);
 		break;
 
-		case Mc.finish:
-			switch (message.sender().id())
-			{
-			case Id.processDoctorsExamination:
-				processFinishProcessDoctorsExamination(message);
-			break;
-
-			case Id.processInitialExamintation:
-				processFinishProcessInitialExamintation(message);
-			break;
-			}
-		break;
-
-		case Mc.allocateDoctorsExaminationAResources:
-			processAllocateDoctorsExaminationAResources(message);
+		case Mc.handlePatientToWaitingRoom:
+			processHandlePatientToWaitingRoom(message);
 		break;
 
 		case Mc.handlePatient:
 			processHandlePatient(message);
 		break;
 
-		case Mc.handeDoctorsMovement:
-			processHandeDoctorsMovement(message);
-		break;
+		case Mc.finish:
+			switch (message.sender().id())
+			{
+			case Id.processInitialExamintation:
+				processFinishProcessInitialExamintation(message);
+			break;
 
-		case Mc.getPatientForInitialExamination:
-			processGetPatientForInitialExamination(message);
-		break;
-
-		case Mc.handleNursesMovement:
-			processHandleNursesMovement(message);
-		break;
-
-		case Mc.handleLeavingPatient:
-			processHandleLeavingPatient(message);
-		break;
-
-		case Mc.handlePatientToClinic:
-			processHandlePatientToClinic(message);
-		break;
-
-		case Mc.allocateInitialExaminationResources:
-			processAllocateInitialExaminationResources(message);
+			case Id.processDoctorsExamination:
+				processFinishProcessDoctorsExamination(message);
+			break;
+			}
 		break;
 
 		case Mc.allocateDoctorsExaminationBResources:
 			processAllocateDoctorsExaminationBResources(message);
 		break;
 
-		case Mc.handlePatientToWaitingRoom:
-			processHandlePatientToWaitingRoom(message);
+		case Mc.handleLeavingPatient:
+			processHandleLeavingPatient(message);
+		break;
+
+		case Mc.handleNursesMovement:
+			processHandleNursesMovement(message);
+		break;
+
+		case Mc.allocateInitialExaminationResources:
+			processAllocateInitialExaminationResources(message);
+		break;
+
+		case Mc.getPatientForDoctorsExamination:
+			processGetPatientForDoctorsExamination(message);
+		break;
+
+		case Mc.getPatientForInitialExamination:
+			processGetPatientForInitialExamination(message);
+		break;
+
+		case Mc.allocateDoctorsExaminationAResources:
+			processAllocateDoctorsExaminationAResources(message);
+		break;
+
+		case Mc.handlePatientToClinic:
+			processHandlePatientToClinic(message);
 		break;
 
 		default:

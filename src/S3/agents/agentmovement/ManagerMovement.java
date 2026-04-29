@@ -71,20 +71,20 @@ public class ManagerMovement extends OSPABA.Manager
 			processHandeDoctorsMovement(message);
 		break;
 
-		case Mc.handleNursesMovement:
-			processHandleNursesMovement(message);
+		case Mc.handlePatientToWaitingRoom:
+			processHandlePatientToWaitingRoom(message);
 		break;
 
 		case Mc.handleLeavingPatient:
 			processHandleLeavingPatient(message);
 		break;
 
-		case Mc.handlePatientToClinic:
-			processHandlePatientToClinic(message);
+		case Mc.handleNursesMovement:
+			processHandleNursesMovement(message);
 		break;
 
-		case Mc.handlePatientToWaitingRoom:
-			processHandlePatientToWaitingRoom(message);
+		case Mc.handlePatientToClinic:
+			processHandlePatientToClinic(message);
 		break;
 
 		default:

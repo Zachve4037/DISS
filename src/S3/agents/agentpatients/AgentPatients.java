@@ -24,6 +24,7 @@ public class AgentPatients extends OSPABA.Agent
 	{
 		new ManagerPatients(Id.managerPatients, mySim(), this);
 		addOwnMessage(Mc.getPatientForDoctorsExamination);
+		addOwnMessage(Mc.putPatient);
 		addOwnMessage(Mc.getPatientForInitialExamination);
 	}
 	//meta! tag="end"

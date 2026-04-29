@@ -25,8 +25,8 @@ public class AgentHospital extends OSPABA.Agent
 	private void init()
 	{
 		new ManagerHospital(Id.managerHospital, mySim(), this);
-		new ProcessDoctorsExamination(Id.processDoctorsExamination, mySim(), this);
 		new ProcessInitialExamintation(Id.processInitialExamintation, mySim(), this);
+		new ProcessDoctorsExamination(Id.processDoctorsExamination, mySim(), this);
 		new ActionHandlePatient(Id.actionHandlePatient, mySim(), this);
 		addOwnMessage(Mc.allocateDoctorsExaminationBResources);
 		addOwnMessage(Mc.handlePatientToWaitingRoom);
@@ -36,8 +36,8 @@ public class AgentHospital extends OSPABA.Agent
 		addOwnMessage(Mc.handleLeavingPatient);
 		addOwnMessage(Mc.handlePatient);
 		addOwnMessage(Mc.allocateDoctorsExaminationAResources);
-		addOwnMessage(Mc.getPatientForInitialExamination);
 		addOwnMessage(Mc.handleNursesMovement);
+		addOwnMessage(Mc.getPatientForInitialExamination);
 		addOwnMessage(Mc.handlePatientToClinic);
 	}
 	//meta! tag="end"

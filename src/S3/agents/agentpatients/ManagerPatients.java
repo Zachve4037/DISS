@@ -42,6 +42,11 @@ public class ManagerPatients extends OSPABA.Manager
 		}
 	}
 
+	//meta! sender="AgentHospital", id="84", type="Notice"
+	public void processPutPatient(MessageForm message)
+	{
+	}
+
 	//meta! userInfo="Generated code: do not modify", tag="begin"
 	public void init()
 	{
@@ -58,6 +63,10 @@ public class ManagerPatients extends OSPABA.Manager
 
 		case Mc.getPatientForInitialExamination:
 			processGetPatientForInitialExamination(message);
+		break;
+
+		case Mc.putPatient:
+			processPutPatient(message);
 		break;
 
 		default:
