@@ -57,16 +57,16 @@ public class ManagerResources extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
+		case Mc.allocateDoctorsExaminationBResources:
+			processAllocateDoctorsExaminationBResources(message);
+		break;
+
 		case Mc.allocateInitialExaminationResources:
 			processAllocateInitialExaminationResources(message);
 		break;
 
 		case Mc.allocateDoctorsExaminationAResources:
 			processAllocateDoctorsExaminationAResources(message);
-		break;
-
-		case Mc.allocateDoctorsExaminationBResources:
-			processAllocateDoctorsExaminationBResources(message);
 		break;
 
 		default:

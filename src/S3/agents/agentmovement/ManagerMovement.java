@@ -57,6 +57,31 @@ public class ManagerMovement extends OSPABA.Manager
 		}
 	}
 
+	//meta! sender="ProcessPatientToWaitingRoomMovement", id="94", type="Finish"
+	public void processFinishProcessPatientToWaitingRoomMovement(MessageForm message)
+	{
+	}
+
+	//meta! sender="ProcessDoctorsMovement", id="90", type="Finish"
+	public void processFinishProcessDoctorsMovement(MessageForm message)
+	{
+	}
+
+	//meta! sender="ProcessPatientToClinicMovement", id="98", type="Finish"
+	public void processFinishProcessPatientToClinicMovement(MessageForm message)
+	{
+	}
+
+	//meta! sender="ProcessNursesMovement", id="92", type="Finish"
+	public void processFinishProcessNursesMovement(MessageForm message)
+	{
+	}
+
+	//meta! sender="ProcessPatientLeavingMovement", id="96", type="Finish"
+	public void processFinishProcessPatientLeavingMovement(MessageForm message)
+	{
+	}
+
 	//meta! userInfo="Generated code: do not modify", tag="begin"
 	public void init()
 	{
@@ -67,14 +92,6 @@ public class ManagerMovement extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
-		case Mc.handeDoctorsMovement:
-			processHandeDoctorsMovement(message);
-		break;
-
-		case Mc.handlePatientToWaitingRoom:
-			processHandlePatientToWaitingRoom(message);
-		break;
-
 		case Mc.handleLeavingPatient:
 			processHandleLeavingPatient(message);
 		break;
@@ -83,8 +100,41 @@ public class ManagerMovement extends OSPABA.Manager
 			processHandleNursesMovement(message);
 		break;
 
+		case Mc.handlePatientToWaitingRoom:
+			processHandlePatientToWaitingRoom(message);
+		break;
+
+		case Mc.finish:
+			switch (message.sender().id())
+			{
+			case Id.processPatientToWaitingRoomMovement:
+				processFinishProcessPatientToWaitingRoomMovement(message);
+			break;
+
+			case Id.processDoctorsMovement:
+				processFinishProcessDoctorsMovement(message);
+			break;
+
+			case Id.processPatientToClinicMovement:
+				processFinishProcessPatientToClinicMovement(message);
+			break;
+
+			case Id.processNursesMovement:
+				processFinishProcessNursesMovement(message);
+			break;
+
+			case Id.processPatientLeavingMovement:
+				processFinishProcessPatientLeavingMovement(message);
+			break;
+			}
+		break;
+
 		case Mc.handlePatientToClinic:
 			processHandlePatientToClinic(message);
+		break;
+
+		case Mc.handeDoctorsMovement:
+			processHandeDoctorsMovement(message);
 		break;
 
 		default:

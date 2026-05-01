@@ -107,27 +107,15 @@ public class ManagerHospital extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
-		case Mc.handeDoctorsMovement:
-			processHandeDoctorsMovement(message);
-		break;
-
-		case Mc.handlePatientToWaitingRoom:
-			processHandlePatientToWaitingRoom(message);
-		break;
-
-		case Mc.handlePatient:
-			processHandlePatient(message);
-		break;
-
 		case Mc.finish:
 			switch (message.sender().id())
 			{
-			case Id.processInitialExamintation:
-				processFinishProcessInitialExamintation(message);
-			break;
-
 			case Id.processDoctorsExamination:
 				processFinishProcessDoctorsExamination(message);
+			break;
+
+			case Id.processInitialExamintation:
+				processFinishProcessInitialExamintation(message);
 			break;
 			}
 		break;
@@ -140,12 +128,12 @@ public class ManagerHospital extends OSPABA.Manager
 			processHandleLeavingPatient(message);
 		break;
 
-		case Mc.handleNursesMovement:
-			processHandleNursesMovement(message);
-		break;
-
 		case Mc.allocateInitialExaminationResources:
 			processAllocateInitialExaminationResources(message);
+		break;
+
+		case Mc.allocateDoctorsExaminationAResources:
+			processAllocateDoctorsExaminationAResources(message);
 		break;
 
 		case Mc.getPatientForDoctorsExamination:
@@ -156,12 +144,24 @@ public class ManagerHospital extends OSPABA.Manager
 			processGetPatientForInitialExamination(message);
 		break;
 
-		case Mc.allocateDoctorsExaminationAResources:
-			processAllocateDoctorsExaminationAResources(message);
+		case Mc.handleNursesMovement:
+			processHandleNursesMovement(message);
+		break;
+
+		case Mc.handlePatientToWaitingRoom:
+			processHandlePatientToWaitingRoom(message);
+		break;
+
+		case Mc.handlePatient:
+			processHandlePatient(message);
 		break;
 
 		case Mc.handlePatientToClinic:
 			processHandlePatientToClinic(message);
+		break;
+
+		case Mc.handeDoctorsMovement:
+			processHandeDoctorsMovement(message);
 		break;
 
 		default:

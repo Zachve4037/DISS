@@ -1,6 +1,7 @@
 package S3.agents.agentmovement;
 
 import OSPABA.*;
+import S3.agents.agentmovement.continualassistants.*;
 import S3.simulation.*;
 
 //meta! id="63"
@@ -23,6 +24,11 @@ public class AgentMovement extends OSPABA.Agent
 	private void init()
 	{
 		new ManagerMovement(Id.managerMovement, mySim(), this);
+		new ProcessDoctorsMovement(Id.processDoctorsMovement, mySim(), this);
+		new ProcessNursesMovement(Id.processNursesMovement, mySim(), this);
+		new ProcessPatientToWaitingRoomMovement(Id.processPatientToWaitingRoomMovement, mySim(), this);
+		new ProcessPatientLeavingMovement(Id.processPatientLeavingMovement, mySim(), this);
+		new ProcessPatientToClinicMovement(Id.processPatientToClinicMovement, mySim(), this);
 		addOwnMessage(Mc.handlePatientToWaitingRoom);
 		addOwnMessage(Mc.handeDoctorsMovement);
 		addOwnMessage(Mc.handleLeavingPatient);

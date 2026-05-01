@@ -57,16 +57,16 @@ public class ManagerPatients extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
+		case Mc.putPatient:
+			processPutPatient(message);
+		break;
+
 		case Mc.getPatientForDoctorsExamination:
 			processGetPatientForDoctorsExamination(message);
 		break;
 
 		case Mc.getPatientForInitialExamination:
 			processGetPatientForInitialExamination(message);
-		break;
-
-		case Mc.putPatient:
-			processPutPatient(message);
 		break;
 
 		default:
