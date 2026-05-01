@@ -1,0 +1,52 @@
+ABACore 2.1, 2017-04-20
+------------------------
+- Správy notice posielané kontinuálnym asistentom su vdy posielané jeho agentovi
+
+ABACore 2.2, 2020-05-05
+------------------------
+- Zrıchlenie práce s dynamickımi agentami
+
+ABACore 2.3, 2023-04-26
+------------------------
+- CommonAgent - volanie ClearMailBox pred PrepareReplication v metóde PrepareReplication
+
+ABACore 2.4, 2023-05-05
+------------------------
+- replikácia bude konèi po dosiahnutí poadovaného èasu vdy
+- pridanie updateAfterReplication do WStat
+
+
+ABACore 4.0, 2025-04-11
+------------------------
+- nová animaèná podpora
+
+
+ABACore 4.1, 2025-05-01
+------------------------
+fix + gis update + toolbar
+fix: zaseknutie pri zmazaní / pridaní animátora
+fix: obnovené aktualizácie slowdown manaérom
+
+udpate animator:
+gis animátor viac menej hotovı
+pridaná legenda (iba Java zatial)
+pridané menu s ikonami
+opravené nastavenia
+removeFirst v animqueue oznaèenı ako deprecated
+java optimalizácia vykreslovania + oprava monıch grafickıch problémov v gui kde sa vloí animátor
+anim queue reset pri zmazaní / vytvorení animátora
+opravené drawtools
+
+ABACore 4.2, 2025-05-02
+------------------------
+GIS animátor zobrazovanie licencie
+c# pridanie legendy
+oprava c# animqueue
+menšie opravy gis
+
+ABACore 4.3, 2025-05-06
+------------------------
+fix: velkost platna pri inom dpi ako 100, tooltip, C# WPF zatvaranie gui
+fix: AnimQueue pridané dodatoèné detekcie nesprávneho stavu + vınimky
+fix: STK odstranenie z queue
+fix: C# zlé tlaèidlá zobrazené pre základnı animátor
