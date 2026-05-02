@@ -1,6 +1,5 @@
 package S3.simulation;
 
-import OSPABA.*;
 import S3.agents.agentpatients.*;
 import S3.agents.agentresources.*;
 import S3.agents.agentenvironment.*;
@@ -8,9 +7,9 @@ import S3.agents.agentboss.*;
 import S3.agents.agenthospital.*;
 import S3.agents.agentmovement.*;
 
-public class MySimulation extends OSPABA.Simulation
+public class EmergencyDepartmentSimulation extends OSPABA.Simulation
 {
-	public MySimulation()
+	public EmergencyDepartmentSimulation()
 	{
 		init();
 	}

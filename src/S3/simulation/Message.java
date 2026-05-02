@@ -2,14 +2,14 @@ package S3.simulation;
 
 import OSPABA.*;
 
-public class MyMessage extends OSPABA.MessageForm
+public class Message extends OSPABA.MessageForm
 {
-	public MyMessage(Simulation mySim)
+	public Message(Simulation mySim)
 	{
 		super(mySim);
 	}
 
-	public MyMessage(MyMessage original)
+	public Message(Message original)
 	{
 		super(original);
 		// copy() is called in superclass
@@ -18,14 +18,14 @@ public class MyMessage extends OSPABA.MessageForm
 	@Override
 	public MessageForm createCopy()
 	{
-		return new MyMessage(this);
+		return new Message(this);
 	}
 
 	@Override
 	protected void copy(MessageForm message)
 	{
 		super.copy(message);
-		MyMessage original = (MyMessage)message;
+		Message original = (Message)message;
 		// Copy attributes
 	}
 }
