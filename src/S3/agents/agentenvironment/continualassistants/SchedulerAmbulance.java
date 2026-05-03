@@ -48,7 +48,7 @@ public class SchedulerAmbulance extends OSPABA.Scheduler {
                 break;
 
             case Mc.patientArrival:
-                Patient patient = new Patient(patientIdCounter++, PatientType.AMBULANCE);
+                Patient patient = new Patient(_mySim, patientIdCounter++, PatientType.AMBULANCE);
 
                 double nextDelay = ambulanceArrivalTimeRNG.generate();
                 Message msgCopy = (Message) message.createCopy();
@@ -58,7 +58,7 @@ public class SchedulerAmbulance extends OSPABA.Scheduler {
                 Message arrivalMsg = new Message(mySim());
                 arrivalMsg.setCode(Mc.patientArrival);
                 arrivalMsg.setAddressee(myAgent());
-                // TODO: priložiť pacienta do správy, ak bude Message to podporovať
+                arrivalMsg.setPatient(patient);
                 notice(arrivalMsg);
                 break;
 
@@ -73,5 +73,4 @@ public class SchedulerAmbulance extends OSPABA.Scheduler {
     public AgentEnvironment myAgent() {
         return (AgentEnvironment) super.myAgent();
     }
-
 }
