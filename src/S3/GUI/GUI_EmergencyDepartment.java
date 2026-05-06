@@ -129,7 +129,7 @@ public class GUI_EmergencyDepartment {
 
             workerThread = new Thread(() -> {
                 try {
-                    simulation.simulate(10000);
+                    simulation.simulate(1);
                 } finally {
                     SwingUtilities.invokeLater(() -> {
                         requestRefresh();
@@ -177,14 +177,12 @@ public class GUI_EmergencyDepartment {
 
     private void refreshFromEmergencyDepartment() {
         if (simulation == null) return;
-        setPeopleEnteredSystem(simulation.getTotalArrivals());
+        setValue(0, safeNum(simulation.getTotalArrivals()), "-");
         setSimTimeSeconds((int) Math.round(simulation.currentTime()));
     }
 
-    public void setPeopleEnteredSystem(long value) {
-        if (statsModel.getRowCount() > 0) {
-            setValue(0, String.valueOf(value), "-");
-        }
+    private String safeNum(long v) {
+        return String.valueOf(v);
     }
 
     public void setSimTimeSeconds(int secondsFromStart) {

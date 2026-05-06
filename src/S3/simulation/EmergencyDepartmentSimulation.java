@@ -62,6 +62,8 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation
 	{
 		super.prepareReplication();
 
+		agentBoss().startSimulation();
+
 		// Reset entities, queues, local statistics, etc...
 	}
 
