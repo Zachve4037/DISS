@@ -27,11 +27,19 @@ public class ManagerEnvironment extends OSPABA.Manager
 	//meta! sender="SchedulerAmbulance", id="16", type="Finish"
 	public void processFinishSchedulerAmbulance(MessageForm message)
 	{
+		Message msg = (Message) message.createCopy();
+		msg.setCode(Mc.patientArrival);
+		msg.setAddressee(mySim().findAgent(Id.agentBoss));
+		notice(msg);
 	}
 
 	//meta! sender="SchedulerThemselves", id="18", type="Finish"
 	public void processFinishSchedulerThemselves(MessageForm message)
 	{
+		Message msg = (Message) message.createCopy();
+		msg.setCode(Mc.patientArrival);
+		msg.setAddressee(mySim().findAgent(Id.agentBoss));
+		notice(msg);
 	}
 
 	//meta! sender="AgentBoss", id="32", type="Notice"
@@ -69,6 +77,16 @@ public class ManagerEnvironment extends OSPABA.Manager
 			break;
 			}
 		break;
+
+		case Mc.start:
+			Message msgAmb = (Message) message.createCopy();
+			msgAmb.setAddressee(Id.schedulerAmbulance);
+			startContinualAssistant(msgAmb);
+
+			Message msgWalk = (Message) message.createCopy();
+			msgWalk.setAddressee(Id.schedulerThemselves);
+			startContinualAssistant(msgWalk);
+			break;
 
 		case Mc.patientDeparture:
 			processPatientDeparture(message);

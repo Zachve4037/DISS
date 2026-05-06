@@ -1,10 +1,14 @@
 package S3.GUI;
 
+import S3.simulation.EmergencyDepartmentSimulation;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class GUI_EmergencyDepartment {
+    private EmergencyDepartmentSimulation simulation;
+    private Thread workerThread;
 
     private final JFrame frame;
     private final JTabbedPane tabbedPane;
@@ -110,6 +114,40 @@ public class GUI_EmergencyDepartment {
             boolean max = maxSpeedCheckBox.isSelected();
             timeScaleSlider.setEnabled(!max);
         });
+        startSimButton.addActionListener(e -> {
+            if (workerThread != null && workerThread.isAlive()) {
+                JOptionPane.showMessageDialog(null, "Simulation is already running.");
+            }
+
+            simulation = new EmergencyDepartmentSimulation();
+            bindSimulation(simulation);
+
+            simulation.setParams(getDoctorsCount(), getNursesCount());
+
+            startSimButton.setEnabled(false);
+            stopSimButton.setEnabled(true);
+
+            workerThread = new Thread(() -> {
+                try {
+                    simulation.simulate(10000);
+                } finally {
+                    SwingUtilities.invokeLater(() -> {
+                        requestRefresh();
+                        startSimButton.setEnabled(true);
+                        stopSimButton.setEnabled(false);
+                    });
+                    workerThread = null;
+                }
+            }, "ed-sim-thread");
+
+            workerThread.setDaemon(true);
+            workerThread.start();
+        });
+        stopSimButton.addActionListener(e -> {
+            if (simulation != null) {
+                simulation.stopSimulation();
+            }
+        });
     }
 
     private void initRefreshTimer() {
@@ -138,7 +176,9 @@ public class GUI_EmergencyDepartment {
     }
 
     private void refreshFromEmergencyDepartment() {
-
+        if (simulation == null) return;
+        setPeopleEnteredSystem(simulation.getTotalArrivals());
+        setSimTimeSeconds((int) Math.round(simulation.currentTime()));
     }
 
     public void setPeopleEnteredSystem(long value) {
@@ -188,6 +228,37 @@ public class GUI_EmergencyDepartment {
             refreshFromEmergencyDepartment();
         } else {
             SwingUtilities.invokeLater(this::refreshFromEmergencyDepartment);
+        }
+    }
+
+    public void bindSimulation(EmergencyDepartmentSimulation mySim) {
+        this.simulation = mySim;
+    }
+
+    private void invokeSimulationStart(EmergencyDepartmentSimulation sim) {
+        if (tryInvoke(sim, "simulate")) return;
+        if (tryInvoke(sim, "run")) return;
+        tryInvoke(sim, "startSimulation");
+    }
+
+    private void invokeSimulationStop(EmergencyDepartmentSimulation sim) {
+        if (tryInvoke(sim, "stopSimulation")) return;
+        tryInvoke(sim, "stop");
+    }
+
+    private boolean tryInvoke(Object target, String method) {
+        try {
+            target.getClass().getMethod(method).invoke(target);
+            return true;
+        } catch (Exception ignored) {
+        }
+        try {
+            var m = target.getClass().getDeclaredMethod(method);
+            m.setAccessible(true);
+            m.invoke(target);
+            return true;
+        } catch (Exception ignored) {
+            return false;
         }
     }
 }

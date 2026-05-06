@@ -27,6 +27,7 @@ public class AgentEnvironment extends OSPABA.Agent
 		new SchedulerAmbulance(Id.schedulerAmbulance, mySim(), this);
 		new SchedulerThemselves(Id.schedulerThemselves, mySim(), this);
 		addOwnMessage(Mc.patientDeparture);
+		addOwnMessage(Mc.patientArrival);
 	}
 	//meta! tag="end"
 }

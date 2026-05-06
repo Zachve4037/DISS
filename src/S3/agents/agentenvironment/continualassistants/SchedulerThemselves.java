@@ -48,18 +48,17 @@ public class SchedulerThemselves extends OSPABA.Scheduler {
                 break;
 
             case Mc.patientArrival:
-                Patient patient = new Patient(_mySim, patientIdCounter++, PatientType.WALK_IN);
+                Message msg = (Message) message;
+
+                Patient patient = new Patient(mySim(), patientIdCounter++, PatientType.WALK_IN);
+                msg.setPatient(patient);
 
                 double nextDelay = walkInArrivalTimeRNG.generate();
-                Message msgCopy = (Message) message.createCopy();
-                msgCopy.setCode(Mc.patientArrival);
-                hold(nextDelay, msgCopy);
+                Message nextMsg = (Message) message.createCopy();
+                nextMsg.setCode(Mc.patientArrival);
+                hold(nextDelay, nextMsg);
 
-                Message arrivalMsg = new Message(mySim());
-                arrivalMsg.setCode(Mc.patientArrival);
-                arrivalMsg.setAddressee(myAgent());
-                arrivalMsg.setPatient(patient);
-                notice(arrivalMsg);
+                assistantFinished(msg);
                 break;
 
             default:

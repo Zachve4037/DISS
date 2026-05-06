@@ -9,22 +9,59 @@ import S3.agents.agentmovement.*;
 
 public class EmergencyDepartmentSimulation extends OSPABA.Simulation
 {
+	private long totalArrivals;
+	private long ambulanceArrivals;
+	private long walkInArrivals;
+
+	private int nursesCount;
+	private int doctorsCount;
+
 	public EmergencyDepartmentSimulation()
 	{
 		init();
+	}
+
+	public void recordArrival(S3.entities.Patient patient)
+	{
+		totalArrivals++;
+		if (patient.getType() == S3.entities.PatientType.AMBULANCE) {
+			ambulanceArrivals++;
+		} else if (patient.getType() == S3.entities.PatientType.WALK_IN) {
+			walkInArrivals++;
+		}
+	}
+
+	public long getTotalArrivals() {
+		return totalArrivals;
+	}
+
+	public long getAmbulanceArrivals() {
+		return ambulanceArrivals;
+	}
+
+	public long getWalkInArrivals() {
+		return walkInArrivals;
+	}
+
+	public void setParams(int doctorsCount, int nursesCount) {
+		this.nursesCount = nursesCount;
+		this.doctorsCount = doctorsCount;
 	}
 
 	@Override
 	public void prepareSimulation()
 	{
 		super.prepareSimulation();
-		// Create global statistcis
+		totalArrivals = 0;
+		ambulanceArrivals = 0;
+		walkInArrivals = 0;
 	}
 
 	@Override
 	public void prepareReplication()
 	{
 		super.prepareReplication();
+
 		// Reset entities, queues, local statistics, etc...
 	}
 

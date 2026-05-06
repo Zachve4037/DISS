@@ -1,3 +1,4 @@
+
 package S3;
 
 import S3.GUI.GUI_EmergencyDepartment;

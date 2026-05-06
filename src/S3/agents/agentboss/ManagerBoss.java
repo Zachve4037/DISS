@@ -32,6 +32,17 @@ public class ManagerBoss extends OSPABA.Manager
 	//meta! sender="AgentEnvironment", id="23", type="Notice"
 	public void processPatientArrival(MessageForm message)
 	{
+		Message msg = (Message) message;
+		EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+
+		if (msg.getPatient() != null) {
+			sim.recordArrival(msg.getPatient());
+		}
+
+		Message req = (Message) msg.createCopy();
+		req.setCode(Mc.handlePatient);
+		req.setAddressee(((EmergencyDepartmentSimulation) mySim()).agentHospital());
+		request(req);
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"
