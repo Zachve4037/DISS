@@ -45,6 +45,13 @@ presun z cakacieho priestoru do ambulancie
 - ak idem do ambulancie, tak cas prechodu medzi ambulanciami
 
 
+Z ODOVZDAVAJUCEH HODINY
+doktori = 6
+sestry = 8
+vstupne vysetrenie waiting time = 1.83min
+vysetrenie lekarom waiting time (sanitkou) = 11.68
+vysetrenie lekarom waiting time (peso) = 15.26
+cas v systeme = 35.39
 
 
 EXPERIMENTY
@@ -52,3 +59,4 @@ EXPERIMENTY
 - priorita A pred B
 - priorita vysetrenie pred evidenciou
 - ziadna optimalizacia - neriesi par ktory sa nemusi hybat
+- vytiahne sa prvy ktory je v zozname
