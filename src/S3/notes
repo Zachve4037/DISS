@@ -46,12 +46,16 @@ presun z cakacieho priestoru do ambulancie
 
 
 Z ODOVZDAVAJUCEH HODINY
+=======================================================
 doktori = 6
 sestry = 8
 vstupne vysetrenie waiting time = 1.83min
 vysetrenie lekarom waiting time (sanitkou) = 11.68
 vysetrenie lekarom waiting time (peso) = 15.26
 cas v systeme = 35.39
+
+DOPROGRAMOVANIE
+- po kazdom vysetreni lekarom (ak pacient prisiel sanitkou), tak bude ambulancia blokovana 5 minut
 
 
 EXPERIMENTY
@@ -60,3 +64,4 @@ EXPERIMENTY
 - priorita vysetrenie pred evidenciou
 - ziadna optimalizacia - neriesi par ktory sa nemusi hybat
 - vytiahne sa prvy ktory je v zozname
+- zahrievanie = 24 hodin
