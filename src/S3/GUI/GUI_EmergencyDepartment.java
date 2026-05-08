@@ -8,6 +8,8 @@ import S3.simulation.EmergencyDepartmentSimulation;
 
 import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.*;
@@ -131,7 +133,7 @@ public class GUI_EmergencyDepartment {
         row1.add(stopSimButton);
 
         JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        timeScaleSlider = new JSlider(1, 200, 50);
+        timeScaleSlider = new JSlider(1, 200, 1);
         timeScaleSlider.setPreferredSize(new Dimension(220, 40));
         timeScaleSlider.setMajorTickSpacing(50);
         timeScaleSlider.setMinorTickSpacing(10);
@@ -190,6 +192,7 @@ public class GUI_EmergencyDepartment {
         maxSpeedCheckBox.addActionListener(e -> {
             boolean max = maxSpeedCheckBox.isSelected();
             timeScaleSlider.setEnabled(!max);
+            changeSimSpeed();
         });
         startSimButton.addActionListener(e -> {
             System.out.println("[GUI] StartSimulation clicked");
@@ -202,6 +205,7 @@ public class GUI_EmergencyDepartment {
             simulation = new EmergencyDepartmentSimulation();
             bindSimulation(simulation);
             simulation.setParams(getDoctorsCount(), getNursesCount());
+            changeSimSpeed();
 
             System.out.printf("[GUI] params: doctors=%d, nurses=%d, speed=%d, maxSpeed=%s%n",
                     getDoctorsCount(), getNursesCount(), getSpeedFactor(), isMaxSpeed());
@@ -239,6 +243,25 @@ public class GUI_EmergencyDepartment {
                 invokeSimulationStop(simulation);
             }
         });
+        ChangeListener changeListener = (ChangeEvent e) -> changeSimSpeed();
+        timeScaleSlider.addChangeListener(changeListener);
+    }
+
+    private void changeSimSpeed() {
+        if (simulation == null) return;
+
+        try {
+            if (isMaxSpeed()) {
+                simulation.setMaxSimSpeed();
+            } else {
+                int simSecondsPerRealSecond = getSpeedFactor();
+                double realSecondsPerSimSecond = 1.0 / (double) simSecondsPerRealSecond;
+                simulation.setSimSpeed(1, realSecondsPerSimSecond);
+            }
+        } catch (Throwable t) {
+            System.err.println("[GUI] changeSimSpeed error:");
+            t.printStackTrace();
+        }
     }
 
     private void initRefreshTimer() {
