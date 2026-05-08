@@ -7,6 +7,7 @@ public class Patient extends Entity {
     private final int id;
     private final PatientType type;
 
+    private int priority;
     private final double arrivalTime;
 
     private double waitStartTime;
@@ -17,17 +18,28 @@ public class Patient extends Entity {
     private double totalServiceTime;
     private boolean isInService;
 
+    private boolean isWaitingForDoctorsExam;
+    private boolean isWaitingForInitialExam;
+
     public Patient(Simulation mySim, int id, PatientType type) {
         super(mySim);
         this.id = id;
         this.type = type;
-        this.arrivalTime = 0;
+        this.arrivalTime = mySim.currentTime();
         this.waitStartTime = 0;
         this.totalWaitTime = 0;
         this.isWaiting = false;
         this.serviceStartTime = 0;
         this.totalServiceTime = 0;
         this.isInService = false;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 
     public int getId() {
@@ -98,5 +110,22 @@ public class Patient extends Entity {
 
     public double getTotalTimeInSystem() {
         return mySim().currentTime() - arrivalTime;
+    }
+
+
+    public boolean isWaitingForDoctorsExam() {
+        return isWaitingForDoctorsExam;
+    }
+
+    public void setWaitingForDoctorsExam(boolean waitingForDoctorsExam) {
+        isWaitingForDoctorsExam = waitingForDoctorsExam;
+    }
+
+    public boolean isWaitingForInitialExam() {
+        return isWaitingForInitialExam;
+    }
+
+    public void setWaitingForInitialExam(boolean waitingForInitialExam) {
+        isWaitingForInitialExam = waitingForInitialExam;
     }
 }

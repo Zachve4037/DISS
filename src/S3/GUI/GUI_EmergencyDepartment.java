@@ -1,10 +1,19 @@
 package S3.GUI;
 
+import S3.entities.Clinic;
+import S3.entities.EmerDepEmployee;
+import S3.entities.EmployeeType;
+import S3.entities.Patient;
 import S3.simulation.EmergencyDepartmentSimulation;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 public class GUI_EmergencyDepartment {
     private EmergencyDepartmentSimulation simulation;
@@ -22,16 +31,85 @@ public class GUI_EmergencyDepartment {
     private final JCheckBox maxSpeedCheckBox;
     private final JLabel simTimeLabel;
 
-    private final DefaultTableModel statsModel;
-    private final JTable statsTable;
+    private final DefaultTableModel simulationStatsModel;
+    private final JTable simulationStatsTable;
+
+    private final DefaultTableModel doctorsModel;
+    private final JTable doctorsTable;
+
+    private final DefaultTableModel nursesModel;
+    private final JTable nursesTable;
+
+    private final DefaultTableModel clinicsModel;
+    private final JTable clinicsTable;
+
+    private final DefaultTableModel waitingForDoctorsModel;
+    private final JTable waitingForDoctorsExaminationTable;
+
+    private final DefaultTableModel waitingForInitialModel;
+    private final JTable waitingForInitialExaminationTable;
+
+
 
     public GUI_EmergencyDepartment() {
         frame = new JFrame("Emergency Department");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setMinimumSize(new Dimension(1400, 900));
 
         tabbedPane = new JTabbedPane();
 
         JPanel simulationTab = new JPanel(new BorderLayout());
+
+        simulationStatsModel = new DefaultTableModel(new Object[]{"Metric", "Value", "Detail"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        simulationStatsTable = createTable(simulationStatsModel);
+
+        doctorsModel = new DefaultTableModel(new Object[]{"Id", "CurrentPatient", "WorkTime", "Busy"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        doctorsTable = createTable(doctorsModel);
+
+        nursesModel = new DefaultTableModel(new Object[]{"Id", "CurrentPatient", "WorkTime", "Busy"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        nursesTable = createTable(nursesModel);
+
+        clinicsModel = new DefaultTableModel(new Object[]{"Id", "Type", "IsOccupied"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        clinicsTable = createTable(clinicsModel);
+
+        waitingForDoctorsModel = new DefaultTableModel(new Object[]{"Id", "Type", "Priority", "WaitStart", "WaitTime", "SystemTime"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        waitingForDoctorsExaminationTable = createTable(waitingForDoctorsModel);
+
+        waitingForInitialModel = new DefaultTableModel(new Object[]{"Id", "Type", "Priority", "WaitStart", "WaitTime", "SystemTime"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        waitingForInitialExaminationTable = createTable(waitingForInitialModel);
+
+        tabbedPane.addTab("Statistics", simulationTab);
 
         JPanel controls = new JPanel();
         controls.setLayout(new BoxLayout(controls, BoxLayout.Y_AXIS));
@@ -73,31 +151,30 @@ public class GUI_EmergencyDepartment {
         controls.add(row1);
         controls.add(row2);
 
-        statsModel = new DefaultTableModel(new Object[]{"Metric", "Value", "Detail"}, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-
-        statsTable = new JTable(statsModel);
-        statsTable.setFillsViewportHeight(true);
-        statsTable.setRowHeight(22);
-
-        JScrollPane tableScroll = new JScrollPane(statsTable);
-
         simulationTab.add(controls, BorderLayout.NORTH);
-        simulationTab.add(tableScroll, BorderLayout.CENTER);
+        JPanel lower = new JPanel(new GridLayout(1, 3, 10, 10));
+        lower.add(createStackedTablesPanel(
+                "Doctors", doctorsTable,
+                "Nurses", nursesTable
+        ));
+        lower.add(createTablePanel("Clinics", clinicsTable));
+        lower.add(createStackedTablesPanel(
+                "Waiting for doctors exam", waitingForDoctorsExaminationTable,
+                "Waiting for initial exam", waitingForInitialExaminationTable
+        ));
 
-        initEmptyRows();
+        JPanel center = new JPanel(new BorderLayout(10, 10));
+        center.add(createTablePanel("Simulation statistics", simulationStatsTable), BorderLayout.NORTH);
+        center.add(lower, BorderLayout.CENTER);
+
+        simulationTab.add(center, BorderLayout.CENTER);
 
         JPanel secondTab = new JPanel(new BorderLayout());
         JLabel placeholder = new JLabel("Second tab prepared for later use", SwingConstants.CENTER);
         placeholder.setFont(placeholder.getFont().deriveFont(Font.PLAIN, 16f));
         secondTab.add(placeholder, BorderLayout.CENTER);
 
-        tabbedPane.addTab("Simulation", simulationTab);
-        tabbedPane.addTab("Tab 2", secondTab);
+        tabbedPane.addTab("Animator", secondTab);
 
         frame.setContentPane(tabbedPane);
 
@@ -115,21 +192,34 @@ public class GUI_EmergencyDepartment {
             timeScaleSlider.setEnabled(!max);
         });
         startSimButton.addActionListener(e -> {
+            System.out.println("[GUI] StartSimulation clicked");
+
             if (workerThread != null && workerThread.isAlive()) {
-                JOptionPane.showMessageDialog(null, "Simulation is already running.");
+                JOptionPane.showMessageDialog(frame, "Simulation is already running.");
+                return;
             }
 
             simulation = new EmergencyDepartmentSimulation();
             bindSimulation(simulation);
-
             simulation.setParams(getDoctorsCount(), getNursesCount());
+
+            System.out.printf("[GUI] params: doctors=%d, nurses=%d, speed=%d, maxSpeed=%s%n",
+                    getDoctorsCount(), getNursesCount(), getSpeedFactor(), isMaxSpeed());
 
             startSimButton.setEnabled(false);
             stopSimButton.setEnabled(true);
 
             workerThread = new Thread(() -> {
                 try {
-                    simulation.simulate(1);
+                    System.out.println("[SIM] Worker thread started");
+                    simulation.simulate(10000);
+                    System.out.println("[SIM] Simulation call finished");
+                } catch (Throwable t) {
+                    System.err.println("[SIM] Simulation crashed:");
+                    t.printStackTrace();
+                    SwingUtilities.invokeLater(() ->
+                            JOptionPane.showMessageDialog(frame, "Simulation error: " + t.getMessage())
+                    );
                 } finally {
                     SwingUtilities.invokeLater(() -> {
                         requestRefresh();
@@ -144,8 +234,9 @@ public class GUI_EmergencyDepartment {
             workerThread.start();
         });
         stopSimButton.addActionListener(e -> {
+            System.out.println("[GUI] Stop clicked");
             if (simulation != null) {
-                simulation.stopSimulation();
+                invokeSimulationStop(simulation);
             }
         });
     }
@@ -161,24 +252,151 @@ public class GUI_EmergencyDepartment {
         uiRefreshTimer.start();
     }
 
-    private void initEmptyRows() {
-        statsModel.setRowCount(0);
-        addRow("People entered system", "0", "-");
-    }
-
-    private void addRow(String metric, Object value, String detail) {
-        statsModel.addRow(new Object[]{metric, value, detail});
-    }
-
-    private void setValue(int row, Object value, Object detail) {
-        statsModel.setValueAt(value, row, 1);
-        statsModel.setValueAt(detail, row, 2);
-    }
-
     private void refreshFromEmergencyDepartment() {
-        if (simulation == null) return;
-        setValue(0, safeNum(simulation.getTotalArrivals()), "-");
+        if (simulation == null) {
+            return;
+        }
+
+        S3.agents.agentresources.AgentResources resources = null;
+        S3.agents.agentpatients.AgentPatients patientsAgent = null;
+
+        try {
+            resources = simulation.agentResources();
+        } catch (Exception ignored) { }
+
+        try {
+            patientsAgent = simulation.agentPatients();
+        } catch (Exception ignored) { }
+
+        List<EmerDepEmployee> doctors = (resources != null && resources.getDoctors() != null)
+                ? resources.getDoctors() : Collections.emptyList();
+        List<EmerDepEmployee> nurses = (resources != null && resources.getNurses() != null)
+                ? resources.getNurses() : Collections.emptyList();
+
+        List<Clinic> clinics = new ArrayList<>();
+        if (resources != null) {
+            if (resources.getClinics() != null) clinics.addAll(resources.getClinics());
+        }
+
+        Queue<Patient> initialQueue = (patientsAgent != null && patientsAgent.getInitialExaminationQueue() != null)
+                ? patientsAgent.getInitialExaminationQueue() : new ConcurrentLinkedQueue<>();
+        Queue<Patient> doctorsQueue = (patientsAgent != null && patientsAgent.getDoctorsExaminationQueue() != null)
+                ? patientsAgent.getDoctorsExaminationQueue() : new ConcurrentLinkedQueue<>();
+
+        List<Patient> waitingDoctors = doctorsQueue.stream()
+                .filter(Patient::isWaitingForDoctorsExam)
+                .collect(Collectors.toList());
+
+        List<Patient> waitingInitial = initialQueue.stream()
+                .filter(Patient::isWaitingForInitialExam)
+                .collect(Collectors.toList());
+
+        List<Patient> allPatients = new ArrayList<>();
+        allPatients.addAll(initialQueue);
+        allPatients.addAll(doctorsQueue);
+        for (EmerDepEmployee e : doctors) {
+            if (e != null && e.getCurrentPatient() != null) {
+                allPatients.add(e.getCurrentPatient());
+            }
+        }
+        for (EmerDepEmployee e : nurses) {
+            if (e != null && e.getCurrentPatient() != null) {
+                allPatients.add(e.getCurrentPatient());
+            }
+        }
+
+        List<EmerDepEmployee> allEmployees = new ArrayList<>();
+        allEmployees.addAll(doctors);
+        allEmployees.addAll(nurses);
+
+        refreshSimulationStats(allPatients, allEmployees);
+        refreshEmployees(doctorsModel, doctors, EmployeeType.DOCTOR);
+        refreshEmployees(nursesModel, nurses, EmployeeType.NURSE);
+        refreshClinics(clinicsModel, clinics);
+        refreshPatients(waitingForDoctorsModel, waitingDoctors);
+        refreshPatients(waitingForInitialModel, waitingInitial);
+
         setSimTimeSeconds((int) Math.round(simulation.currentTime()));
+    }
+
+    private void refreshSimulationStats(List<Patient> patients, List<EmerDepEmployee> employees) {
+        simulationStatsModel.setRowCount(0);
+
+        long waitingInitial = patients.stream().filter(Patient::isWaitingForInitialExam).count();
+        long waitingDoctors = patients.stream().filter(Patient::isWaitingForDoctorsExam).count();
+        long busyEmployees = employees.stream().filter(EmerDepEmployee::isBusy).count();
+
+        double avgSystemTime = patients.isEmpty() ? 0.0
+                : patients.stream().mapToDouble(Patient::getTotalTimeInSystem).average().orElse(0.0);
+
+        double avgWaitTime = patients.isEmpty() ? 0.0
+                : patients.stream().mapToDouble(Patient::getTotalWaitTime).average().orElse(0.0);
+
+        simulationStatsModel.addRow(new Object[]{"Patients entered system", safeNum(simulation.getTotalArrivals()), "-"});
+        simulationStatsModel.addRow(new Object[]{"Ambulance arrivals", safeNum(simulation.getAmbulanceArrivals()), "-"});
+        simulationStatsModel.addRow(new Object[]{"Walk-in arrivals", safeNum(simulation.getWalkInArrivals()), "-"});
+        simulationStatsModel.addRow(new Object[]{"Patients currently in system", patients.size(), "-"});
+        simulationStatsModel.addRow(new Object[]{"Waiting for initial exam", waitingInitial, "-"});
+        simulationStatsModel.addRow(new Object[]{"Waiting for doctors exam", waitingDoctors, "-"});
+        simulationStatsModel.addRow(new Object[]{"Average system time (s)", formatDouble(avgSystemTime), "-"});
+        simulationStatsModel.addRow(new Object[]{"Average wait time (s)", formatDouble(avgWaitTime), "-"});
+        simulationStatsModel.addRow(new Object[]{"Busy employees", busyEmployees, "-"});
+        simulationStatsModel.addRow(new Object[]{"Current sim time", formatTime((int) Math.round(simulation.currentTime())), "-"});
+    }
+
+    private void refreshEmployees(DefaultTableModel model, List<EmerDepEmployee> employees, EmployeeType type) {
+        model.setRowCount(0);
+
+        for (EmerDepEmployee e : employees) {
+            if (e.getType() != type) {
+                continue;
+            }
+
+            Patient cp = e.getCurrentPatient();
+            String currentPatient = (cp == null) ? "-" : cp.getId() + " (" + cp.getType() + ")";
+            double workTime = e.isBusy()
+                    ? simulation.currentTime() - e.getWorkStartTime()
+                    : e.getTotalWorkTime();
+
+            model.addRow(new Object[]{
+                    e.getId(),
+                    currentPatient,
+                    formatDouble(workTime),
+                    e.isBusy()
+            });
+        }
+    }
+
+    private void refreshClinics(DefaultTableModel model, List<Clinic> clinics) {
+        model.setRowCount(0);
+
+        for (Clinic clinic : clinics) {
+            model.addRow(new Object[]{
+                    clinic.getId(),
+                    clinic.getType(),
+                    clinic.isOccupied()
+            });
+        }
+    }
+
+    private void refreshPatients(DefaultTableModel model, List<Patient> patients) {
+        model.setRowCount(0);
+
+        for (Patient p : patients) {
+            model.addRow(new Object[]{
+                    p.getId(),
+                    p.getType(),
+                    p.getPriority(),
+                    formatDouble(p.getWaitStartTime()),
+                    formatDouble(p.getTotalWaitTime()),
+                    formatDouble(p.getTotalTimeInSystem())
+            });
+        }
+    }
+
+    private String formatDouble(double v) {
+        if (Double.isNaN(v) || Double.isInfinite(v)) return "-";
+        return String.format("%.4f", v);
     }
 
     private String safeNum(long v) {
@@ -213,14 +431,6 @@ public class GUI_EmergencyDepartment {
         return (Integer) nursesCountCombo.getSelectedItem();
     }
 
-    public JButton getStartSimButton() {
-        return startSimButton;
-    }
-
-    public JButton getStopSimButton() {
-        return stopSimButton;
-    }
-
     public void requestRefresh() {
         if (SwingUtilities.isEventDispatchThread()) {
             refreshFromEmergencyDepartment();
@@ -231,12 +441,6 @@ public class GUI_EmergencyDepartment {
 
     public void bindSimulation(EmergencyDepartmentSimulation mySim) {
         this.simulation = mySim;
-    }
-
-    private void invokeSimulationStart(EmergencyDepartmentSimulation sim) {
-        if (tryInvoke(sim, "simulate")) return;
-        if (tryInvoke(sim, "run")) return;
-        tryInvoke(sim, "startSimulation");
     }
 
     private void invokeSimulationStop(EmergencyDepartmentSimulation sim) {
@@ -258,5 +462,66 @@ public class GUI_EmergencyDepartment {
         } catch (Exception ignored) {
             return false;
         }
+    }
+
+    private JComponent buildStatisticsTab() {
+        JPanel root = new JPanel(new BorderLayout(10, 10));
+        root.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        root.add(controlsPanel(), BorderLayout.NORTH);
+
+        JPanel lower = new JPanel(new GridLayout(1, 3, 10, 10));
+        lower.add(createStackedTablesPanel(
+                "Doctors", doctorsTable,
+                "Nurses", nursesTable
+        ));
+        lower.add(createTablePanel("Clinics", clinicsTable));
+        lower.add(createStackedTablesPanel(
+                "Waiting for doctors exam", waitingForDoctorsExaminationTable,
+                "Waiting for initial exam", waitingForInitialExaminationTable
+        ));
+
+        JPanel center = new JPanel(new BorderLayout(10, 10));
+        center.add(createTablePanel("Simulation statistics", simulationStatsTable), BorderLayout.NORTH);
+        center.add(lower, BorderLayout.CENTER);
+
+        root.add(center, BorderLayout.CENTER);
+        return root;
+    }
+
+    private JPanel controlsPanel() {
+        JPanel controls = new JPanel();
+        controls.setLayout(new BoxLayout(controls, BoxLayout.Y_AXIS));
+        return controls;
+    }
+
+    private JPanel createTablePanel(String title, JTable table) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(title));
+        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JPanel createStackedTablesPanel(String topTitle, JTable topTable, String bottomTitle, JTable bottomTable) {
+        JPanel top = createTablePanel(topTitle, topTable);
+        JPanel bottom = createTablePanel(bottomTitle, bottomTable);
+
+        JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bottom);
+        split.setResizeWeight(0.5);
+        split.setDividerLocation(250);
+        split.setContinuousLayout(true);
+        split.setBorder(null);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(split, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JTable createTable(DefaultTableModel model) {
+        JTable table = new JTable(model);
+        table.setFillsViewportHeight(true);
+        table.setRowHeight(24);
+        table.setAutoCreateRowSorter(true);
+        return table;
     }
 }

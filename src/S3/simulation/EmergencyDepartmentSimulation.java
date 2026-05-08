@@ -6,6 +6,7 @@ import S3.agents.agentenvironment.*;
 import S3.agents.agentboss.*;
 import S3.agents.agenthospital.*;
 import S3.agents.agentmovement.*;
+import S3.entities.Patient;
 
 public class EmergencyDepartmentSimulation extends OSPABA.Simulation
 {
@@ -21,7 +22,7 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation
 		init();
 	}
 
-	public void recordArrival(S3.entities.Patient patient)
+	public void recordArrival(Patient patient)
 	{
 		totalArrivals++;
 		if (patient.getType() == S3.entities.PatientType.AMBULANCE) {

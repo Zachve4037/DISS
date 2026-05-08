@@ -8,7 +8,7 @@ public class EmerDepEmployee extends Entity {
     private final EmployeeType type;
 
     private Patient currentPatient;
-    private boolean working;
+    private boolean busy;
     private double workTime;
     private double workStartTime;
     private double totalWorkTime;
@@ -18,7 +18,7 @@ public class EmerDepEmployee extends Entity {
         this.id = id;
         this.type = type;
         this.currentPatient = null;
-        this.working = false;
+        this.busy = false;
         this.workTime = 0;
         this.workStartTime = 0;
         this.totalWorkTime = 0;
@@ -35,7 +35,7 @@ public class EmerDepEmployee extends Entity {
     public void startWork(Patient patient) {
         this.workStartTime = mySim().currentTime();
         this.currentPatient = patient;
-        this.working = true;
+        this.busy = true;
 
         if (patient != null) {
             patient.startService();
@@ -43,7 +43,7 @@ public class EmerDepEmployee extends Entity {
     }
 
     public void endWork() {
-        this.working = false;
+        this.busy = false;
         this.workTime = mySim().currentTime() - this.workStartTime;
         this.totalWorkTime += this.workTime;
 
@@ -54,8 +54,8 @@ public class EmerDepEmployee extends Entity {
         this.currentPatient = null;
     }
 
-    public boolean isWorking() {
-        return working;
+    public boolean isBusy() {
+        return busy;
     }
 
     public Patient getCurrentPatient() {

@@ -1,15 +1,31 @@
 package S3.agents.agentpatients;
 
 import OSPABA.*;
+import S3.entities.Patient;
 import S3.simulation.*;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 //meta! id="62"
-public class AgentPatients extends OSPABA.Agent
-{
+public class AgentPatients extends OSPABA.Agent {
+
+	//patients queues
+	private Queue<Patient> initialExaminationQueue;
+	private Queue<Patient> doctorsExaminationQueue;
+
 	public AgentPatients(int id, Simulation mySim, Agent parent)
 	{
 		super(id, mySim, parent);
 		init();
+	}
+
+	public Queue<Patient> getInitialExaminationQueue() {
+		return initialExaminationQueue;
+	}
+
+	public Queue<Patient> getDoctorsExaminationQueue() {
+		return doctorsExaminationQueue;
 	}
 
 	@Override
@@ -17,6 +33,8 @@ public class AgentPatients extends OSPABA.Agent
 	{
 		super.prepareReplication();
 		// Setup component for the next replication
+		initialExaminationQueue = new ConcurrentLinkedQueue<>();
+		doctorsExaminationQueue = new ConcurrentLinkedQueue<>();
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"
