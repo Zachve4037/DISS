@@ -504,31 +504,6 @@ public class GUI_EmergencyDepartment {
         }
     }
 
-    private JComponent buildStatisticsTab() {
-        JPanel root = new JPanel(new BorderLayout(10, 10));
-        root.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        root.add(controlsPanel(), BorderLayout.NORTH);
-
-        JPanel lower = new JPanel(new GridLayout(1, 3, 10, 10));
-        lower.add(createStackedTablesPanel(
-                "Doctors", doctorsTable,
-                "Nurses", nursesTable
-        ));
-        lower.add(createTablePanel("Clinics", clinicsTable));
-        lower.add(createStackedTablesPanel(
-                "Waiting for doctors exam", waitingForDoctorsExaminationTable,
-                "Waiting for initial exam", waitingForInitialExaminationTable
-        ));
-
-        JPanel center = new JPanel(new BorderLayout(10, 10));
-        center.add(createTablePanel("Simulation statistics", simulationStatsTable), BorderLayout.NORTH);
-        center.add(lower, BorderLayout.CENTER);
-
-        root.add(center, BorderLayout.CENTER);
-        return root;
-    }
-
     private JPanel controlsPanel() {
         JPanel controls = new JPanel();
         controls.setLayout(new BoxLayout(controls, BoxLayout.Y_AXIS));
