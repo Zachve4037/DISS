@@ -5,12 +5,17 @@ import S3.simulation.*;
 import S3.agents.agentenvironment.continualassistants.*;
 
 //meta! id="3"
-public class AgentEnvironment extends OSPABA.Agent
-{
+public class AgentEnvironment extends OSPABA.Agent {
+	private int id;
 	public AgentEnvironment(int id, Simulation mySim, Agent parent)
 	{
 		super(id, mySim, parent);
 		init();
+	}
+
+	public int getId() {
+		id++;
+		return id;
 	}
 
 	@Override
@@ -29,5 +34,5 @@ public class AgentEnvironment extends OSPABA.Agent
 		addOwnMessage(Mc.patientDeparture);
 		addOwnMessage(Mc.patientArrival);
 	}
-	//meta! tag="end"
+    //meta! tag="end"
 }

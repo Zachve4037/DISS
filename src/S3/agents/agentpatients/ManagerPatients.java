@@ -1,6 +1,7 @@
 package S3.agents.agentpatients;
 
 import OSPABA.*;
+import S3.entities.Patient;
 import S3.simulation.*;
 
 //meta! id="62"
@@ -45,6 +46,15 @@ public class ManagerPatients extends OSPABA.Manager
 	//meta! sender="AgentHospital", id="84", type="Notice"
 	public void processPutPatient(MessageForm message)
 	{
+		Message msg = (Message) message.createCopy();
+        Patient current = msg.getPatient();
+		if (current.isWaitingForInitialExam()) {
+			myAgent().getInitialExaminationQueue().add(current);
+		} else if (current.isWaitingForDoctorsExam()) {
+			myAgent().getDoctorsExaminationQueue().add(current);
+		} else {
+			System.out.println("Patient " + current.getId() + " is not waiting for any examination.");
+		}
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"

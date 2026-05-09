@@ -1,5 +1,7 @@
 package S3.GUI;
 
+import S3.agents.agentpatients.AgentPatients;
+import S3.agents.agentresources.AgentResources;
 import S3.entities.Clinic;
 import S3.entities.EmerDepEmployee;
 import S3.entities.EmployeeType;
@@ -204,7 +206,7 @@ public class GUI_EmergencyDepartment {
 
             simulation = new EmergencyDepartmentSimulation();
             bindSimulation(simulation);
-            simulation.setParams(getDoctorsCount(), getNursesCount());
+            simulation.setParameters(getDoctorsCount(), getNursesCount());
             changeSimSpeed();
 
             System.out.printf("[GUI] params: doctors=%d, nurses=%d, speed=%d, maxSpeed=%s%n",
@@ -216,6 +218,7 @@ public class GUI_EmergencyDepartment {
             workerThread = new Thread(() -> {
                 try {
                     System.out.println("[SIM] Worker thread started");
+                    simulation.setParameters(getDoctorsCount(), getNursesCount());
                     simulation.simulate(10000);
                     System.out.println("[SIM] Simulation call finished");
                 } catch (Throwable t) {
@@ -280,8 +283,8 @@ public class GUI_EmergencyDepartment {
             return;
         }
 
-        S3.agents.agentresources.AgentResources resources = null;
-        S3.agents.agentpatients.AgentPatients patientsAgent = null;
+        AgentResources resources = null;
+        AgentPatients patientsAgent = null;
 
         try {
             resources = simulation.agentResources();

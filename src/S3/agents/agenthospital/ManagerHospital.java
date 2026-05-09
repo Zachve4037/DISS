@@ -67,6 +67,10 @@ public class ManagerHospital extends OSPABA.Manager
 	//meta! sender="AgentBoss", id="33", type="Request"
 	public void processHandlePatient(MessageForm message)
 	{
+		Message msg = (Message) message.createCopy();
+		msg.setCode(Mc.putPatient);
+		msg.setAddressee(mySim().findAgent(Id.agentPatients));
+		notice(msg);
 	}
 
 	//meta! sender="AgentResources", id="70", type="Response"

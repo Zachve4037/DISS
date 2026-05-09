@@ -12,7 +12,6 @@ import java.util.Random;
 //meta! id="15"
 public class SchedulerAmbulance extends OSPABA.Scheduler {
     private ContinuousErlangDistRNG ambulanceArrivalTimeRNG;
-    private int patientIdCounter;
 
     public SchedulerAmbulance(int id, Simulation mySim, CommonAgent myAgent) {
         super(id, mySim, myAgent);
@@ -22,7 +21,6 @@ public class SchedulerAmbulance extends OSPABA.Scheduler {
     public void prepareReplication() {
         super.prepareReplication();
         this.ambulanceArrivalTimeRNG = new ContinuousErlangDistRNG(new Random(), 8, 0.0212);
-        this.patientIdCounter = 0;
     }
 
     //meta! sender="AgentEnvironment", id="16", type="Start"
@@ -50,7 +48,7 @@ public class SchedulerAmbulance extends OSPABA.Scheduler {
             case Mc.patientArrival:
                 Message msg = (Message) message;
 
-                Patient patient = new Patient(mySim(), patientIdCounter++, PatientType.AMBULANCE);
+                Patient patient = new Patient(mySim(), myAgent().getId(), PatientType.AMBULANCE);
                 msg.setPatient(patient);
 
                 double nextDelay = ambulanceArrivalTimeRNG.generate();

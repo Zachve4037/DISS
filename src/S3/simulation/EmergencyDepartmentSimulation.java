@@ -14,9 +14,6 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation
 	private long ambulanceArrivals;
 	private long walkInArrivals;
 
-	private int nursesCount;
-	private int doctorsCount;
-
 	public EmergencyDepartmentSimulation()
 	{
 		init();
@@ -32,6 +29,10 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation
 		}
 	}
 
+	public void setParameters(int doctorsCount, int nursesCount) {
+		agentResources().setNumberOfPersonal(doctorsCount, nursesCount);
+	}
+
 	public long getTotalArrivals() {
 		return totalArrivals;
 	}
@@ -42,11 +43,6 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation
 
 	public long getWalkInArrivals() {
 		return walkInArrivals;
-	}
-
-	public void setParams(int doctorsCount, int nursesCount) {
-		this.nursesCount = nursesCount;
-		this.doctorsCount = doctorsCount;
 	}
 
 	@Override

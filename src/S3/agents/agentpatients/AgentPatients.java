@@ -18,6 +18,8 @@ public class AgentPatients extends OSPABA.Agent {
 	{
 		super(id, mySim, parent);
 		init();
+		initialExaminationQueue = new ConcurrentLinkedQueue<>();
+		doctorsExaminationQueue = new ConcurrentLinkedQueue<>();
 	}
 
 	public Queue<Patient> getInitialExaminationQueue() {
@@ -33,8 +35,6 @@ public class AgentPatients extends OSPABA.Agent {
 	{
 		super.prepareReplication();
 		// Setup component for the next replication
-		initialExaminationQueue = new ConcurrentLinkedQueue<>();
-		doctorsExaminationQueue = new ConcurrentLinkedQueue<>();
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"

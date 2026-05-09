@@ -32,6 +32,8 @@ public class Patient extends Entity {
         this.serviceStartTime = 0;
         this.totalServiceTime = 0;
         this.isInService = false;
+        this.isWaitingForInitialExam = true;
+        this.isWaitingForDoctorsExam = false;
     }
 
     public int getPriority() {

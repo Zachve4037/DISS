@@ -2,7 +2,9 @@ package S3.agents.agentresources;
 
 import OSPABA.*;
 import S3.entities.Clinic;
+import S3.entities.ClinicType;
 import S3.entities.EmerDepEmployee;
+import S3.entities.EmployeeType;
 import S3.simulation.*;
 
 import java.util.ArrayList;
@@ -21,6 +23,9 @@ public class AgentResources extends OSPABA.Agent {
 	{
 		super(id, mySim, parent);
 		init();
+		this.clinics = new ArrayList<>();
+		this.doctors = new ArrayList<>();
+		this.nurses = new ArrayList<>();
 	}
 
 	public List<Clinic> getClinics() {
@@ -38,6 +43,26 @@ public class AgentResources extends OSPABA.Agent {
 	public void setNumberOfPersonal(int doctors, int nurses) {
 		this.numberOfDocs = doctors;
 		this.numberOfNurses = nurses;
+
+		this.doctors.clear();
+		this.nurses.clear();
+
+		for (int i = 0; i < numberOfDocs; i++) {
+			this.doctors.add(new EmerDepEmployee(mySim(), i, EmployeeType.DOCTOR));
+		}
+		for (int i = 0; i < numberOfNurses; i++) {
+			this.nurses.add(new EmerDepEmployee(mySim(), i, EmployeeType.NURSE));
+		}
+	}
+
+	public void initClinics() {
+		for (int i = 0; i < 13; ++i) {
+			if (i <= 4) {
+				this.clinics.add(new Clinic(i, ClinicType.A));
+			} else {
+				this.clinics.add(new Clinic(i, ClinicType.B));
+			}
+		}
 	}
 
 	@Override
@@ -45,9 +70,7 @@ public class AgentResources extends OSPABA.Agent {
 	{
 		super.prepareReplication();
 		// Setup component for the next replication
-		doctors = new ArrayList<>();
-		nurses = new ArrayList<>();
-		clinics = new ArrayList<>();
+		initClinics();
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"

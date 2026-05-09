@@ -12,7 +12,6 @@ import java.util.Random;
 //meta! id="17"
 public class SchedulerThemselves extends OSPABA.Scheduler {
     private ContinuousExponentialDistRNG walkInArrivalTimeRNG;
-    private int patientIdCounter;
 
     public SchedulerThemselves(int id, Simulation mySim, CommonAgent myAgent) {
         super(id, mySim, myAgent);
@@ -22,7 +21,6 @@ public class SchedulerThemselves extends OSPABA.Scheduler {
     public void prepareReplication() {
         super.prepareReplication();
         this.walkInArrivalTimeRNG = new ContinuousExponentialDistRNG(new Random(), 1.0 / 565.4236);
-        this.patientIdCounter = 10000000;
     }
 
     //meta! sender="AgentEnvironment", id="18", type="Start"
@@ -50,7 +48,7 @@ public class SchedulerThemselves extends OSPABA.Scheduler {
             case Mc.patientArrival:
                 Message msg = (Message) message;
 
-                Patient patient = new Patient(mySim(), patientIdCounter++, PatientType.WALK_IN);
+                Patient patient = new Patient(mySim(), myAgent().getId(), PatientType.WALK_IN);
                 msg.setPatient(patient);
 
                 double nextDelay = walkInArrivalTimeRNG.generate();
