@@ -56,6 +56,7 @@ public class AgentResources extends OSPABA.Agent {
 	}
 
 	public void initClinics() {
+		this.clinics.clear();
 		for (int i = 0; i < 13; ++i) {
 			if (i <= 4) {
 				this.clinics.add(new Clinic(i, ClinicType.A));

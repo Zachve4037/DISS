@@ -45,6 +45,12 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation
 		return walkInArrivals;
 	}
 
+	public void resetStatistics() {
+		totalArrivals = 0;
+		ambulanceArrivals = 0;
+		walkInArrivals = 0;
+	}
+
 	@Override
 	public void prepareSimulation()
 	{

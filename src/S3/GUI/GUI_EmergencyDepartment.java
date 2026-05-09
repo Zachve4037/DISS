@@ -34,6 +34,7 @@ public class GUI_EmergencyDepartment {
     private final JSlider timeScaleSlider;
     private final JCheckBox maxSpeedCheckBox;
     private final JLabel simTimeLabel;
+    private final JLabel replicationsLabel;
 
     private final DefaultTableModel simulationStatsModel;
     private final JTable simulationStatsTable;
@@ -143,7 +144,8 @@ public class GUI_EmergencyDepartment {
         timeScaleSlider.setPaintLabels(true);
 
         maxSpeedCheckBox = new JCheckBox("Max speed (no delay)");
-        simTimeLabel = new JLabel("Sim time: 00:00:00");
+        simTimeLabel = new JLabel("Sim time: 0 00:00:00");
+        replicationsLabel = new JLabel("Replications: 0");
 
         row2.add(new JLabel("Speed factor:"));
         row2.add(timeScaleSlider);
@@ -151,6 +153,8 @@ public class GUI_EmergencyDepartment {
         row2.add(maxSpeedCheckBox);
         row2.add(Box.createHorizontalStrut(12));
         row2.add(simTimeLabel);
+        row2.add(Box.createHorizontalStrut(12));
+        row2.add(replicationsLabel);
 
         controls.add(row1);
         controls.add(row2);
@@ -219,7 +223,7 @@ public class GUI_EmergencyDepartment {
                 try {
                     System.out.println("[SIM] Worker thread started");
                     simulation.setParameters(getDoctorsCount(), getNursesCount());
-                    simulation.simulate(10000);
+                    simulation.simulate(1000, 8 * 24 * 3600);
                     System.out.println("[SIM] Simulation call finished");
                 } catch (Throwable t) {
                     System.err.println("[SIM] Simulation crashed:");
@@ -283,6 +287,10 @@ public class GUI_EmergencyDepartment {
             return;
         }
 
+        if (simulation.currentTime() >= 24 * 3600) {
+            simulation.resetStatistics();
+        }
+
         AgentResources resources = null;
         AgentPatients patientsAgent = null;
 
@@ -343,6 +351,7 @@ public class GUI_EmergencyDepartment {
         refreshPatients(waitingForInitialModel, waitingInitial);
 
         setSimTimeSeconds((int) Math.round(simulation.currentTime()));
+        setReplicationsLabel(simulation.currentReplication());
     }
 
     private void refreshSimulationStats(List<Patient> patients, List<EmerDepEmployee> employees) {
@@ -433,12 +442,17 @@ public class GUI_EmergencyDepartment {
         simTimeLabel.setText("Sim time: " + formatTime(secondsFromStart));
     }
 
+    public void setReplicationsLabel(int replications) {
+        replicationsLabel.setText("Replications: " + replications);
+    }
+
     private String formatTime(int secondsFromStart) {
         int total = Math.max(secondsFromStart, 0);
+        int DD = total / (24 * 3600);
         int hh = (total / 3600) % 24;
         int mm = (total % 3600) / 60;
         int ss = total % 60;
-        return String.format("%02d:%02d:%02d", hh, mm, ss);
+        return String.format("%d %02d:%02d:%02d", DD , hh, mm, ss);
     }
 
     public boolean isMaxSpeed() {

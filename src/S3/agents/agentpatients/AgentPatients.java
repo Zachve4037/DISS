@@ -34,6 +34,8 @@ public class AgentPatients extends OSPABA.Agent {
 	public void prepareReplication()
 	{
 		super.prepareReplication();
+		this.doctorsExaminationQueue.clear();
+		this.initialExaminationQueue.clear();
 		// Setup component for the next replication
 	}
 

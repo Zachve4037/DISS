@@ -21,6 +21,7 @@ public class AgentEnvironment extends OSPABA.Agent {
 	@Override
 	public void prepareReplication()
 	{
+		this.id = 0;
 		super.prepareReplication();
 		// Setup component for the next replication
 	}
