@@ -32,6 +32,10 @@ public class ManagerHospital extends OSPABA.Manager
 	//meta! sender="AgentMovement", id="74", type="Response"
 	public void processHandlePatientToWaitingRoom(MessageForm message)
 	{
+		Message msg = (Message) message.createCopy();
+		msg.setCode(Mc.putPatient);
+		msg.setAddressee(mySim().findAgent(Id.agentPatients));
+		notice(msg);
 	}
 
 	//meta! sender="AgentMovement", id="72", type="Response"
@@ -68,9 +72,9 @@ public class ManagerHospital extends OSPABA.Manager
 	public void processHandlePatient(MessageForm message)
 	{
 		Message msg = (Message) message.createCopy();
-		msg.setCode(Mc.putPatient);
-		msg.setAddressee(mySim().findAgent(Id.agentPatients));
-		notice(msg);
+		msg.setCode(Mc.handlePatientToWaitingRoom);
+		msg.setAddressee(mySim().findAgent(Id.agentMovement));
+		request(msg);
 	}
 
 	//meta! sender="AgentResources", id="70", type="Response"

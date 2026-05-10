@@ -27,6 +27,8 @@ public class ManagerMovement extends OSPABA.Manager
 	//meta! sender="AgentHospital", id="74", type="Request"
 	public void processHandlePatientToWaitingRoom(MessageForm message)
 	{
+		message.setAddressee(myAgent().findAssistant(Id.processPatientToWaitingRoomMovement));
+		startContinualAssistant(message);
 	}
 
 	//meta! sender="AgentHospital", id="72", type="Request"
@@ -60,6 +62,8 @@ public class ManagerMovement extends OSPABA.Manager
 	//meta! sender="ProcessPatientToWaitingRoomMovement", id="94", type="Finish"
 	public void processFinishProcessPatientToWaitingRoomMovement(MessageForm message)
 	{
+		message.setCode(Mc.handlePatientToWaitingRoom);
+		response(message);
 	}
 
 	//meta! sender="ProcessDoctorsMovement", id="90", type="Finish"
