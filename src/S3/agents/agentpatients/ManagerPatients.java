@@ -42,7 +42,12 @@ public class ManagerPatients extends OSPABA.Manager {
         if (current.isWaitingForInitialExam()) {
             myAgent().getInitialExaminationQueue().add(current);
         } else if (current.isWaitingForDoctorsExam()) {
-            myAgent().getDoctorsExaminationQueue().add(current);
+            if (current.getPriority() <= 4) {
+                myAgent().getDoctorsExaminationQueueA().add(current);
+            } else {
+                myAgent().getDoctorsExaminationQueueB().add(current);
+            }
+            //TODO upravit podla priority
         } else {
             System.out.println("Patient " + current.getId() + " is not waiting for any examination.");
         }

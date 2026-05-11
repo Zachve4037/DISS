@@ -313,17 +313,19 @@ public class GUI_EmergencyDepartment {
         }
 
         Queue<Patient> initialQueue = (patientsAgent != null && patientsAgent.getInitialExaminationQueue() != null)
-                ? patientsAgent.getInitialExaminationQueue() : new ConcurrentLinkedQueue<>();
-        Queue<Patient> doctorsQueue = (patientsAgent != null && patientsAgent.getDoctorsExaminationQueue() != null)
-                ? patientsAgent.getDoctorsExaminationQueue() : new ConcurrentLinkedQueue<>();
+                ? patientsAgent.getInitialExaminationQueue() : new PriorityQueue<>();
+        Queue<Patient> doctorsQueue = (patientsAgent != null && patientsAgent.getDoctorsExaminationQueues() != null)
+                ? patientsAgent.getDoctorsExaminationQueues() : new ConcurrentLinkedQueue<>();
 
         List<Patient> waitingDoctors = doctorsQueue.stream()
                 .filter(Patient::isWaitingForDoctorsExam)
                 .collect(Collectors.toList());
 
         List<Patient> waitingInitial = initialQueue.stream()
-                .filter(Patient::isWaitingForInitialExam)
-                .collect(Collectors.toList());
+                .filter(Patient::isWaitingForInitialExam).sorted(Comparator
+                        .comparingInt((Patient p) -> p.getType() == S3.entities.PatientType.AMBULANCE ? 0 : 1)
+                        .thenComparingDouble(Patient::getArrivalTime)
+                        .thenComparingInt(Patient::getId)).collect(Collectors.toList());
 
         List<Patient> allPatients = new ArrayList<>();
         allPatients.addAll(initialQueue);
