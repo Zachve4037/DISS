@@ -50,6 +50,11 @@ public class ManagerHospital extends OSPABA.Manager {
 
     //meta! sender="ProcessInitialExamintation", id="40", type="Finish"
     public void processFinishProcessInitialExamintation(MessageForm message) {
+        EmerDepEmployee nurse = ((Message) message).getNurse();
+        nurse.endWork();
+        message.setCode(Mc.releaseResources);
+        message.setAddressee(mySim().findAgent(Id.agentResources));
+        notice(message);
     }
 
     //meta! sender="AgentResources", id="69", type="Response"
@@ -103,7 +108,7 @@ public class ManagerHospital extends OSPABA.Manager {
             for (EmerDepEmployee employee : resources.getDoctors()) {
                 Message req = (Message) message.createCopy();
                 req.setCode(Mc.handleInitialPersonalMovement);
-                req.setEmployee(employee);
+                req.setDoctor(employee);
                 req.setAddressee(mySim().findAgent(Id.agentMovement));
                 request(req);
             }
@@ -111,7 +116,7 @@ public class ManagerHospital extends OSPABA.Manager {
             for (EmerDepEmployee employee : resources.getNurses()) {
                 Message req = (Message) message.createCopy();
                 req.setCode(Mc.handleInitialPersonalMovement);
-                req.setEmployee(employee);
+                req.setNurse(employee);
                 req.setAddressee(mySim().findAgent(Id.agentMovement));
                 request(req);
             }

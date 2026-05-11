@@ -1,7 +1,7 @@
 package S3.agents.agentmovement.continualassistants;
 
 import OSPABA.*;
-import S2.RNGs.intervals.UniformInterval;
+import S3.RNGs.intervals.UniformInterval;
 import S3.RNGs.uniform.ContinuousUniformDistRNG;
 import S3.agents.agentmovement.AgentMovement;
 import S3.entities.EmerDepEmployee;
@@ -26,7 +26,11 @@ public class ProcessInitialPersonalMovement extends OSPABA.Process {
     //meta! sender="AgentMovement", id="106", type="Start"
     public void processStart(MessageForm message) {
         Message msg = (Message) message.createCopy();
-        EmerDepEmployee employee = msg.getEmployee();
+
+        EmerDepEmployee employee = msg.getDoctor() != null
+                ? msg.getDoctor()
+                : msg.getNurse();
+
         employee.setBusy(true);
 
         double time = movementTime.generate();

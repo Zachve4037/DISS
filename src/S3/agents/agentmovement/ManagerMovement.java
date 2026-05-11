@@ -80,7 +80,9 @@ public class ManagerMovement extends OSPABA.Manager {
     //meta! sender="ProcessInitialPersonalMovement", id="106", type="Finish"
     public void processFinishProcessInitialPersonalMovement(MessageForm message) {
         message.setCode(Mc.handleInitialPersonalMovement);
-        EmerDepEmployee employee = ((Message) message).getEmployee();
+        EmerDepEmployee employee = ((Message)message).getDoctor() != null
+                ? ((Message)message).getDoctor()
+                : ((Message)message).getNurse();
         employee.setBusy(false);
         response(message);
     }

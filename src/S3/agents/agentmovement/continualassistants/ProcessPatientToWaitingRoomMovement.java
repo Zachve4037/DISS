@@ -1,8 +1,8 @@
 package S3.agents.agentmovement.continualassistants;
 
 import OSPABA.*;
-import S2.RNGs.intervals.TriangleInterval;
-import S2.RNGs.intervals.UniformInterval;
+import S3.RNGs.intervals.TriangleInterval;
+import S3.RNGs.intervals.UniformInterval;
 import S3.RNGs.triangle.ContinuousTriangularDistRNG;
 import S3.RNGs.uniform.ContinuousUniformDistRNG;
 import S3.entities.Patient;

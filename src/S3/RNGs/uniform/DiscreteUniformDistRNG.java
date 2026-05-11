@@ -1,7 +1,6 @@
 package S3.RNGs.uniform;
 
-import S1.RNGs.intervals.UniformInterval;
-import S1.RNGs.uniform.UniformGenerator;
+import S3.RNGs.intervals.UniformInterval;
 
 import java.util.Random;
 

@@ -1,6 +1,6 @@
 package S3.RNGs.triangle;
 
-import S2.RNGs.intervals.TriangleInterval;
+import S3.RNGs.intervals.TriangleInterval;
 
 import java.util.Random;
 

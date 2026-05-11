@@ -32,6 +32,20 @@ public class ManagerResources extends OSPABA.Manager {
     public void processAllocateDoctorsExaminationAResources(MessageForm message) {
     }
 
+    public void processReleaseResources(MessageForm message) {
+        Message msg = (Message) message.createCopy();
+        msg.setCode(Mc.releaseResources);
+        if (msg.getClinic() != null) {
+            myAgent().getClinics().get(msg.getClinic().getId()).setOccupied(false);
+        }
+        if (msg.getDoctor() != null) {
+            myAgent().getDoctors().get(msg.getDoctor().getId()).setBusy(false);
+        }
+        if (msg.getNurse() != null) {
+            myAgent().getNurses().get(msg.getNurse().getId()).setBusy(false);
+        }
+    }
+
     //meta! userInfo="Process messages defined in code", id="0"
     public void processDefault(MessageForm message) {
         switch (message.code()) {
@@ -55,6 +69,10 @@ public class ManagerResources extends OSPABA.Manager {
 
             case Mc.allocateDoctorsExaminationAResources:
                 processAllocateDoctorsExaminationAResources(message);
+                break;
+
+            case Mc.releaseResources:
+                processReleaseResources(message);
                 break;
 
             default:

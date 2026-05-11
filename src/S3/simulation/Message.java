@@ -1,18 +1,23 @@
 package S3.simulation;
 
 import OSPABA.*;
+import S3.entities.Clinic;
 import S3.entities.Patient;
 import S3.entities.EmerDepEmployee;
 
 public class Message extends OSPABA.MessageForm {
     private Patient patient;
-    private EmerDepEmployee employee;
+    private EmerDepEmployee doctor;
+    private EmerDepEmployee nurse;
+    private Clinic clinic;
     private double processDuration;
 
     public Message(Simulation mySim) {
         super(mySim);
         this.patient = null;
-        this.employee = null;
+        this.doctor = null;
+        this.nurse = null;
+        this.clinic = null;
         this.processDuration = -1;
     }
 
@@ -31,8 +36,26 @@ public class Message extends OSPABA.MessageForm {
         super.copy(message);
         Message original = (Message) message;
         this.patient = original.patient;
-        this.employee = original.employee;
+        this.doctor = original.doctor;
+        this.nurse = original.nurse;
+        this.clinic = original.clinic;
         this.processDuration = original.processDuration;
+    }
+
+    public EmerDepEmployee getNurse() {
+        return nurse;
+    }
+
+    public void setNurse(EmerDepEmployee nurse) {
+        this.nurse = nurse;
+    }
+
+    public Clinic getClinic() {
+        return clinic;
+    }
+
+    public void setClinic(Clinic clinic) {
+        this.clinic = clinic;
     }
 
     public Patient getPatient() {
@@ -43,12 +66,12 @@ public class Message extends OSPABA.MessageForm {
         this.patient = patient;
     }
 
-    public EmerDepEmployee getEmployee() {
-        return employee;
+    public EmerDepEmployee getDoctor() {
+        return doctor;
     }
 
-    public void setEmployee(EmerDepEmployee employee) {
-        this.employee = employee;
+    public void setDoctor(EmerDepEmployee doctor) {
+        this.doctor = doctor;
     }
 
     public double getProcessDuration() {
