@@ -1,197 +1,212 @@
 package S3.agents.agenthospital;
 
 import OSPABA.*;
+import S3.agents.agentresources.AgentResources;
+import S3.entities.EmerDepEmployee;
 import S3.simulation.*;
 
 //meta! id="4"
-public class ManagerHospital extends OSPABA.Manager
-{
-	public ManagerHospital(int id, Simulation mySim, Agent myAgent)
-	{
-		super(id, mySim, myAgent);
-		init();
-	}
+public class ManagerHospital extends OSPABA.Manager {
+    private int remainingInitialMovements;
 
-	@Override
-	public void prepareReplication()
-	{
-		super.prepareReplication();
-		// Setup component for the next replication
+    public ManagerHospital(int id, Simulation mySim, Agent myAgent) {
+        super(id, mySim, myAgent);
+        init();
+    }
 
-		if (petriNet() != null)
-		{
-			petriNet().clear();
-		}
-	}
+    @Override
+    public void prepareReplication() {
+        super.prepareReplication();
+        // Setup component for the next replication
 
-	//meta! sender="AgentResources", id="71", type="Response"
-	public void processAllocateDoctorsExaminationBResources(MessageForm message)
-	{
-	}
+        if (petriNet() != null) {
+            petriNet().clear();
+        }
+    }
 
-	//meta! sender="AgentMovement", id="74", type="Response"
-	public void processHandlePatientToWaitingRoom(MessageForm message)
-	{
-		Message msg = (Message) message.createCopy();
-		msg.setCode(Mc.putPatient);
-		msg.setAddressee(mySim().findAgent(Id.agentPatients));
-		notice(msg);
-	}
+    //meta! sender="AgentResources", id="71", type="Response"
+    public void processAllocateDoctorsExaminationBResources(MessageForm message) {
+    }
 
-	//meta! sender="AgentMovement", id="72", type="Response"
-	public void processHandeDoctorsMovement(MessageForm message)
-	{
-	}
+    //meta! sender="AgentMovement", id="74", type="Response"
+    public void processHandlePatientToWaitingRoom(MessageForm message) {
+        Message msg = (Message) message.createCopy();
+        msg.setCode(Mc.putPatient);
+        msg.setAddressee(mySim().findAgent(Id.agentPatients));
+        notice(msg);
+    }
 
-	//meta! sender="AgentPatients", id="79", type="Response"
-	public void processGetPatientForDoctorsExamination(MessageForm message)
-	{
-	}
+    //meta! sender="AgentMovement", id="72", type="Response"
+    public void processHandeDoctorsMovement(MessageForm message) {
+    }
 
-	//meta! sender="ProcessDoctorsExamination", id="42", type="Finish"
-	public void processFinishProcessDoctorsExamination(MessageForm message)
-	{
-	}
+    //meta! sender="AgentPatients", id="79", type="Response"
+    public void processGetPatientForDoctorsExamination(MessageForm message) {
+    }
 
-	//meta! sender="ProcessInitialExamintation", id="40", type="Finish"
-	public void processFinishProcessInitialExamintation(MessageForm message)
-	{
-	}
+    //meta! sender="ProcessDoctorsExamination", id="42", type="Finish"
+    public void processFinishProcessDoctorsExamination(MessageForm message) {
+    }
 
-	//meta! sender="AgentResources", id="69", type="Response"
-	public void processAllocateInitialExaminationResources(MessageForm message)
-	{
-	}
+    //meta! sender="ProcessInitialExamintation", id="40", type="Finish"
+    public void processFinishProcessInitialExamintation(MessageForm message) {
+    }
 
-	//meta! sender="AgentMovement", id="75", type="Response"
-	public void processHandleLeavingPatient(MessageForm message)
-	{
-	}
+    //meta! sender="AgentResources", id="69", type="Response"
+    public void processAllocateInitialExaminationResources(MessageForm message) {
+    }
 
-	//meta! sender="AgentBoss", id="33", type="Request"
-	public void processHandlePatient(MessageForm message)
-	{
-		Message msg = (Message) message.createCopy();
-		msg.setCode(Mc.handlePatientToWaitingRoom);
-		msg.setAddressee(mySim().findAgent(Id.agentMovement));
-		request(msg);
-	}
+    //meta! sender="AgentMovement", id="75", type="Response"
+    public void processHandleLeavingPatient(MessageForm message) {
+    }
 
-	//meta! sender="AgentResources", id="70", type="Response"
-	public void processAllocateDoctorsExaminationAResources(MessageForm message)
-	{
-	}
+    //meta! sender="AgentBoss", id="33", type="Request"
+    public void processHandlePatient(MessageForm message) {
+        Message msg = (Message) message.createCopy();
+        msg.setCode(Mc.handlePatientToWaitingRoom);
+        msg.setAddressee(mySim().findAgent(Id.agentMovement));
+        request(msg);
+    }
 
-	//meta! sender="AgentPatients", id="78", type="Response"
-	public void processGetPatientForInitialExamination(MessageForm message)
-	{
-	}
+    //meta! sender="AgentResources", id="70", type="Response"
+    public void processAllocateDoctorsExaminationAResources(MessageForm message) {
+    }
 
-	//meta! sender="AgentMovement", id="73", type="Response"
-	public void processHandleNursesMovement(MessageForm message)
-	{
-	}
+    //meta! sender="AgentPatients", id="78", type="Response"
+    public void processGetPatientForInitialExamination(MessageForm message) {
+    }
 
-	//meta! sender="AgentMovement", id="76", type="Response"
-	public void processHandlePatientToClinic(MessageForm message)
-	{
-	}
+    //meta! sender="AgentMovement", id="73", type="Response"
+    public void processHandleNursesMovement(MessageForm message) {
+    }
 
-	//meta! userInfo="Process messages defined in code", id="0"
-	public void processDefault(MessageForm message)
-	{
-		switch (message.code())
-		{
-		}
-	}
+    //meta! sender="AgentMovement", id="76", type="Response"
+    public void processHandlePatientToClinic(MessageForm message) {
+    }
 
-	//meta! sender="AgentMovement", id="109", type="Response"
-	public void processHandleInitialPersonalMovement(MessageForm message)
-	{
-	}
+    //meta! userInfo="Process messages defined in code", id="0"
+    public void processDefault(MessageForm message) {
+        switch (message.code()) {
+        }
+    }
 
-	//meta! userInfo="Generated code: do not modify", tag="begin"
-	public void init()
-	{
-	}
+    //meta! sender="AgentMovement", id="109", type="Response"
+    public void processHandleInitialPersonalMovement(MessageForm message) {
+        int senderId = message.sender().id();
 
-	@Override
-	public void processMessage(MessageForm message)
-	{
-		switch (message.code())
-		{
-		case Mc.finish:
-			switch (message.sender().id())
-			{
-			case Id.processDoctorsExamination:
-				processFinishProcessDoctorsExamination(message);
-			break;
+        if (senderId == Id.agentBoss) {
+            EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+            AgentResources resources = sim.agentResources();
 
-			case Id.processInitialExamintation:
-				processFinishProcessInitialExamintation(message);
-			break;
-			}
-		break;
+            remainingInitialMovements = resources.getDoctors().size() + resources.getNurses().size();
 
-		case Mc.allocateDoctorsExaminationBResources:
-			processAllocateDoctorsExaminationBResources(message);
-		break;
+            for (EmerDepEmployee employee : resources.getDoctors()) {
+                Message req = (Message) message.createCopy();
+                req.setCode(Mc.handleInitialPersonalMovement);
+                req.setEmployee(employee);
+                req.setAddressee(mySim().findAgent(Id.agentMovement));
+                request(req);
+            }
 
-		case Mc.handleLeavingPatient:
-			processHandleLeavingPatient(message);
-		break;
+            for (EmerDepEmployee employee : resources.getNurses()) {
+                Message req = (Message) message.createCopy();
+                req.setCode(Mc.handleInitialPersonalMovement);
+                req.setEmployee(employee);
+                req.setAddressee(mySim().findAgent(Id.agentMovement));
+                request(req);
+            }
 
-		case Mc.allocateInitialExaminationResources:
-			processAllocateInitialExaminationResources(message);
-		break;
+            return;
+        }
+    }
 
-		case Mc.handleInitialPersonalMovement:
-			processHandleInitialPersonalMovement(message);
-		break;
+    public void processFinishProcessInitialPersonalMovement(MessageForm message) {
+        remainingInitialMovements--;
 
-		case Mc.allocateDoctorsExaminationAResources:
-			processAllocateDoctorsExaminationAResources(message);
-		break;
+        if (remainingInitialMovements <= 0) {
+            Message resp = (Message) message.createCopy();
+            resp.setCode(Mc.handleInitialPersonalMovement);
+            response(resp);
+        }
+    }
 
-		case Mc.getPatientForDoctorsExamination:
-			processGetPatientForDoctorsExamination(message);
-		break;
+    //meta! userInfo="Generated code: do not modify", tag="begin"
+    public void init() {
+    }
 
-		case Mc.getPatientForInitialExamination:
-			processGetPatientForInitialExamination(message);
-		break;
+    @Override
+    public void processMessage(MessageForm message) {
+        switch (message.code()) {
+            case Mc.finish:
+                switch (message.sender().id()) {
+                    case Id.processDoctorsExamination:
+                        processFinishProcessDoctorsExamination(message);
+                        break;
 
-		case Mc.handleNursesMovement:
-			processHandleNursesMovement(message);
-		break;
+                    case Id.processInitialExamintation:
+                        processFinishProcessInitialExamintation(message);
+                        break;
+                }
+                break;
 
-		case Mc.handlePatientToWaitingRoom:
-			processHandlePatientToWaitingRoom(message);
-		break;
+            case Mc.allocateDoctorsExaminationBResources:
+                processAllocateDoctorsExaminationBResources(message);
+                break;
 
-		case Mc.handlePatient:
-			processHandlePatient(message);
-		break;
+            case Mc.handleLeavingPatient:
+                processHandleLeavingPatient(message);
+                break;
 
-		case Mc.handlePatientToClinic:
-			processHandlePatientToClinic(message);
-		break;
+            case Mc.allocateInitialExaminationResources:
+                processAllocateInitialExaminationResources(message);
+                break;
 
-		case Mc.handeDoctorsMovement:
-			processHandeDoctorsMovement(message);
-		break;
+            case Mc.handleInitialPersonalMovement:
+                processHandleInitialPersonalMovement(message);
+                break;
 
-		default:
-			processDefault(message);
-		break;
-		}
-	}
-	//meta! tag="end"
+            case Mc.allocateDoctorsExaminationAResources:
+                processAllocateDoctorsExaminationAResources(message);
+                break;
 
-	@Override
-	public AgentHospital myAgent()
-	{
-		return (AgentHospital)super.myAgent();
-	}
+            case Mc.getPatientForDoctorsExamination:
+                processGetPatientForDoctorsExamination(message);
+                break;
+
+            case Mc.getPatientForInitialExamination:
+                processGetPatientForInitialExamination(message);
+                break;
+
+            case Mc.handleNursesMovement:
+                processHandleNursesMovement(message);
+                break;
+
+            case Mc.handlePatientToWaitingRoom:
+                processHandlePatientToWaitingRoom(message);
+                break;
+
+            case Mc.handlePatient:
+                processHandlePatient(message);
+                break;
+
+            case Mc.handlePatientToClinic:
+                processHandlePatientToClinic(message);
+                break;
+
+            case Mc.handeDoctorsMovement:
+                processHandeDoctorsMovement(message);
+                break;
+
+            default:
+                processDefault(message);
+                break;
+        }
+    }
+    //meta! tag="end"
+
+    @Override
+    public AgentHospital myAgent() {
+        return (AgentHospital) super.myAgent();
+    }
 
 }

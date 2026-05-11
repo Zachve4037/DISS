@@ -6,34 +6,32 @@ import S3.agents.agentenvironment.continualassistants.*;
 
 //meta! id="3"
 public class AgentEnvironment extends OSPABA.Agent {
-	private int id;
-	public AgentEnvironment(int id, Simulation mySim, Agent parent)
-	{
-		super(id, mySim, parent);
-		init();
-	}
+    private int id;
 
-	public int getId() {
-		id++;
-		return id;
-	}
+    public AgentEnvironment(int id, Simulation mySim, Agent parent) {
+        super(id, mySim, parent);
+        init();
+    }
 
-	@Override
-	public void prepareReplication()
-	{
-		this.id = 0;
-		super.prepareReplication();
-		// Setup component for the next replication
-	}
+    public int getId() {
+        id++;
+        return id;
+    }
 
-	//meta! userInfo="Generated code: do not modify", tag="begin"
-	private void init()
-	{
-		new ManagerEnvironment(Id.managerEnvironment, mySim(), this);
-		new SchedulerThemselves(Id.schedulerThemselves, mySim(), this);
-		new SchedulerAmbulance(Id.schedulerAmbulance, mySim(), this);
-		addOwnMessage(Mc.patientDeparture);
-		addOwnMessage(Mc.patientArrival);
-	}
-	//meta! tag="end"
+    @Override
+    public void prepareReplication() {
+        this.id = 0;
+        super.prepareReplication();
+        // Setup component for the next replication
+    }
+
+    //meta! userInfo="Generated code: do not modify", tag="begin"
+    private void init() {
+        new ManagerEnvironment(Id.managerEnvironment, mySim(), this);
+        new SchedulerThemselves(Id.schedulerThemselves, mySim(), this);
+        new SchedulerAmbulance(Id.schedulerAmbulance, mySim(), this);
+        addOwnMessage(Mc.patientDeparture);
+        addOwnMessage(Mc.patientArrival);
+    }
+    //meta! tag="end"
 }

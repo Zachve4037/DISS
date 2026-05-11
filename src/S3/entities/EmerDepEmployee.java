@@ -8,6 +8,7 @@ public class EmerDepEmployee extends Entity {
     private final EmployeeType type;
 
     private Patient currentPatient;
+    private Clinic currentClinic;
     private boolean busy;
     private double workTime;
     private double workStartTime;
@@ -22,6 +23,7 @@ public class EmerDepEmployee extends Entity {
         this.workTime = 0;
         this.workStartTime = 0;
         this.totalWorkTime = 0;
+        this.currentClinic = null;
     }
 
     public int getId() {
@@ -54,6 +56,10 @@ public class EmerDepEmployee extends Entity {
         this.currentPatient = null;
     }
 
+    public void setBusy(boolean busy) {
+        this.busy = busy;
+    }
+
     public boolean isBusy() {
         return busy;
     }
@@ -72,5 +78,13 @@ public class EmerDepEmployee extends Entity {
 
     public double getWorkStartTime() {
         return workStartTime;
+    }
+
+    public Clinic getCurrentClinic() {
+        return currentClinic;
+    }
+
+    public void setCurrentClinic(Clinic clinic) {
+        this.currentClinic = clinic;
     }
 }

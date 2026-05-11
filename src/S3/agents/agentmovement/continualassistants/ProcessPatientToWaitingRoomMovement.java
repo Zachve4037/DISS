@@ -13,68 +13,61 @@ import S3.agents.agentmovement.*;
 import java.util.Random;
 
 //meta! id="93"
-public class ProcessPatientToWaitingRoomMovement extends OSPABA.Process
-{
-	private ContinuousTriangularDistRNG movementTimePeso = new ContinuousTriangularDistRNG(new Random(), new TriangleInterval(120, 150, 300));
-	private ContinuousUniformDistRNG movementTimeSanitka = new ContinuousUniformDistRNG(new Random(), new UniformInterval(90, 200));
-	public ProcessPatientToWaitingRoomMovement(int id, Simulation mySim, CommonAgent myAgent)
-	{
-		super(id, mySim, myAgent);
-	}
+public class ProcessPatientToWaitingRoomMovement extends OSPABA.Process {
+    private ContinuousTriangularDistRNG movementTimePeso = new ContinuousTriangularDistRNG(new Random(), new TriangleInterval(120, 150, 300));
+    private ContinuousUniformDistRNG movementTimeSanitka = new ContinuousUniformDistRNG(new Random(), new UniformInterval(90, 200));
 
-	@Override
-	public void prepareReplication()
-	{
-		super.prepareReplication();
-		// Setup component for the next replication
-	}
+    public ProcessPatientToWaitingRoomMovement(int id, Simulation mySim, CommonAgent myAgent) {
+        super(id, mySim, myAgent);
+    }
 
-	//meta! sender="AgentMovement", id="94", type="Start"
-	public void processStart(MessageForm message)
-	{
-		Message msg = (Message) message.createCopy();
-		Patient patient = msg.getPatient();
+    @Override
+    public void prepareReplication() {
+        super.prepareReplication();
+        // Setup component for the next replication
+    }
 
-		double time = (patient.getType() == PatientType.AMBULANCE)
-				? movementTimeSanitka.generate()
-				: movementTimePeso.generate();
+    //meta! sender="AgentMovement", id="94", type="Start"
+    public void processStart(MessageForm message) {
+        Message msg = (Message) message.createCopy();
+        Patient patient = msg.getPatient();
 
-		msg.setCode(Mc.finish);
-		hold(time, msg);
-	}
+        double time = (patient.getType() == PatientType.AMBULANCE)
+                ? movementTimeSanitka.generate()
+                : movementTimePeso.generate();
 
-	//meta! userInfo="Process messages defined in code", id="0"
-	public void processDefault(MessageForm message)
-	{
-		switch (message.code())
-		{
-		}
-	}
+        msg.setCode(Mc.finish);
+        hold(time, msg);
+    }
 
-	//meta! userInfo="Generated code: do not modify", tag="begin"
-	@Override
-	public void processMessage(MessageForm message)
-	{
-		switch (message.code()) {
-			case Mc.start:
-				processStart(message);
-			break;
+    //meta! userInfo="Process messages defined in code", id="0"
+    public void processDefault(MessageForm message) {
+        switch (message.code()) {
+        }
+    }
 
-			case Mc.finish:
-				assistantFinished(message);
-			break;
+    //meta! userInfo="Generated code: do not modify", tag="begin"
+    @Override
+    public void processMessage(MessageForm message) {
+        switch (message.code()) {
+            case Mc.start:
+                processStart(message);
+                break;
 
-			default:
-				processDefault(message);
-			break;
-		}
-	}
-	//meta! tag="end"
+            case Mc.finish:
+                assistantFinished(message);
+                break;
 
-	@Override
-	public AgentMovement myAgent()
-	{
-		return (AgentMovement)super.myAgent();
-	}
+            default:
+                processDefault(message);
+                break;
+        }
+    }
+    //meta! tag="end"
+
+    @Override
+    public AgentMovement myAgent() {
+        return (AgentMovement) super.myAgent();
+    }
 
 }

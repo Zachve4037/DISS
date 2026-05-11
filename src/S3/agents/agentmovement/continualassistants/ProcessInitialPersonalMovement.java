@@ -1,60 +1,68 @@
 package S3.agents.agentmovement.continualassistants;
 
 import OSPABA.*;
+import S2.RNGs.intervals.UniformInterval;
+import S3.RNGs.uniform.ContinuousUniformDistRNG;
 import S3.agents.agentmovement.AgentMovement;
+import S3.entities.EmerDepEmployee;
 import S3.simulation.*;
-import S3.agents.agentmovement.*;
-import OSPABA.Process;
+
+import java.util.Random;
 
 //meta! id="105"
-public class ProcessInitialPersonalMovement extends OSPABA.Process
-{
-	public ProcessInitialPersonalMovement(int id, Simulation mySim, CommonAgent myAgent)
-	{
-		super(id, mySim, myAgent);
-	}
+public class ProcessInitialPersonalMovement extends OSPABA.Process {
+    private ContinuousUniformDistRNG movementTime = new ContinuousUniformDistRNG(new Random(), new UniformInterval(90, 200));
 
-	@Override
-	public void prepareReplication()
-	{
-		super.prepareReplication();
-		// Setup component for the next replication
-	}
+    public ProcessInitialPersonalMovement(int id, Simulation mySim, CommonAgent myAgent) {
+        super(id, mySim, myAgent);
+    }
 
-	//meta! sender="AgentMovement", id="106", type="Start"
-	public void processStart(MessageForm message)
-	{
-	}
+    @Override
+    public void prepareReplication() {
+        super.prepareReplication();
+        // Setup component for the next replication
+    }
 
-	//meta! userInfo="Process messages defined in code", id="0"
-	public void processDefault(MessageForm message)
-	{
-		switch (message.code())
-		{
-		}
-	}
+    //meta! sender="AgentMovement", id="106", type="Start"
+    public void processStart(MessageForm message) {
+        Message msg = (Message) message.createCopy();
+        EmerDepEmployee employee = msg.getEmployee();
+        employee.setBusy(true);
 
-	//meta! userInfo="Generated code: do not modify", tag="begin"
-	@Override
-	public void processMessage(MessageForm message)
-	{
-		switch (message.code())
-		{
-		case Mc.start:
-			processStart(message);
-		break;
+        double time = movementTime.generate();
+        msg.setCode(Mc.finish);
 
-		default:
-			processDefault(message);
-		break;
-		}
-	}
-	//meta! tag="end"
+        hold(time, msg);
+    }
 
-	@Override
-	public AgentMovement myAgent()
-	{
-		return (AgentMovement)super.myAgent();
-	}
+    //meta! userInfo="Process messages defined in code", id="0"
+    public void processDefault(MessageForm message) {
+        switch (message.code()) {
+        }
+    }
+
+    //meta! userInfo="Generated code: do not modify", tag="begin"
+    @Override
+    public void processMessage(MessageForm message) {
+        switch (message.code()) {
+            case Mc.start:
+                processStart(message);
+                break;
+
+            case Mc.finish:
+                assistantFinished(message);
+                break;
+
+            default:
+                processDefault(message);
+                break;
+        }
+    }
+    //meta! tag="end"
+
+    @Override
+    public AgentMovement myAgent() {
+        return (AgentMovement) super.myAgent();
+    }
 
 }
