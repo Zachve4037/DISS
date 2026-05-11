@@ -6,7 +6,6 @@ import S3.entities.ClinicType;
 import S3.entities.EmerDepEmployee;
 import S3.entities.EmployeeType;
 import S3.simulation.*;
-
 import java.util.ArrayList;
 import java.util.List;
 

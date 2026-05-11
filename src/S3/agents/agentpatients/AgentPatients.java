@@ -3,7 +3,6 @@ package S3.agents.agentpatients;
 import OSPABA.*;
 import S3.entities.Patient;
 import S3.simulation.*;
-
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 

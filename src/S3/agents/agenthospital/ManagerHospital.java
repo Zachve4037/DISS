@@ -105,6 +105,11 @@ public class ManagerHospital extends OSPABA.Manager
 		}
 	}
 
+	//meta! sender="AgentMovement", id="109", type="Response"
+	public void processHandleInitialPersonalMovement(MessageForm message)
+	{
+	}
+
 	//meta! userInfo="Generated code: do not modify", tag="begin"
 	public void init()
 	{
@@ -138,6 +143,10 @@ public class ManagerHospital extends OSPABA.Manager
 
 		case Mc.allocateInitialExaminationResources:
 			processAllocateInitialExaminationResources(message);
+		break;
+
+		case Mc.handleInitialPersonalMovement:
+			processHandleInitialPersonalMovement(message);
 		break;
 
 		case Mc.allocateDoctorsExaminationAResources:

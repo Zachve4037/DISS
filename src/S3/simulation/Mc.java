@@ -19,6 +19,7 @@ public class Mc extends OSPABA.IdList
 	public static final int patientArrival = 1002;
 	public static final int patientDeparture = 1010;
 	public static final int handlePatient = 1011;
+	public static final int handleInitialPersonalMovement = 1028;
 	//meta! tag="end"
 
 	// 1..1000 range reserved for user

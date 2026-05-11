@@ -86,6 +86,16 @@ public class ManagerMovement extends OSPABA.Manager
 	{
 	}
 
+	//meta! sender="AgentHospital", id="109", type="Request"
+	public void processHandleInitialPersonalMovement(MessageForm message)
+	{
+	}
+
+	//meta! sender="ProcessInitialPersonalMovement", id="106", type="Finish"
+	public void processFinishProcessInitialPersonalMovement(MessageForm message)
+	{
+	}
+
 	//meta! userInfo="Generated code: do not modify", tag="begin"
 	public void init()
 	{
@@ -100,23 +110,23 @@ public class ManagerMovement extends OSPABA.Manager
 			processHandleLeavingPatient(message);
 		break;
 
-		case Mc.handleNursesMovement:
-			processHandleNursesMovement(message);
-		break;
-
-		case Mc.handlePatientToWaitingRoom:
-			processHandlePatientToWaitingRoom(message);
-		break;
-
 		case Mc.finish:
 			switch (message.sender().id())
 			{
-			case Id.processPatientToWaitingRoomMovement:
-				processFinishProcessPatientToWaitingRoomMovement(message);
-			break;
-
 			case Id.processDoctorsMovement:
 				processFinishProcessDoctorsMovement(message);
+			break;
+
+			case Id.processPatientLeavingMovement:
+				processFinishProcessPatientLeavingMovement(message);
+			break;
+
+			case Id.processInitialPersonalMovement:
+				processFinishProcessInitialPersonalMovement(message);
+			break;
+
+			case Id.processPatientToWaitingRoomMovement:
+				processFinishProcessPatientToWaitingRoomMovement(message);
 			break;
 
 			case Id.processPatientToClinicMovement:
@@ -126,11 +136,19 @@ public class ManagerMovement extends OSPABA.Manager
 			case Id.processNursesMovement:
 				processFinishProcessNursesMovement(message);
 			break;
-
-			case Id.processPatientLeavingMovement:
-				processFinishProcessPatientLeavingMovement(message);
-			break;
 			}
+		break;
+
+		case Mc.handleInitialPersonalMovement:
+			processHandleInitialPersonalMovement(message);
+		break;
+
+		case Mc.handleNursesMovement:
+			processHandleNursesMovement(message);
+		break;
+
+		case Mc.handlePatientToWaitingRoom:
+			processHandlePatientToWaitingRoom(message);
 		break;
 
 		case Mc.handlePatientToClinic:
