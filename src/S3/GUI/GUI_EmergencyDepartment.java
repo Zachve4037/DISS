@@ -172,8 +172,18 @@ public class GUI_EmergencyDepartment {
         ));
 
         JPanel center = new JPanel(new BorderLayout(10, 10));
-        center.add(createTablePanel("Simulation statistics", simulationStatsTable), BorderLayout.NORTH);
-        center.add(lower, BorderLayout.CENTER);
+
+        JPanel simStatsPanel = createTablePanel("Simulation statistics", simulationStatsTable);
+        simStatsPanel.setMinimumSize(new Dimension(200, 150));
+        lower.setMinimumSize(new Dimension(200, 200));
+
+        JSplitPane topSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, simStatsPanel, lower);
+        topSplit.setResizeWeight(0.2);
+        topSplit.setDividerLocation(200);
+        topSplit.setContinuousLayout(true);
+        topSplit.setBorder(null);
+
+        center.add(topSplit, BorderLayout.CENTER);
 
         simulationTab.add(center, BorderLayout.CENTER);
 
