@@ -16,8 +16,8 @@
             <version>1.5.4</version>
         </dependency>
         <dependency>
-            <groupId>cz.abacore</groupId>
-            <artifactId>abacore</artifactId>
+            <groupId>sk.uniza.ABACore</groupId>
+            <artifactId>ABACore</artifactId>
             <version>1.0</version>
         </dependency>
     </dependencies>
