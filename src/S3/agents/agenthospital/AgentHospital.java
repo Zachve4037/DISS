@@ -27,7 +27,7 @@ public class AgentHospital extends OSPABA.Agent {
         addOwnMessage(Mc.allocateDoctorsExaminationBResources);
         addOwnMessage(Mc.handlePatientToWaitingRoom);
         addOwnMessage(Mc.handleInitialPersonalMovement);
-        addOwnMessage(Mc.handeDoctorsMovement);
+        addOwnMessage(Mc.handleDoctorsMovement);
         addOwnMessage(Mc.getPatientForDoctorsExamination);
         addOwnMessage(Mc.allocateInitialExaminationResources);
         addOwnMessage(Mc.handleLeavingPatient);

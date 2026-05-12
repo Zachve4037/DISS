@@ -38,6 +38,17 @@ public class ManagerHospital extends OSPABA.Manager {
 
     //meta! sender="AgentMovement", id="72", type="Response"
     public void processHandeDoctorsMovement(MessageForm message) {
+        int senderId = message.sender().id();
+
+        if (senderId == Id.agentMovement) {
+            response(message);
+            return;
+        }
+
+        Message req = (Message) message.createCopy();
+        req.setCode(Mc.handleDoctorsMovement);
+        req.setAddressee(mySim().findAgent(Id.agentMovement));
+        request(req);
     }
 
     //meta! sender="AgentPatients", id="79", type="Response"
@@ -63,6 +74,20 @@ public class ManagerHospital extends OSPABA.Manager {
 
     //meta! sender="AgentMovement", id="75", type="Response"
     public void processHandleLeavingPatient(MessageForm message) {
+        int senderId = message.sender().id();
+
+        if (senderId == Id.agentMovement) {
+            Message msg = (Message) message.createCopy();
+            msg.setCode(Mc.patientDeparture);
+            msg.setAddressee(mySim().findAgent(Id.agentEnvironment));
+            notice(msg);
+            return;
+        }
+
+        Message req = (Message) message.createCopy();
+        req.setCode(Mc.handleLeavingPatient);
+        req.setAddressee(mySim().findAgent(Id.agentMovement));
+        request(req);
     }
 
     //meta! sender="AgentBoss", id="33", type="Request"
@@ -120,18 +145,6 @@ public class ManagerHospital extends OSPABA.Manager {
                 req.setAddressee(mySim().findAgent(Id.agentMovement));
                 request(req);
             }
-
-            return;
-        }
-    }
-
-    public void processFinishProcessInitialPersonalMovement(MessageForm message) {
-        remainingInitialMovements--;
-
-        if (remainingInitialMovements <= 0) {
-            Message resp = (Message) message.createCopy();
-            resp.setCode(Mc.handleInitialPersonalMovement);
-            response(resp);
         }
     }
 
@@ -198,7 +211,7 @@ public class ManagerHospital extends OSPABA.Manager {
                 processHandlePatientToClinic(message);
                 break;
 
-            case Mc.handeDoctorsMovement:
+            case Mc.handleDoctorsMovement:
                 processHandeDoctorsMovement(message);
                 break;
 

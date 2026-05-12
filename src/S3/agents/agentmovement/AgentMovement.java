@@ -28,7 +28,7 @@ public class AgentMovement extends OSPABA.Agent {
         new ProcessInitialPersonalMovement(Id.processInitialPersonalMovement, mySim(), this);
         addOwnMessage(Mc.handlePatientToWaitingRoom);
         addOwnMessage(Mc.handleInitialPersonalMovement);
-        addOwnMessage(Mc.handeDoctorsMovement);
+        addOwnMessage(Mc.handleDoctorsMovement);
         addOwnMessage(Mc.handleLeavingPatient);
         addOwnMessage(Mc.handleNursesMovement);
         addOwnMessage(Mc.handlePatientToClinic);

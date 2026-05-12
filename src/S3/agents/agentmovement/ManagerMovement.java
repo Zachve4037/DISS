@@ -66,7 +66,7 @@ public class ManagerMovement extends OSPABA.Manager {
 
     //meta! sender="ProcessDoctorsMovement", id="90", type="Finish"
     public void processFinishProcessDoctorsMovement(MessageForm message) {
-        message.setCode(Mc.handeDoctorsMovement);
+        message.setCode(Mc.handleDoctorsMovement);
         EmerDepEmployee doctor = ((Message)message).getDoctor();
         doctor.setBusy(false);
         response(message);
@@ -165,7 +165,7 @@ public class ManagerMovement extends OSPABA.Manager {
                 processHandlePatientToClinic(message);
                 break;
 
-            case Mc.handeDoctorsMovement:
+            case Mc.handleDoctorsMovement:
                 processHandeDoctorsMovement(message);
                 break;
 

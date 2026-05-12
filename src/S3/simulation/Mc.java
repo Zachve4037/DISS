@@ -1,14 +1,12 @@
 package S3.simulation;
 
-import OSPABA.*;
-
 public class Mc extends OSPABA.IdList
 {
 	//meta! userInfo="Generated code: do not modify", tag="begin"
 	public static final int allocateInitialExaminationResources = 1015;
 	public static final int allocateDoctorsExaminationAResources = 1016;
 	public static final int allocateDoctorsExaminationBResources = 1017;
-	public static final int handeDoctorsMovement = 1018;
+	public static final int handleDoctorsMovement = 1018;
 	public static final int handleNursesMovement = 1019;
 	public static final int handlePatientToWaitingRoom = 1020;
 	public static final int handleLeavingPatient = 1021;
