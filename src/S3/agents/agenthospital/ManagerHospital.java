@@ -62,10 +62,53 @@ public class ManagerHospital extends OSPABA.Manager {
 
     //meta! sender="AgentPatients", id="79", type="Response"
     public void processGetPatientForDoctorsExamination(MessageForm message) {
+        Message msg = (Message) message;
+        Patient p = msg.getPatient();
+        if (p == null) return;
+
+        // Decide which clinic type to try (A, B, or both)
+        if (p.getPriority() == 1 || p.getPriority() == 2) {
+            msg.setCode(Mc.allocateDoctorsExaminationAResources);
+            msg.setAddressee(mySim().findAgent(Id.agentResources));
+            request(msg);
+        } else if (p.getPriority() == 5) {
+            msg.setCode(Mc.allocateDoctorsExaminationBResources);
+            msg.setAddressee(mySim().findAgent(Id.agentResources));
+            request(msg);
+        } else {
+            msg.setCode(Mc.allocateDoctorsExaminationAResources);
+            msg.setAddressee(mySim().findAgent(Id.agentResources));
+            request(msg);
+            // If A fails, in the response handler, try B
+        }
     }
 
     //meta! sender="ProcessDoctorsExamination", id="42", type="Finish"
     public void processFinishProcessDoctorsExamination(MessageForm message) {
+        Message msg = (Message) message.createCopy();
+        Patient patient = msg.getPatient();
+
+        patient.setWaitingForDoctorsExam(false);
+
+        EmerDepEmployee nurse = msg.getNurse();
+        nurse.endWork();
+        EmerDepEmployee doctor = msg.getDoctor();
+        doctor.endWork();
+
+        Message departureMsg = new Message(mySim());
+        departureMsg.setCode(Mc.patientDeparture);
+        departureMsg.setPatient(patient);
+        departureMsg.setAddressee(mySim().findAgent(Id.agentBoss));
+        notice(departureMsg);
+
+        msg.setCode(Mc.releaseResources);
+        msg.setAddressee(mySim().findAgent(Id.agentResources));
+        notice(msg);
+
+        Message retry = new Message(mySim());
+        retry.setCode(Mc.tryStartDoctorsExamination);
+        retry.setAddressee(myAgent());
+        notice(retry);
     }
 
     //meta! sender="ProcessInitialExamintation", id="40", type="Finish"
@@ -89,6 +132,12 @@ public class ManagerHospital extends OSPABA.Manager {
         msg.setCode(Mc.releaseResources);
         msg.setAddressee(mySim().findAgent(Id.agentResources));
         notice(msg);
+
+        //Try to start doctors examination
+        Message doctorExamMsg = new Message(mySim());
+        doctorExamMsg.setCode(Mc.tryStartDoctorsExamination);
+        doctorExamMsg.setAddressee(myAgent());
+        notice(doctorExamMsg);
 
         // Try to start another examination
         Message retry = new Message(mySim());
@@ -136,6 +185,13 @@ public class ManagerHospital extends OSPABA.Manager {
 
     //meta! sender="AgentResources", id="70", type="Response"
     public void processAllocateDoctorsExaminationAResources(MessageForm message) {
+        Message msg = (Message) message;
+        if (msg.getNurse() == null || msg.getClinic() == null || msg.getPatient() == null || msg.getDoctor() == null) {
+            return;
+        }
+        msg.setCode(Mc.handleNursesMovement);
+        msg.setAddressee(mySim().findAgent(Id.agentMovement));
+        request(msg);
     }
 
     //meta! sender="AgentPatients", id="78", type="Response"
@@ -179,11 +235,28 @@ public class ManagerHospital extends OSPABA.Manager {
     public void processHandlePatientToClinic(MessageForm message) {
         int senderId = message.sender().id();
 
-        // pacient dorazil do ambulancie
         if (senderId == Id.agentMovement) {
-            message.setCode(Mc.start);
-            message.setAddressee(myAgent().findAssistant(Id.processInitialExamintation));
-            startContinualAssistant(message);
+            Message msg = (Message) message.createCopy();
+            Patient patient = msg.getPatient();
+
+            if (patient == null) {
+                return;
+            }
+
+            if (patient.isWaitingForInitialExam()) {
+                msg.setCode(Mc.start);
+                msg.setAddressee(myAgent().findAssistant(Id.processInitialExamintation));
+                startContinualAssistant(msg);
+                return;
+            }
+
+            if (patient.isWaitingForDoctorsExam()) {
+                msg.setCode(Mc.start);
+                msg.setAddressee(myAgent().findAssistant(Id.processDoctorsExamination));
+                startContinualAssistant(msg);
+                return;
+            }
+
             return;
         }
 
@@ -230,6 +303,13 @@ public class ManagerHospital extends OSPABA.Manager {
     private void processTryStartInitialExamination(MessageForm message) {
         Message req = (Message) message.createCopy();
         req.setCode(Mc.getPatientForInitialExamination);
+        req.setAddressee(mySim().findAgent(Id.agentPatients));
+        request(req);
+    }
+
+    private void processTryStartDoctorsExamination(MessageForm message) {
+        Message req = (Message) message.createCopy();
+        req.setCode(Mc.getPatientForDoctorsExamination);
         req.setAddressee(mySim().findAgent(Id.agentPatients));
         request(req);
     }
@@ -303,6 +383,10 @@ public class ManagerHospital extends OSPABA.Manager {
 
             case Mc.tryStartInitialExamination:
                 processTryStartInitialExamination(message);
+                break;
+
+            case Mc.tryStartDoctorsExamination:
+                processTryStartDoctorsExamination(message);
                 break;
 
             default:

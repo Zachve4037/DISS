@@ -23,6 +23,19 @@ public class ManagerPatients extends OSPABA.Manager {
 
     //meta! sender="AgentHospital", id="79", type="Request"
     public void processGetPatientForDoctorsExamination(MessageForm message) {
+        Message msg = (Message) message.createCopy();
+        Patient patient = null;
+
+        if (!myAgent().getDoctorsExaminationQueueA().isEmpty()) {
+            patient = myAgent().getDoctorsExaminationQueueA().poll();
+        } else if (!myAgent().getDoctorsExaminationQueueB().isEmpty()) {
+            patient = myAgent().getDoctorsExaminationQueueB().poll();
+        }
+
+        if (patient != null) {
+            msg.setPatient(patient);
+            response(msg);
+        }
     }
 
     //meta! sender="AgentHospital", id="78", type="Request"
@@ -45,15 +58,21 @@ public class ManagerPatients extends OSPABA.Manager {
     public void processPutPatient(MessageForm message) {
         Message msg = (Message) message.createCopy();
         Patient current = msg.getPatient();
+
+        if (current == null) {
+            return;
+        }
+
         if (current.isWaitingForInitialExam()) {
+            current.startWaitingForInitialExam();
             myAgent().getInitialExaminationQueue().add(current);
         } else if (current.isWaitingForDoctorsExam()) {
+            current.startWaitingForDoctorsExam();
             if (current.getPriority() <= 4) {
                 myAgent().getDoctorsExaminationQueueA().add(current);
             } else {
                 myAgent().getDoctorsExaminationQueueB().add(current);
             }
-            //TODO upravit podla priority
         } else {
             System.out.println("Patient " + current.getId() + " is not waiting for any examination.");
         }

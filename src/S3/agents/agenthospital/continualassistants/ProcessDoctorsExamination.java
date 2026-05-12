@@ -5,6 +5,8 @@ import S3.RNGs.empirical.ContinuousEmpiricalDistRNG;
 import S3.RNGs.intervals.EmpiricInterval;
 import S3.RNGs.intervals.UniformInterval;
 import S3.RNGs.uniform.ContinuousUniformDistRNG;
+import S3.entities.EmerDepEmployee;
+import S3.entities.Patient;
 import S3.entities.PatientType;
 import S3.simulation.*;
 import S3.agents.agenthospital.*;
@@ -40,7 +42,19 @@ public class ProcessDoctorsExamination extends OSPABA.Process {
     //meta! sender="AgentHospital", id="42", type="Start"
     public void processStart(MessageForm message) {
         Message msg = (Message) message.createCopy();
-        double time = (msg.getPatient().getType() == PatientType.AMBULANCE)
+
+        Patient patient = msg.getPatient();
+        EmerDepEmployee nurse = msg.getNurse();
+        EmerDepEmployee doctor = msg.getDoctor();
+
+        if (patient == null || nurse == null || doctor == null) {
+            return;
+        }
+
+        nurse.startWork(patient);
+        doctor.startWork(patient);
+
+        double time = (patient.getType() == PatientType.AMBULANCE)
                 ? examinationTimeSanitka.generate()
                 : examinationTimePeso.generate();
         msg.setCode(Mc.finish);
@@ -60,6 +74,10 @@ public class ProcessDoctorsExamination extends OSPABA.Process {
         switch (message.code()) {
             case Mc.start:
                 processStart(message);
+                break;
+
+            case Mc.finish:
+                assistantFinished(message);
                 break;
 
             default:

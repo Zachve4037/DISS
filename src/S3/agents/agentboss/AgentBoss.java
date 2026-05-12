@@ -16,7 +16,6 @@ public class AgentBoss extends OSPABA.Agent {
         // Setup component for the next replication
     }
 
-
     public void startSimulation() {
         Message envStart = new Message(mySim());
         envStart.setCode(Mc.start);
@@ -35,6 +34,7 @@ public class AgentBoss extends OSPABA.Agent {
         addOwnMessage(Mc.handlePatient);
         addOwnMessage(Mc.patientArrival);
         addOwnMessage(Mc.handleInitialPersonalMovement);
+        addOwnMessage(Mc.patientDeparture);
     }
     //meta! tag="end"
 }

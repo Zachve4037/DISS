@@ -21,6 +21,7 @@ public class Mc extends OSPABA.IdList
 	//meta! tag="end"
 	public static final int releaseResources = 1;
 	public static final int tryStartInitialExamination = 2;
+	public static final int tryStartDoctorsExamination = 3;
 
 	// 1..1000 range reserved for user
 }

@@ -10,7 +10,7 @@ import java.util.Random;
 
 //meta! id="97"
 public class ProcessPatientToClinicMovement extends OSPABA.Process {
-    private ContinuousTriangularDistRNG movementTime = new ContinuousTriangularDistRNG(new Random(), new TriangleInterval(15, 20, 450));
+    private ContinuousTriangularDistRNG movementTime = new ContinuousTriangularDistRNG(new Random(), new TriangleInterval(15, 20, 45));
 
     public ProcessPatientToClinicMovement(int id, Simulation mySim, CommonAgent myAgent) {
         super(id, mySim, myAgent);

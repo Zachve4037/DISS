@@ -1,6 +1,8 @@
 package S3.agents.agentenvironment;
 
 import OSPABA.*;
+import S3.entities.EmerDepEmployee;
+import S3.entities.Patient;
 import S3.simulation.*;
 
 //meta! id="3"
@@ -38,7 +40,12 @@ public class ManagerEnvironment extends OSPABA.Manager {
 
     //meta! sender="AgentBoss", id="32", type="Notice"
     public void processPatientDeparture(MessageForm message) {
-        //TODO ked pacient odchadza zo systemu, iba mu ukoncit statistiky a vymazat pacienta
+        Message msg = (Message) message.createCopy();
+        Patient patient = msg.getPatient();
+        patient.endService();
+        patient.finalizeStatistics();
+        EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+        sim.recordDeparture(patient);
     }
 
     //meta! userInfo="Process messages defined in code", id="0"

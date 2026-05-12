@@ -21,19 +21,43 @@ public class Patient extends Entity {
     private boolean isWaitingForDoctorsExam;
     private boolean isWaitingForInitialExam;
 
+    private double initialExamWaitTime;
+    private double doctorsExamWaitTime;
+
+    private double finalizedTotalTimeInSystem;
+    private boolean statisticsFinalized;
+
+    private WaitingPhase waitingPhase;
+
+    private enum WaitingPhase {
+        NONE,
+        INITIAL_EXAM,
+        DOCTORS_EXAM
+    }
+
     public Patient(Simulation mySim, int id, PatientType type) {
         super(mySim);
         this.id = id;
         this.type = type;
         this.arrivalTime = mySim.currentTime();
+
         this.waitStartTime = 0;
         this.totalWaitTime = 0;
         this.isWaiting = false;
+
         this.serviceStartTime = 0;
         this.totalServiceTime = 0;
         this.isInService = false;
+
         this.isWaitingForInitialExam = true;
         this.isWaitingForDoctorsExam = false;
+
+        this.initialExamWaitTime = 0;
+        this.doctorsExamWaitTime = 0;
+
+        this.finalizedTotalTimeInSystem = 0;
+        this.statisticsFinalized = false;
+        this.waitingPhase = WaitingPhase.NONE;
     }
 
     public int getPriority() {
@@ -57,16 +81,38 @@ public class Patient extends Entity {
     }
 
     public void startWaiting() {
+        startWaiting(WaitingPhase.NONE);
+    }
+
+    public void startWaitingForInitialExam() {
+        startWaiting(WaitingPhase.INITIAL_EXAM);
+    }
+
+    public void startWaitingForDoctorsExam() {
+        startWaiting(WaitingPhase.DOCTORS_EXAM);
+    }
+
+    private void startWaiting(WaitingPhase phase) {
         if (!isWaiting) {
             this.waitStartTime = mySim().currentTime();
             this.isWaiting = true;
         }
+        this.waitingPhase = phase;
     }
 
     public void endWaiting() {
         if (isWaiting) {
+            double waited = mySim().currentTime() - this.waitStartTime;
+            this.totalWaitTime += waited;
+
+            if (waitingPhase == WaitingPhase.INITIAL_EXAM) {
+                this.initialExamWaitTime += waited;
+            } else if (waitingPhase == WaitingPhase.DOCTORS_EXAM) {
+                this.doctorsExamWaitTime += waited;
+            }
+
             this.isWaiting = false;
-            this.totalWaitTime += mySim().currentTime() - this.waitStartTime;
+            this.waitingPhase = WaitingPhase.NONE;
         }
     }
 
@@ -110,10 +156,30 @@ public class Patient extends Entity {
         return isInService;
     }
 
-    public double getTotalTimeInSystem() {
-        return mySim().currentTime() - arrivalTime;
+    public double getInitialExamWaitTime() {
+        return initialExamWaitTime;
     }
 
+    public double getDoctorsExamWaitTime() {
+        return doctorsExamWaitTime;
+    }
+
+    public void finalizeStatistics() {
+        if (isWaiting) {
+            endWaiting();
+        }
+        if (isInService) {
+            endService();
+        }
+        this.finalizedTotalTimeInSystem = mySim().currentTime() - arrivalTime;
+        this.statisticsFinalized = true;
+    }
+
+    public double getTotalTimeInSystem() {
+        return statisticsFinalized
+                ? finalizedTotalTimeInSystem
+                : mySim().currentTime() - arrivalTime;
+    }
 
     public boolean isWaitingForDoctorsExam() {
         return isWaitingForDoctorsExam;
@@ -129,5 +195,9 @@ public class Patient extends Entity {
 
     public void setWaitingForInitialExam(boolean waitingForInitialExam) {
         isWaitingForInitialExam = waitingForInitialExam;
+    }
+
+    public boolean isStatisticsFinalized() {
+        return statisticsFinalized;
     }
 }

@@ -41,6 +41,13 @@ public class ManagerBoss extends OSPABA.Manager {
         request(req);
     }
 
+    public void processPatientDeparture(MessageForm message) {
+        Message msg = (Message) message.createCopy();
+        msg.setCode(Mc.patientDeparture);
+        msg.setAddressee(mySim().findAgent(Id.agentEnvironment));
+        notice(msg);
+    }
+
     //meta! userInfo="Process messages defined in code", id="0"
     public void processDefault(MessageForm message) {
         switch (message.code()) {
@@ -60,6 +67,10 @@ public class ManagerBoss extends OSPABA.Manager {
 
             case Mc.handlePatient:
                 processHandlePatient(message);
+                break;
+
+            case Mc.patientDeparture:
+                processPatientDeparture(message);
                 break;
 
             default:
