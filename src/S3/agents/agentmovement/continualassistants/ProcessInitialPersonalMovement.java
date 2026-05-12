@@ -26,19 +26,8 @@ public class ProcessInitialPersonalMovement extends OSPABA.Process {
     //meta! sender="AgentMovement", id="106", type="Start"
     public void processStart(MessageForm message) {
         Message msg = (Message) message.createCopy();
-
-        EmerDepEmployee employee = msg.getDoctor() != null
-                ? msg.getDoctor()
-                : msg.getNurse();
-
-        if (employee == null) {
-            System.out.println("Error: No employee found for initial movement.");
-        }
-        employee.setBusy(true);
-
         double time = movementTime.generate();
         msg.setCode(Mc.finish);
-
         hold(time, msg);
     }
 

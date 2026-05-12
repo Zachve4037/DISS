@@ -6,6 +6,7 @@ import S3.RNGs.empirical.DiscreteEmpiricalDistRNG;
 import S3.RNGs.intervals.EmpiricInterval;
 import S3.RNGs.intervals.UniformInterval;
 import S3.RNGs.uniform.DiscreteUniformDistRNG;
+import S3.entities.Clinic;
 import S3.entities.EmerDepEmployee;
 import S3.entities.Patient;
 import S3.entities.PatientType;
@@ -64,6 +65,8 @@ public class ProcessInitialExamintation extends OSPABA.Process {
         Patient patient = msg.getPatient();
         EmerDepEmployee nurse = msg.getNurse();
         nurse.startWork(patient);
+        Clinic clinic = msg.getClinic();
+        clinic.setOccupied(true);
 
         double examinationTime = (patient.getType() == PatientType.AMBULANCE)
                 ? examinationTimeSanitka.generate()

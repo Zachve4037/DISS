@@ -7,36 +7,43 @@ import S3.simulation.*;
 
 import java.util.Comparator;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
 //meta! id="62"
 public class AgentPatients extends OSPABA.Agent {
 
-    //patients queues
     private Queue<Patient> initialExaminationQueue;
+
     private Queue<Patient> doctorsExaminationQueueA;
     private Queue<Patient> doctorsExaminationQueueB;
+
     private Comparator<Patient> initialQueueComparator;
+    private Comparator<Patient> doctorQueueComparator;
 
     public AgentPatients(int id, Simulation mySim, Agent parent) {
         super(id, mySim, parent);
         init();
-        this.initialQueueComparator = Comparator
-                .comparingInt((Patient p) -> p.getType() == PatientType.AMBULANCE ? 0 : 1)
-                .thenComparingDouble(Patient::getArrivalTime)
-                .thenComparingInt(Patient::getId);
-        initialExaminationQueue = new PriorityBlockingQueue<>(1, initialQueueComparator);
-        doctorsExaminationQueueA = new ConcurrentLinkedQueue<>();
-        doctorsExaminationQueueB = new ConcurrentLinkedQueue<>();
+        this.initialQueueComparator = Comparator.comparingInt(
+                (Patient p) -> p.getType() == PatientType.AMBULANCE ? 0 : 1).
+                thenComparingDouble(Patient::getArrivalTime).
+                thenComparingInt(Patient::getId);
+        this.doctorQueueComparator = Comparator.comparingInt(Patient::getPriority).
+                thenComparingDouble(Patient::getArrivalTime).
+                thenComparingInt(Patient::getId);
+        initialExaminationQueue = new PriorityBlockingQueue<>(11, initialQueueComparator);
+        doctorsExaminationQueueA = new PriorityBlockingQueue<>(11, doctorQueueComparator);
+        doctorsExaminationQueueB = new PriorityBlockingQueue<>(11, doctorQueueComparator);
+    }
+
+    public Queue<Patient> getDoctorsExaminationQueues() {
+        Queue<Patient> combinedQueue = new PriorityBlockingQueue<>(11, doctorQueueComparator);
+        combinedQueue.addAll(doctorsExaminationQueueA);
+        combinedQueue.addAll(doctorsExaminationQueueB);
+        return combinedQueue;
     }
 
     public Queue<Patient> getInitialExaminationQueue() {
         return initialExaminationQueue;
-    }
-
-    public Queue<Patient> getDoctorsExaminationQueues() {
-        return doctorsExaminationQueueA.addAll(doctorsExaminationQueueB) ? doctorsExaminationQueueA : doctorsExaminationQueueB;
     }
 
     public Queue<Patient> getDoctorsExaminationQueueA() {
@@ -50,10 +57,9 @@ public class AgentPatients extends OSPABA.Agent {
     @Override
     public void prepareReplication() {
         super.prepareReplication();
-        this.doctorsExaminationQueueA.clear();
-        this.doctorsExaminationQueueB.clear();
-        this.initialExaminationQueue = new PriorityBlockingQueue<>(11, initialQueueComparator);
-        // Setup component for the next replication
+        initialExaminationQueue = new PriorityBlockingQueue<>(11, initialQueueComparator);
+        doctorsExaminationQueueA = new PriorityBlockingQueue<>(11, doctorQueueComparator);
+        doctorsExaminationQueueB = new PriorityBlockingQueue<>(11, doctorQueueComparator);
     }
 
     //meta! userInfo="Generated code: do not modify", tag="begin"

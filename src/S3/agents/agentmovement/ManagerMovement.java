@@ -68,7 +68,6 @@ public class ManagerMovement extends OSPABA.Manager {
     public void processFinishProcessDoctorsMovement(MessageForm message) {
         message.setCode(Mc.handleDoctorsMovement);
         EmerDepEmployee doctor = ((Message)message).getDoctor();
-        doctor.setBusy(false);
         response(message);
     }
 
@@ -83,8 +82,6 @@ public class ManagerMovement extends OSPABA.Manager {
     //meta! sender="ProcessNursesMovement", id="92", type="Finish"
     public void processFinishProcessNursesMovement(MessageForm message) {
         message.setCode(Mc.handleNursesMovement);
-        EmerDepEmployee nurse = ((Message)message).getNurse();
-        nurse.setBusy(false);
         response(message);
     }
 
@@ -103,9 +100,9 @@ public class ManagerMovement extends OSPABA.Manager {
     //meta! sender="ProcessInitialPersonalMovement", id="106", type="Finish"
     public void processFinishProcessInitialPersonalMovement(MessageForm message) {
         message.setCode(Mc.handleInitialPersonalMovement);
-        EmerDepEmployee employee = ((Message)message).getDoctor() != null
-                ? ((Message)message).getDoctor()
-                : ((Message)message).getNurse();
+        EmerDepEmployee employee = ((Message) message).getDoctor() != null
+                ? ((Message) message).getDoctor()
+                : ((Message) message).getNurse();
         employee.setBusy(false);
         response(message);
     }

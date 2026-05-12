@@ -9,7 +9,7 @@ public class EmerDepEmployee extends Entity {
 
     private Patient currentPatient;
     private Clinic currentClinic;
-    private boolean busy;
+    private volatile boolean busy;
     private double workTime;
     private double workStartTime;
     private double totalWorkTime;
@@ -37,7 +37,6 @@ public class EmerDepEmployee extends Entity {
     public void startWork(Patient patient) {
         this.workStartTime = mySim().currentTime();
         this.currentPatient = patient;
-        this.busy = true;
 
         if (patient != null) {
             patient.startService();

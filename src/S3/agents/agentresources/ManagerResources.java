@@ -80,12 +80,12 @@ public class ManagerResources extends OSPABA.Manager {
             msg.setNurse(null);
             msg.setClinic(null);
         } else {
-            doctor.setBusy(true);
             msg.setDoctor(doctor);
-            nurse.setBusy(true);
             msg.setNurse(nurse);
-            clinic.setOccupied(true);
             msg.setClinic(clinic);
+            doctor.setBusy(true);
+            nurse.setBusy(true);
+            clinic.setOccupied(true);
         }
         response(msg);
     }
@@ -97,6 +97,11 @@ public class ManagerResources extends OSPABA.Manager {
         Clinic c = msg.getClinic();
         EmerDepEmployee d = msg.getDoctor();
         EmerDepEmployee n = msg.getNurse();
+
+        System.out.println(
+                "END WORK nurse: " +
+                        (n != null ? n.getId() : "NULL")
+        );
 
         if (c != null) {
             int id = c.getId();

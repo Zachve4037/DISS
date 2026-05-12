@@ -44,6 +44,7 @@ public class ProcessDoctorsExamination extends OSPABA.Process {
                 ? examinationTimeSanitka.generate()
                 : examinationTimePeso.generate();
         msg.setCode(Mc.finish);
+
         hold(time * 60, msg);
     }
 

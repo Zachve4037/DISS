@@ -38,6 +38,7 @@ public class ManagerEnvironment extends OSPABA.Manager {
 
     //meta! sender="AgentBoss", id="32", type="Notice"
     public void processPatientDeparture(MessageForm message) {
+        //TODO ked pacient odchadza zo systemu, iba mu ukoncit statistiky a vymazat pacienta
     }
 
     //meta! userInfo="Process messages defined in code", id="0"
