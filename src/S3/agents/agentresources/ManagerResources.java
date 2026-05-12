@@ -98,11 +98,6 @@ public class ManagerResources extends OSPABA.Manager {
         EmerDepEmployee d = msg.getDoctor();
         EmerDepEmployee n = msg.getNurse();
 
-        System.out.println(
-                "END WORK nurse: " +
-                        (n != null ? n.getId() : "NULL")
-        );
-
         if (c != null) {
             int id = c.getId();
             if (id >= 0 && id < myAgent().getClinics().size()) {
