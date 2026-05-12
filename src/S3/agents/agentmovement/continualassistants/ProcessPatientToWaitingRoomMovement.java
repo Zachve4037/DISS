@@ -32,6 +32,10 @@ public class ProcessPatientToWaitingRoomMovement extends OSPABA.Process {
         Message msg = (Message) message.createCopy();
         Patient patient = msg.getPatient();
 
+        if (patient == null) {
+            System.out.println("Error: No patient found for movement to waiting room.");
+        }
+
         double time = (patient.getType() == PatientType.AMBULANCE)
                 ? movementTimeSanitka.generate()
                 : movementTimePeso.generate();

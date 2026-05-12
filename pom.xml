@@ -15,6 +15,11 @@
             <artifactId>jfreechart</artifactId>
             <version>1.5.4</version>
         </dependency>
+        <dependency>
+            <groupId>cz.abacore</groupId>
+            <artifactId>abacore</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 
     <build>

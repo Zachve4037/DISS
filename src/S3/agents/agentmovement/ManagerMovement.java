@@ -2,6 +2,7 @@ package S3.agents.agentmovement;
 
 import OSPABA.*;
 import S3.entities.EmerDepEmployee;
+import S3.entities.Patient;
 import S3.simulation.*;
 
 //meta! id="63"
@@ -29,18 +30,26 @@ public class ManagerMovement extends OSPABA.Manager {
 
     //meta! sender="AgentHospital", id="72", type="Request"
     public void processHandeDoctorsMovement(MessageForm message) {
+        message.setAddressee(myAgent().findAssistant(Id.processDoctorsMovement));
+        startContinualAssistant(message);
     }
 
     //meta! sender="AgentHospital", id="75", type="Request"
     public void processHandleLeavingPatient(MessageForm message) {
+        message.setAddressee(myAgent().findAssistant(Id.processPatientLeavingMovement));
+        startContinualAssistant(message);
     }
 
     //meta! sender="AgentHospital", id="73", type="Request"
     public void processHandleNursesMovement(MessageForm message) {
+        message.setAddressee(myAgent().findAssistant(Id.processNursesMovement));
+        startContinualAssistant(message);
     }
 
     //meta! sender="AgentHospital", id="76", type="Request"
     public void processHandlePatientToClinic(MessageForm message) {
+        message.setAddressee(myAgent().findAssistant(Id.processPatientToClinicMovement));
+        startContinualAssistant(message);
     }
 
     //meta! userInfo="Process messages defined in code", id="0"
@@ -57,18 +66,32 @@ public class ManagerMovement extends OSPABA.Manager {
 
     //meta! sender="ProcessDoctorsMovement", id="90", type="Finish"
     public void processFinishProcessDoctorsMovement(MessageForm message) {
+        message.setCode(Mc.handeDoctorsMovement);
+        EmerDepEmployee doctor = ((Message)message).getDoctor();
+        doctor.setBusy(false);
+        response(message);
     }
 
     //meta! sender="ProcessPatientToClinicMovement", id="98", type="Finish"
     public void processFinishProcessPatientToClinicMovement(MessageForm message) {
+        message.setCode(Mc.handlePatientToClinic);
+        Patient patient = ((Message) message).getPatient();
+        patient.endWaiting();
+        response(message);
     }
 
     //meta! sender="ProcessNursesMovement", id="92", type="Finish"
     public void processFinishProcessNursesMovement(MessageForm message) {
+        message.setCode(Mc.handleNursesMovement);
+        EmerDepEmployee nurse = ((Message)message).getNurse();
+        nurse.setBusy(false);
+        response(message);
     }
 
     //meta! sender="ProcessPatientLeavingMovement", id="96", type="Finish"
     public void processFinishProcessPatientLeavingMovement(MessageForm message) {
+        message.setCode(Mc.handleLeavingPatient);
+        response(message);
     }
 
     //meta! sender="AgentHospital", id="109", type="Request"
