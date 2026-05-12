@@ -27,6 +27,12 @@ public class ManagerPatients extends OSPABA.Manager {
 
     //meta! sender="AgentHospital", id="78", type="Request"
     public void processGetPatientForInitialExamination(MessageForm message) {
+        Message msg = (Message) message.createCopy();
+        if (!myAgent().getInitialExaminationQueue().isEmpty()) {
+            Patient patient = myAgent().getInitialExaminationQueue().poll();
+            msg.setPatient(patient);
+            response(msg);
+        }
     }
 
     //meta! userInfo="Process messages defined in code", id="0"

@@ -35,7 +35,7 @@ public class ManagerResources extends OSPABA.Manager {
         Clinic clinic = myAgent().getClinics().stream().filter(
                 c -> !c.isOccupied() && c.getType() == ClinicType.B
         ).findFirst().orElse(null);
-        setResponseMessage(message, msg, doctor, nurse, clinic);
+        setResponseMessage(msg, doctor, nurse, clinic);
     }
 
     //meta! sender="AgentHospital", id="69", type="Request"
@@ -56,7 +56,7 @@ public class ManagerResources extends OSPABA.Manager {
             clinic.setOccupied(true);
             msg.setClinic(clinic);
         }
-        response(message);
+        response(msg);
     }
 
     //meta! sender="AgentHospital", id="70", type="Request"
@@ -71,10 +71,10 @@ public class ManagerResources extends OSPABA.Manager {
         Clinic clinic = myAgent().getClinics().stream().filter(
                 c -> !c.isOccupied() && c.getType() == ClinicType.A
         ).findFirst().orElse(null);
-        setResponseMessage(message, msg, doctor, nurse, clinic);
+        setResponseMessage(msg, doctor, nurse, clinic);
     }
 
-    private void setResponseMessage(MessageForm message, Message msg, EmerDepEmployee doctor, EmerDepEmployee nurse, Clinic clinic) {
+    private void setResponseMessage(Message msg, EmerDepEmployee doctor, EmerDepEmployee nurse, Clinic clinic) {
         if (doctor == null || nurse == null || clinic == null) {
             msg.setDoctor(null);
             msg.setNurse(null);
@@ -87,20 +87,40 @@ public class ManagerResources extends OSPABA.Manager {
             clinic.setOccupied(true);
             msg.setClinic(clinic);
         }
-        response(message);
+        response(msg);
     }
 
+    //TODO ak to bude fungovat tak prehodit naspat na priame volanie do pola a zmazat vypisy
     public void processReleaseResources(MessageForm message) {
-        Message msg = (Message) message.createCopy();
-        msg.setCode(Mc.releaseResources);
-        if (msg.getClinic() != null) {
-            myAgent().getClinics().get(msg.getClinic().getId()).setOccupied(false);
+        Message msg = (Message) message;
+
+        Clinic c = msg.getClinic();
+        EmerDepEmployee d = msg.getDoctor();
+        EmerDepEmployee n = msg.getNurse();
+
+        if (c != null) {
+            int id = c.getId();
+            if (id >= 0 && id < myAgent().getClinics().size()) {
+                myAgent().getClinics().get(id).setOccupied(false);
+            } else {
+                System.err.println("[ManagerResources] Warning: clinic id out of bounds: " + id);
+            }
         }
-        if (msg.getDoctor() != null) {
-            myAgent().getDoctors().get(msg.getDoctor().getId()).setBusy(false);
+        if (d != null) {
+            int id = d.getId();
+            if (id >= 0 && id < myAgent().getDoctors().size()) {
+                myAgent().getDoctors().get(id).setBusy(false);
+            } else {
+                System.err.println("[ManagerResources] Warning: doctor id out of bounds: " + id);
+            }
         }
-        if (msg.getNurse() != null) {
-            myAgent().getNurses().get(msg.getNurse().getId()).setBusy(false);
+        if (n != null) {
+            int id = n.getId();
+            if (id >= 0 && id < myAgent().getNurses().size()) {
+                myAgent().getNurses().get(id).setBusy(false);
+            } else {
+                System.err.println("[ManagerResources] Warning: nurse id out of bounds: " + id);
+            }
         }
     }
 
