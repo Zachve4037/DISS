@@ -6,6 +6,7 @@ import S3.entities.Clinic;
 import S3.entities.ClinicType;
 import S3.entities.EmerDepEmployee;
 import S3.entities.Patient;
+import S3.entities.PatientType;
 import S3.simulation.*;
 
 //meta! id="4"
@@ -126,7 +127,11 @@ public class ManagerHospital extends OSPABA.Manager {
             ((EmergencyDepartmentSimulation) mySim()).edAnimator().employeeIdle(nurse);
         }
 
-        releaseClinicNow(msg);
+        if (sim.isAmbulanceCleanupBlockEnabled() && patient.getType() == PatientType.AMBULANCE) {
+            blockClinicForCleanup(msg);
+        } else {
+            releaseClinicNow(msg);
+        }
 
         // After doctor examination the patient still has to leave the department physically.
         Message leavingMsg = (Message) msg.createCopy();
@@ -330,6 +335,7 @@ public class ManagerHospital extends OSPABA.Manager {
     private void releaseClinicNow(Message msg) {
         if (msg != null && msg.getClinic() != null) {
             msg.getClinic().setOccupied(false);
+            msg.getClinic().setOverflowActive(false);
             ((EmergencyDepartmentSimulation) mySim()).edAnimator().clinicOccupied(msg.getClinic(), false);
         }
     }
@@ -414,15 +420,14 @@ public class ManagerHospital extends OSPABA.Manager {
         }
 
         if (startedDoctor) {
+            if (canStartOverflowInitialPatientNow()) {
+                requestInitialPatient(true);
+            }
             return;
         }
 
         if (canStartInitialPatientNow()) {
-            initialPatientRequestPending = true;
-            Message req = new Message(mySim());
-            req.setCode(Mc.getPatientForInitialExamination);
-            req.setAddressee(mySim().findAgent(Id.agentPatients));
-            request(req);
+            requestInitialPatient(false);
         }
     }
 
@@ -431,6 +436,15 @@ public class ManagerHospital extends OSPABA.Manager {
         Message req = new Message(mySim());
         req.setRequestedClinicType(clinicType);
         req.setCode(Mc.getPatientForDoctorsExamination);
+        req.setAddressee(mySim().findAgent(Id.agentPatients));
+        request(req);
+    }
+
+    private void requestInitialPatient(boolean overflowRequest) {
+        initialPatientRequestPending = true;
+        Message req = new Message(mySim());
+        req.setOverflowInitialRequest(overflowRequest);
+        req.setCode(Mc.getPatientForInitialExamination);
         req.setAddressee(mySim().findAgent(Id.agentPatients));
         request(req);
     }
@@ -445,7 +459,7 @@ public class ManagerHospital extends OSPABA.Manager {
     private boolean canTryDoctorBranch(ClinicType clinicType) {
         EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
         return freeDoctorNursePairs() > 0
-                && hasFreeClinic(clinicType)
+                && hasFreeDoctorClinicForQueuedPatient(clinicType)
                 && sim.agentPatients().hasDoctorPatientFor(clinicType);
     }
 
@@ -453,7 +467,16 @@ public class ManagerHospital extends OSPABA.Manager {
         EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
         return sim.agentPatients().hasInitialPatients()
                 && hasFreeNurse()
-                && hasFreeClinic(ClinicType.B);
+                && sim.agentResources().firstFreeInitialClinic(false) != null;
+    }
+
+    private boolean canStartOverflowInitialPatientNow() {
+        EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+        return sim.isDynamicInitialOverflowEnabled()
+                && sim.agentPatients().getInitialExaminationQueue().size() > sim.getDynamicInitialOverflowThreshold()
+                && sim.agentPatients().hasInitialPatients()
+                && hasFreeNurse()
+                && sim.agentResources().firstFreeInitialClinic(true) != null;
     }
 
     private int freeDoctorNursePairs() {
@@ -470,10 +493,14 @@ public class ManagerHospital extends OSPABA.Manager {
         return sim.agentResources().getNurses().stream().anyMatch(n -> !n.isBusy());
     }
 
-    private boolean hasFreeClinic(ClinicType clinicType) {
+    private boolean hasFreeDoctorClinicForQueuedPatient(ClinicType clinicType) {
         EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
-        return sim.agentResources().getClinics().stream()
-                .anyMatch(c -> !c.isOccupied() && c.getType() == clinicType);
+        for (Patient patient : sim.agentPatients().getDoctorsExaminationQueue()) {
+            if (sim.agentResources().firstFreeDoctorClinic(patient, clinicType) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void scheduleDispatch() {
@@ -485,6 +512,37 @@ public class ManagerHospital extends OSPABA.Manager {
         retry.setCode(Mc.tryStartDoctorsExamination);
         retry.setAddressee(myAgent());
         notice(retry);
+    }
+
+    private void blockClinicForCleanup(Message msg) {
+        if (msg == null || msg.getClinic() == null) {
+            return;
+        }
+
+        Clinic clinic = msg.getClinic();
+        clinic.setOccupied(false);
+        clinic.setOverflowActive(false);
+        clinic.setBlocked(true);
+        ((EmergencyDepartmentSimulation) mySim()).edAnimator().clinicBlocked(clinic, true);
+
+        Message blockMsg = (Message) msg.createCopy();
+        blockMsg.setDoctor(null);
+        blockMsg.setNurse(null);
+        blockMsg.setPatient(null);
+        blockMsg.setCode(Mc.start);
+        blockMsg.setAddressee(myAgent().findAssistant(Id.processClinicCleanupBlock));
+        startContinualAssistant(blockMsg);
+    }
+
+    private void processFinishClinicCleanupBlock(MessageForm message) {
+        Message msg = (Message) message.createCopy();
+        Clinic clinic = msg.getClinic();
+        if (clinic != null) {
+            clinic.setBlocked(false);
+            clinic.setOverflowActive(false);
+            ((EmergencyDepartmentSimulation) mySim()).edAnimator().clinicBlocked(clinic, false);
+        }
+        scheduleDispatch();
     }
 
     //meta! userInfo="Generated code: do not modify", tag="begin"
@@ -502,6 +560,10 @@ public class ManagerHospital extends OSPABA.Manager {
 
                     case Id.processInitialExamintation:
                         processFinishProcessInitialExamintation(message);
+                        break;
+
+                    case Id.processClinicCleanupBlock:
+                        processFinishClinicCleanupBlock(message);
                         break;
                 }
                 break;

@@ -1,5 +1,7 @@
 package S3.simulation;
 
+import S2.Statistics.ArithmeticalStatistic;
+import S2.Statistics.ConfidenceIntervalStatistic;
 import S3.animation.EmergencyDepartmentAnimator;
 import S3.agents.agentboss.AgentBoss;
 import S3.agents.agentenvironment.AgentEnvironment;
@@ -16,6 +18,12 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
     public EmergencyDepartmentAnimator edAnimator() {
         return edAnimator;
     }
+
+    private boolean ambulanceCleanupBlockEnabled;
+    private boolean reserveInitialClinicsEnabled;
+    private boolean reservePriority12ClinicEnabled;
+    private boolean dynamicInitialOverflowEnabled;
+    private int dynamicInitialOverflowThreshold = 10;
 
     // simulation-level statistics
     private long simulationArrivals;
@@ -49,8 +57,28 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
     private long replicationDoctorWaitWalkInCount;
     private long replicationSystemTimeCount;
 
+    private ArithmeticalStatistic simulationArrivalsMean;
+    private ArithmeticalStatistic simulationDeparturesMean;
+    private ArithmeticalStatistic simulationAmbulanceArrivalsMean;
+    private ArithmeticalStatistic simulationWalkInArrivalsMean;
+    private ArithmeticalStatistic simulationInitialWaitMean;
+    private ArithmeticalStatistic simulationDoctorWaitAmbulanceMean;
+    private ArithmeticalStatistic simulationDoctorWaitWalkInMean;
+    private ArithmeticalStatistic simulationSystemTimeMean;
+
+    private ConfidenceIntervalStatistic simulationArrivalsCi;
+    private ConfidenceIntervalStatistic simulationDeparturesCi;
+    private ConfidenceIntervalStatistic simulationAmbulanceArrivalsCi;
+    private ConfidenceIntervalStatistic simulationWalkInArrivalsCi;
+    private ConfidenceIntervalStatistic simulationInitialWaitCi;
+    private ConfidenceIntervalStatistic simulationDoctorWaitAmbulanceCi;
+    private ConfidenceIntervalStatistic simulationDoctorWaitWalkInCi;
+    private ConfidenceIntervalStatistic simulationSystemTimeCi;
+
     public EmergencyDepartmentSimulation() {
         init();
+        resetSimulationStatistics();
+        resetReplicationStatistics();
     }
 
     public void recordArrival(Patient patient) {
@@ -125,6 +153,24 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         simulationDoctorWaitAmbulanceCount = 0;
         simulationDoctorWaitWalkInCount = 0;
         simulationSystemTimeCount = 0;
+
+        simulationArrivalsMean = new ArithmeticalStatistic();
+        simulationDeparturesMean = new ArithmeticalStatistic();
+        simulationAmbulanceArrivalsMean = new ArithmeticalStatistic();
+        simulationWalkInArrivalsMean = new ArithmeticalStatistic();
+        simulationInitialWaitMean = new ArithmeticalStatistic();
+        simulationDoctorWaitAmbulanceMean = new ArithmeticalStatistic();
+        simulationDoctorWaitWalkInMean = new ArithmeticalStatistic();
+        simulationSystemTimeMean = new ArithmeticalStatistic();
+
+        simulationArrivalsCi = new ConfidenceIntervalStatistic();
+        simulationDeparturesCi = new ConfidenceIntervalStatistic();
+        simulationAmbulanceArrivalsCi = new ConfidenceIntervalStatistic();
+        simulationWalkInArrivalsCi = new ConfidenceIntervalStatistic();
+        simulationInitialWaitCi = new ConfidenceIntervalStatistic();
+        simulationDoctorWaitAmbulanceCi = new ConfidenceIntervalStatistic();
+        simulationDoctorWaitWalkInCi = new ConfidenceIntervalStatistic();
+        simulationSystemTimeCi = new ConfidenceIntervalStatistic();
     }
 
     public void resetReplicationStatistics() {
@@ -181,6 +227,70 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         return avg(simulationSystemTimeSum, simulationSystemTimeCount);
     }
 
+    public double getSimulationMeanArrivalsPerReplication() {
+        return simulationArrivalsMean.getValue();
+    }
+
+    public double getSimulationArrivalsCiHalfWidth() {
+        return simulationArrivalsCi.getValue();
+    }
+
+    public double getSimulationMeanDeparturesPerReplication() {
+        return simulationDeparturesMean.getValue();
+    }
+
+    public double getSimulationDeparturesCiHalfWidth() {
+        return simulationDeparturesCi.getValue();
+    }
+
+    public double getSimulationMeanAmbulanceArrivalsPerReplication() {
+        return simulationAmbulanceArrivalsMean.getValue();
+    }
+
+    public double getSimulationAmbulanceArrivalsCiHalfWidth() {
+        return simulationAmbulanceArrivalsCi.getValue();
+    }
+
+    public double getSimulationMeanWalkInArrivalsPerReplication() {
+        return simulationWalkInArrivalsMean.getValue();
+    }
+
+    public double getSimulationWalkInArrivalsCiHalfWidth() {
+        return simulationWalkInArrivalsCi.getValue();
+    }
+
+    public double getSimulationMeanInitialExamWait() {
+        return simulationInitialWaitMean.getValue();
+    }
+
+    public double getSimulationInitialExamWaitCiHalfWidth() {
+        return simulationInitialWaitCi.getValue();
+    }
+
+    public double getSimulationMeanDoctorWaitAmbulance() {
+        return simulationDoctorWaitAmbulanceMean.getValue();
+    }
+
+    public double getSimulationDoctorWaitAmbulanceCiHalfWidth() {
+        return simulationDoctorWaitAmbulanceCi.getValue();
+    }
+
+    public double getSimulationMeanDoctorWaitWalkIn() {
+        return simulationDoctorWaitWalkInMean.getValue();
+    }
+
+    public double getSimulationDoctorWaitWalkInCiHalfWidth() {
+        return simulationDoctorWaitWalkInCi.getValue();
+    }
+
+    public double getSimulationMeanSystemTime() {
+        return simulationSystemTimeMean.getValue();
+    }
+
+    public double getSimulationSystemTimeCiHalfWidth() {
+        return simulationSystemTimeCi.getValue();
+    }
+
     // replication getters
     public long getReplicationArrivals() {
         return replicationArrivals;
@@ -218,6 +328,48 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         agentResources().setNumberOfPersonal(doctorsCount, nursesCount);
     }
 
+    public void setExperimentSettings(
+            boolean ambulanceCleanupBlockEnabled,
+            boolean reserveInitialClinicsEnabled,
+            boolean reservePriority12ClinicEnabled,
+            boolean dynamicInitialOverflowEnabled,
+            int dynamicInitialOverflowThreshold
+    ) {
+        this.ambulanceCleanupBlockEnabled = ambulanceCleanupBlockEnabled;
+        this.reserveInitialClinicsEnabled = reserveInitialClinicsEnabled;
+        this.reservePriority12ClinicEnabled = reservePriority12ClinicEnabled;
+        this.dynamicInitialOverflowEnabled = dynamicInitialOverflowEnabled;
+        this.dynamicInitialOverflowThreshold = Math.max(1, dynamicInitialOverflowThreshold);
+    }
+
+    public boolean isAmbulanceCleanupBlockEnabled() {
+        return ambulanceCleanupBlockEnabled;
+    }
+
+    public boolean isReserveInitialClinicsEnabled() {
+        return reserveInitialClinicsEnabled;
+    }
+
+    public boolean isReservePriority12ClinicEnabled() {
+        return reservePriority12ClinicEnabled;
+    }
+
+    public boolean isDynamicInitialOverflowEnabled() {
+        return dynamicInitialOverflowEnabled;
+    }
+
+    public int getDynamicInitialOverflowThreshold() {
+        return dynamicInitialOverflowThreshold;
+    }
+
+    public int getDoctorsCount() {
+        return agentResources().getDoctors().size();
+    }
+
+    public int getNursesCount() {
+        return agentResources().getNurses().size();
+    }
+
     @Override
     public void prepareSimulation() {
         super.prepareSimulation();
@@ -238,7 +390,7 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
 
     @Override
     public void replicationFinished() {
-        // Collect local statistics into global, update UI, etc...
+        collectReplicationStatistics();
         super.replicationFinished();
     }
 
@@ -246,6 +398,22 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
     public void simulationFinished() {
         // Display simulation results
         super.simulationFinished();
+    }
+
+    private void collectReplicationStatistics() {
+        addReplicationValue(simulationArrivalsMean, simulationArrivalsCi, replicationArrivals);
+        addReplicationValue(simulationDeparturesMean, simulationDeparturesCi, replicationDepartures);
+        addReplicationValue(simulationAmbulanceArrivalsMean, simulationAmbulanceArrivalsCi, replicationAmbulanceArrivals);
+        addReplicationValue(simulationWalkInArrivalsMean, simulationWalkInArrivalsCi, replicationWalkInArrivals);
+        addReplicationValue(simulationInitialWaitMean, simulationInitialWaitCi, getReplicationAverageInitialExamWait());
+        addReplicationValue(simulationDoctorWaitAmbulanceMean, simulationDoctorWaitAmbulanceCi, getReplicationAverageDoctorWaitAmbulance());
+        addReplicationValue(simulationDoctorWaitWalkInMean, simulationDoctorWaitWalkInCi, getReplicationAverageDoctorWaitWalkIn());
+        addReplicationValue(simulationSystemTimeMean, simulationSystemTimeCi, getReplicationAverageSystemTime());
+    }
+
+    private void addReplicationValue(ArithmeticalStatistic mean, ConfidenceIntervalStatistic ci, double value) {
+        mean.addValue(value, 1);
+        ci.addValue(value, 1);
     }
 
     //meta! userInfo="Generated code: do not modify", tag="begin"

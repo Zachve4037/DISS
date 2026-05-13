@@ -27,6 +27,12 @@ public class GUI_EmergencyDepartment {
 
     private final JComboBox<Integer> doctorsCountCombo;
     private final JComboBox<Integer> nursesCountCombo;
+    private final JComboBox<String> staffingScenarioCombo;
+    private final JCheckBox ambulanceCleanupBlockCheckBox;
+    private final JCheckBox reserveInitialClinicsCheckBox;
+    private final JCheckBox reservePriority12ClinicCheckBox;
+    private final JCheckBox dynamicInitialOverflowCheckBox;
+    private final JSpinner overflowThresholdSpinner;
     private final JButton startSimButton;
     private final JButton stopSimButton;
 
@@ -134,6 +140,12 @@ public class GUI_EmergencyDepartment {
         JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
         doctorsCountCombo = new JComboBox<>(new Integer[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12});
         nursesCountCombo = new JComboBox<>(new Integer[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12});
+        staffingScenarioCombo = new JComboBox<>(new String[]{
+                "Default GUI values",
+                "6 doctors / 6 nurses",
+                "6 doctors / 8 nurses",
+                "6 doctors / 10 nurses"
+        });
         startSimButton = new JButton("Start Simulation");
         stopSimButton = new JButton("Stop");
         stopSimButton.setEnabled(false);
@@ -143,6 +155,9 @@ public class GUI_EmergencyDepartment {
         row1.add(Box.createHorizontalStrut(12));
         row1.add(new JLabel("Nurses count:"));
         row1.add(nursesCountCombo);
+        row1.add(Box.createHorizontalStrut(12));
+        row1.add(new JLabel("Staffing scenario:"));
+        row1.add(staffingScenarioCombo);
         row1.add(Box.createHorizontalStrut(12));
         row1.add(startSimButton);
         row1.add(stopSimButton);
@@ -168,8 +183,27 @@ public class GUI_EmergencyDepartment {
         row2.add(Box.createHorizontalStrut(12));
         row2.add(replicationsLabel);
 
+        JPanel row3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        row3.setBorder(BorderFactory.createTitledBorder("Experiments"));
+        ambulanceCleanupBlockCheckBox = new JCheckBox("Ambulance cleanup block");
+        reserveInitialClinicsCheckBox = new JCheckBox("Reserve 2 clinics for initial exam");
+        reservePriority12ClinicCheckBox = new JCheckBox("Reserve 1 A clinic for priority 1-2");
+        dynamicInitialOverflowCheckBox = new JCheckBox("Dynamic initial overflow");
+        overflowThresholdSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 500, 1));
+
+        row3.add(ambulanceCleanupBlockCheckBox);
+        row3.add(Box.createHorizontalStrut(8));
+        row3.add(reserveInitialClinicsCheckBox);
+        row3.add(Box.createHorizontalStrut(8));
+        row3.add(reservePriority12ClinicCheckBox);
+        row3.add(Box.createHorizontalStrut(8));
+        row3.add(dynamicInitialOverflowCheckBox);
+        row3.add(new JLabel("Threshold:"));
+        row3.add(overflowThresholdSpinner);
+
         controls.add(row1);
         controls.add(row2);
+        controls.add(row3);
 
         simulationTab.add(controls, BorderLayout.NORTH);
         JPanel lower = new JPanel(new GridLayout(1, 3, 10, 10));
@@ -220,6 +254,9 @@ public class GUI_EmergencyDepartment {
     }
 
     private void initListeners() {
+        staffingScenarioCombo.addActionListener(e -> updateStaffingControls());
+        updateStaffingControls();
+
         maxSpeedCheckBox.addActionListener(e -> {
             boolean max = maxSpeedCheckBox.isSelected();
             timeScaleSlider.setEnabled(!max);
@@ -235,6 +272,21 @@ public class GUI_EmergencyDepartment {
 
             lastReplicationDay = -1;
             simulation = new EmergencyDepartmentSimulation();
+            int doctorsCount = getEffectiveDoctorsCount();
+            int nursesCount = getEffectiveNursesCount();
+            boolean cleanupBlock = isAmbulanceCleanupBlockEnabled();
+            boolean reserveInitial = isReserveInitialClinicsEnabled();
+            boolean reservePriority12 = isReservePriority12ClinicEnabled();
+            boolean dynamicOverflow = isDynamicInitialOverflowEnabled();
+            int overflowThreshold = getOverflowThreshold();
+
+            simulation.setExperimentSettings(
+                    cleanupBlock,
+                    reserveInitial,
+                    reservePriority12,
+                    dynamicOverflow,
+                    overflowThreshold
+            );
             if (!isMaxSpeed()) {
                 simulation.createAnimator();
                 if (simulation.animator() instanceof Animator) {
@@ -243,11 +295,12 @@ public class GUI_EmergencyDepartment {
             }
             installAnimatorCanvas(simulation);
             bindSimulation(simulation);
-            simulation.setParameters(getDoctorsCount(), getNursesCount());
+            simulation.setParameters(doctorsCount, nursesCount);
             changeSimSpeed();
 
-            System.out.printf("[GUI] params: doctors=%d, nurses=%d, speed=%d, maxSpeed=%s%n",
-                    getDoctorsCount(), getNursesCount(), getSpeedFactor(), isMaxSpeed());
+            System.out.printf("[GUI] params: doctors=%d, nurses=%d, speed=%d, maxSpeed=%s, cleanup=%s, initialOnly=%s, p12Only=%s, overflow=%s(threshold=%d)%n",
+                    doctorsCount, nursesCount, getSpeedFactor(), isMaxSpeed(),
+                    cleanupBlock, reserveInitial, reservePriority12, dynamicOverflow, overflowThreshold);
 
             startSimButton.setEnabled(false);
             stopSimButton.setEnabled(true);
@@ -255,7 +308,7 @@ public class GUI_EmergencyDepartment {
             workerThread = new Thread(() -> {
                 try {
                     System.out.println("[SIM] Worker thread started");
-                    simulation.setParameters(getDoctorsCount(), getNursesCount());
+                    simulation.setParameters(doctorsCount, nursesCount);
                     simulation.simulate(1000, 8 * 24 * 3600);
                     System.out.println("[SIM] Simulation call finished");
                 } catch (Throwable t) {
@@ -411,9 +464,6 @@ public class GUI_EmergencyDepartment {
         simulationStatsModel.setRowCount(0);
         replicationStatsModel.setRowCount(0);
 
-        long entered = simulation.getSimulationArrivals();
-        long departed = simulation.getSimulationDepartures();
-
         long inSystem = Math.max(simulation.getReplicationArrivals() - simulation.getReplicationDepartures(), 0);
 
         replicationStatsModel.addRow(new Object[]{"--- CURRENT STATE ---", ""});
@@ -423,14 +473,14 @@ public class GUI_EmergencyDepartment {
         replicationStatsModel.addRow(new Object[]{"Busy employees", safeNum(busyEmployees)});
 
         simulationStatsModel.addRow(new Object[]{"--- SIMULATION STATS ---", ""});
-        simulationStatsModel.addRow(new Object[]{"Patients entered system", safeNum(entered)});
-        simulationStatsModel.addRow(new Object[]{"Patients departed", safeNum(departed)});
-        simulationStatsModel.addRow(new Object[]{"Ambulance arrivals", safeNum(simulation.getSimulationAmbulanceArrivals())});
-        simulationStatsModel.addRow(new Object[]{"Walk-in arrivals", safeNum(simulation.getSimulationWalkInArrivals())});
-        simulationStatsModel.addRow(new Object[]{"Avg waiting time initial exam (s)", formatDouble(simulation.getSimulationAverageInitialExamWait())});
-        simulationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - ambulance (s)", formatDouble(simulation.getSimulationAverageDoctorWaitAmbulance())});
-        simulationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - walk-in (s)", formatDouble(simulation.getSimulationAverageDoctorWaitWalkIn())});
-        simulationStatsModel.addRow(new Object[]{"Avg time in system (s)", formatDouble(simulation.getSimulationAverageSystemTime())});
+        simulationStatsModel.addRow(new Object[]{"Patients entered system", formatCi(simulation.getSimulationMeanArrivalsPerReplication(), simulation.getSimulationArrivalsCiHalfWidth())});
+        simulationStatsModel.addRow(new Object[]{"Patients departed", formatCi(simulation.getSimulationMeanDeparturesPerReplication(), simulation.getSimulationDeparturesCiHalfWidth())});
+        simulationStatsModel.addRow(new Object[]{"Ambulance arrivals", formatCi(simulation.getSimulationMeanAmbulanceArrivalsPerReplication(), simulation.getSimulationAmbulanceArrivalsCiHalfWidth())});
+        simulationStatsModel.addRow(new Object[]{"Walk-in arrivals", formatCi(simulation.getSimulationMeanWalkInArrivalsPerReplication(), simulation.getSimulationWalkInArrivalsCiHalfWidth())});
+        simulationStatsModel.addRow(new Object[]{"Avg waiting time initial exam (s)", formatCi(simulation.getSimulationMeanInitialExamWait(), simulation.getSimulationInitialExamWaitCiHalfWidth())});
+        simulationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - ambulance (s)", formatCi(simulation.getSimulationMeanDoctorWaitAmbulance(), simulation.getSimulationDoctorWaitAmbulanceCiHalfWidth())});
+        simulationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - walk-in (s)", formatCi(simulation.getSimulationMeanDoctorWaitWalkIn(), simulation.getSimulationDoctorWaitWalkInCiHalfWidth())});
+        simulationStatsModel.addRow(new Object[]{"Avg time in system (s)", formatCi(simulation.getSimulationMeanSystemTime(), simulation.getSimulationSystemTimeCiHalfWidth())});
 
         replicationStatsModel.addRow(new Object[]{"--- REPLICATION STATS ---", ""});
         replicationStatsModel.addRow(new Object[]{"Patients entered system", safeNum(simulation.getReplicationArrivals())});
@@ -502,6 +552,18 @@ public class GUI_EmergencyDepartment {
         return String.format("%.4f", v);
     }
 
+    private String formatCi(double mean, double halfWidth) {
+        if (Double.isNaN(mean) || Double.isInfinite(mean)) {
+            return "-";
+        }
+        if (Double.isNaN(halfWidth) || Double.isInfinite(halfWidth)) {
+            return formatDouble(mean) + " [CI pending]";
+        }
+        double low = mean - halfWidth;
+        double high = mean + halfWidth;
+        return String.format("%.4f [%.4f; %.4f]", mean, low, high);
+    }
+
     private String safeNum(long v) {
         return String.valueOf(v);
     }
@@ -537,6 +599,48 @@ public class GUI_EmergencyDepartment {
 
     public int getNursesCount() {
         return (Integer) nursesCountCombo.getSelectedItem();
+    }
+
+    private int getEffectiveDoctorsCount() {
+        return switch (staffingScenarioCombo.getSelectedIndex()) {
+            case 1, 2, 3 -> 6;
+            default -> getDoctorsCount();
+        };
+    }
+
+    private int getEffectiveNursesCount() {
+        return switch (staffingScenarioCombo.getSelectedIndex()) {
+            case 1 -> 6;
+            case 2 -> 8;
+            case 3 -> 10;
+            default -> getNursesCount();
+        };
+    }
+
+    private boolean isAmbulanceCleanupBlockEnabled() {
+        return ambulanceCleanupBlockCheckBox.isSelected();
+    }
+
+    private boolean isReserveInitialClinicsEnabled() {
+        return reserveInitialClinicsCheckBox.isSelected();
+    }
+
+    private boolean isReservePriority12ClinicEnabled() {
+        return reservePriority12ClinicCheckBox.isSelected();
+    }
+
+    private boolean isDynamicInitialOverflowEnabled() {
+        return dynamicInitialOverflowCheckBox.isSelected();
+    }
+
+    private int getOverflowThreshold() {
+        return ((Number) overflowThresholdSpinner.getValue()).intValue();
+    }
+
+    private void updateStaffingControls() {
+        boolean defaultScenario = staffingScenarioCombo.getSelectedIndex() == 0;
+        doctorsCountCombo.setEnabled(defaultScenario);
+        nursesCountCombo.setEnabled(defaultScenario);
     }
 
     public void requestRefresh() {

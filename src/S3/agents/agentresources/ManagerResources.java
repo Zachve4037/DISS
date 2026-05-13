@@ -43,9 +43,7 @@ public class ManagerResources extends OSPABA.Manager {
         EmerDepEmployee nurse = myAgent().getNurses().stream().filter(
                 n -> !n.isBusy()
         ).findFirst().orElse(null);
-        Clinic clinic = myAgent().getClinics().stream().filter(
-                c -> !c.isOccupied() && c.getType() == ClinicType.B
-        ).findFirst().orElse(null);
+        Clinic clinic = myAgent().firstFreeInitialClinic(msg.isOverflowInitialRequest());
         if (nurse == null || clinic == null) {
             msg.setNurse(null);
             msg.setClinic(null);
@@ -53,6 +51,7 @@ public class ManagerResources extends OSPABA.Manager {
             nurse.setBusy(true);
             msg.setNurse(nurse);
             clinic.setOccupied(true);
+            clinic.setOverflowActive(msg.isOverflowInitialRequest());
             msg.setClinic(clinic);
             ((EmergencyDepartmentSimulation) mySim()).edAnimator().employeeReserved(nurse, clinic);
             ((EmergencyDepartmentSimulation) mySim()).edAnimator().clinicOccupied(clinic, true);
@@ -86,59 +85,11 @@ public class ManagerResources extends OSPABA.Manager {
     }
 
     private Clinic findClinicForDoctorExamination(Patient patient, ClinicType requestedType) {
-        if (patient == null || requestedType == null) {
-            return null;
-        }
-
-        Clinic lastClinic = patient.getLastClinic();
-        if (lastClinic != null
-                && !lastClinic.isOccupied()
-                && lastClinic.getType() == requestedType
-                && canUseClinic(patient, requestedType)) {
-            return lastClinic;
-        }
-
-        return firstFreeClinic(requestedType);
+        return myAgent().firstFreeDoctorClinic(patient, requestedType);
     }
 
     private Clinic findClinicForDoctorExamination(Patient patient) {
-        if (patient == null) {
-            return null;
-        }
-
-        Clinic lastClinic = patient.getLastClinic();
-        if (lastClinic != null && !lastClinic.isOccupied() && canUseClinic(patient, lastClinic.getType())) {
-            return lastClinic;
-        }
-
-        if (patient.getPriority() <= 2) {
-            return firstFreeClinic(ClinicType.A);
-        }
-
-        if (patient.getPriority() == 5) {
-            return firstFreeClinic(ClinicType.B);
-        }
-
-        Clinic clinicA = firstFreeClinic(ClinicType.A);
-        return clinicA != null ? clinicA : firstFreeClinic(ClinicType.B);
-    }
-
-    private Clinic firstFreeClinic(ClinicType clinicType) {
-        return myAgent().getClinics().stream().filter(
-                c -> !c.isOccupied() && c.getType() == clinicType
-        ).findFirst().orElse(null);
-    }
-
-    private boolean canUseClinic(Patient patient, ClinicType clinicType) {
-        if (patient == null || clinicType == null) {
-            return false;
-        }
-
-        int priority = patient.getPriority();
-        if (clinicType == ClinicType.A) {
-            return priority >= 1 && priority <= 4;
-        }
-        return priority >= 3 && priority <= 5;
+        return myAgent().firstFreeDoctorClinic(patient);
     }
 
     private void setResponseMessage(Message msg, EmerDepEmployee doctor, EmerDepEmployee nurse, Clinic clinic) {
@@ -171,6 +122,7 @@ public class ManagerResources extends OSPABA.Manager {
             int id = c.getId();
             if (id >= 0 && id < myAgent().getClinics().size()) {
                 myAgent().getClinics().get(id).setOccupied(false);
+                myAgent().getClinics().get(id).setOverflowActive(false);
                 ((EmergencyDepartmentSimulation) mySim()).edAnimator().clinicOccupied(myAgent().getClinics().get(id), false);
             } else {
                 System.err.println("[ManagerResources] Warning: clinic id out of bounds: " + id);

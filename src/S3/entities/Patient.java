@@ -60,8 +60,8 @@ public class Patient extends Entity {
 
         this.initialExamWaitTime = 0;
         this.doctorsExamWaitTime = 0;
-        this.doctorsExamWaitStartTime = 0;
-        this.doctorsExamWaitRunning = false;
+        this.doctorsExamWaitStartTime = this.arrivalTime;
+        this.doctorsExamWaitRunning = true;
         this.doctorsExamWaitRecorded = false;
 
         this.finalizedTotalTimeInSystem = 0;
@@ -90,17 +90,10 @@ public class Patient extends Entity {
     }
 
     public void startWaitingForInitialExam() {
-        // According to the assignment/statistics definition, the waiting time
-        // for the doctor examination starts at the first entrance into the
-        // waiting room, not only after the initial examination is finished.
-        startDoctorsExamWaitIfNeeded();
         startWaiting(WaitingPhase.INITIAL_EXAM);
     }
 
     public void startWaitingForDoctorsExam() {
-        // Do not reset the doctor waiting statistic here.  The timer was
-        // already started when the patient entered the waiting room.  This
-        // call only starts/continues the physical doctor queue phase.
         startDoctorsExamWaitIfNeeded();
         startWaiting(WaitingPhase.DOCTORS_EXAM);
     }

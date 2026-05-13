@@ -23,6 +23,7 @@ public class AgentHospital extends OSPABA.Agent {
         new ManagerHospital(Id.managerHospital, mySim(), this);
         new ProcessInitialExamintation(Id.processInitialExamintation, mySim(), this);
         new ProcessDoctorsExamination(Id.processDoctorsExamination, mySim(), this);
+        new ProcessClinicCleanupBlock(Id.processClinicCleanupBlock, mySim(), this);
         new ActionHandlePatient(Id.actionHandlePatient, mySim(), this);
         addOwnMessage(Mc.allocateDoctorsExaminationBResources);
         addOwnMessage(Mc.handlePatientToWaitingRoom);

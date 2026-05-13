@@ -13,6 +13,7 @@ public class Message extends OSPABA.MessageForm {
     private Clinic clinic;
     private ClinicType requestedClinicType;
     private double processDuration;
+    private boolean overflowInitialRequest;
 
     public Message(Simulation mySim) {
         super(mySim);
@@ -22,6 +23,7 @@ public class Message extends OSPABA.MessageForm {
         this.clinic = null;
         this.requestedClinicType = null;
         this.processDuration = -1;
+        this.overflowInitialRequest = false;
     }
 
     private Message(Message original) {
@@ -44,6 +46,7 @@ public class Message extends OSPABA.MessageForm {
         this.clinic = original.clinic;
         this.requestedClinicType = original.requestedClinicType;
         this.processDuration = original.processDuration;
+        this.overflowInitialRequest = original.overflowInitialRequest;
     }
 
     public EmerDepEmployee getNurse() {
@@ -92,5 +95,13 @@ public class Message extends OSPABA.MessageForm {
 
     public void setProcessDuration(double processDuration) {
         this.processDuration = processDuration;
+    }
+
+    public boolean isOverflowInitialRequest() {
+        return overflowInitialRequest;
+    }
+
+    public void setOverflowInitialRequest(boolean overflowInitialRequest) {
+        this.overflowInitialRequest = overflowInitialRequest;
     }
 }

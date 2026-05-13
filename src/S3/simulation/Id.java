@@ -28,4 +28,5 @@ public class Id extends OSPABA.IdList {
     public static final int processPatientToWaitingRoomMovement = 1008;
     public static final int processPatientLeavingMovement = 1009;
     //meta! tag="end"
+    public static final int processClinicCleanupBlock = 1012;
 }
