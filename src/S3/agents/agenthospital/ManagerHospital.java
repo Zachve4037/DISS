@@ -111,9 +111,6 @@ public class ManagerHospital extends OSPABA.Manager {
 
         EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
 
-        // trvanie lekárskeho vyšetrenia
-        sim.recordDoctorExamDuration(patient, msg.getProcessDuration());
-
         // pacient už nečaká na lekárske vyšetrenie
         patient.setWaitingForDoctorsExam(false);
 
@@ -160,9 +157,6 @@ public class ManagerHospital extends OSPABA.Manager {
         if (patient == null) {
             return;
         }
-
-        EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
-        sim.recordInitialExamDuration(patient, msg.getProcessDuration());
 
         patient.setWaitingForInitialExam(false);
         patient.setWaitingForDoctorsExam(true);

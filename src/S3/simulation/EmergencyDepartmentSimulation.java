@@ -42,59 +42,8 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
     private long replicationDoctorWaitWalkInCount;
     private long replicationSystemTimeCount;
 
-    // replication-level exam durations
-    private double replicationInitialExamAmbulanceSum;
-    private double replicationInitialExamWalkInSum;
-    private double replicationDoctorExamAmbulanceSum;
-    private double replicationDoctorExamWalkInSum;
-
-    private long replicationInitialExamAmbulanceCount;
-    private long replicationInitialExamWalkInCount;
-    private long replicationDoctorExamAmbulanceCount;
-    private long replicationDoctorExamWalkInCount;
-
     public EmergencyDepartmentSimulation() {
         init();
-    }
-
-    public void recordInitialExamDuration(Patient patient, double durationMinutes) {
-        if (patient == null) {
-            return;
-        }
-
-        if (patient.getType() == PatientType.AMBULANCE) {
-            simulationInitialExamAmbulanceSum += durationMinutes;
-            simulationInitialExamAmbulanceCount++;
-
-            replicationInitialExamAmbulanceSum += durationMinutes;
-            replicationInitialExamAmbulanceCount++;
-        } else if (patient.getType() == PatientType.WALK_IN) {
-            simulationInitialExamWalkInSum += durationMinutes;
-            simulationInitialExamWalkInCount++;
-
-            replicationInitialExamWalkInSum += durationMinutes;
-            replicationInitialExamWalkInCount++;
-        }
-    }
-
-    public void recordDoctorExamDuration(Patient patient, double durationMinutes) {
-        if (patient == null) {
-            return;
-        }
-
-        if (patient.getType() == PatientType.AMBULANCE) {
-            simulationDoctorExamAmbulanceSum += durationMinutes;
-            simulationDoctorExamAmbulanceCount++;
-
-            replicationDoctorExamAmbulanceSum += durationMinutes;
-            replicationDoctorExamAmbulanceCount++;
-        } else if (patient.getType() == PatientType.WALK_IN) {
-            simulationDoctorExamWalkInSum += durationMinutes;
-            simulationDoctorExamWalkInCount++;
-
-            replicationDoctorExamWalkInSum += durationMinutes;
-            replicationDoctorExamWalkInCount++;
-        }
     }
 
     public void recordArrival(Patient patient) {
@@ -169,16 +118,6 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         simulationDoctorWaitAmbulanceCount = 0;
         simulationDoctorWaitWalkInCount = 0;
         simulationSystemTimeCount = 0;
-
-        simulationInitialExamAmbulanceSum = 0;
-        simulationInitialExamWalkInSum = 0;
-        simulationDoctorExamAmbulanceSum = 0;
-        simulationDoctorExamWalkInSum = 0;
-
-        simulationInitialExamAmbulanceCount = 0;
-        simulationInitialExamWalkInCount = 0;
-        simulationDoctorExamAmbulanceCount = 0;
-        simulationDoctorExamWalkInCount = 0;
     }
 
     public void resetReplicationStatistics() {
@@ -196,16 +135,6 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         replicationDoctorWaitAmbulanceCount = 0;
         replicationDoctorWaitWalkInCount = 0;
         replicationSystemTimeCount = 0;
-
-        replicationInitialExamAmbulanceSum = 0;
-        replicationInitialExamWalkInSum = 0;
-        replicationDoctorExamAmbulanceSum = 0;
-        replicationDoctorExamWalkInSum = 0;
-
-        replicationInitialExamAmbulanceCount = 0;
-        replicationInitialExamWalkInCount = 0;
-        replicationDoctorExamAmbulanceCount = 0;
-        replicationDoctorExamWalkInCount = 0;
     }
 
     private double avg(double sum, long count) {
@@ -280,22 +209,6 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
 
     public void setParameters(int doctorsCount, int nursesCount) {
         agentResources().setNumberOfPersonal(doctorsCount, nursesCount);
-    }
-
-    public double getReplicationAverageInitialExamAmbulance() {
-        return avg(replicationInitialExamAmbulanceSum, replicationInitialExamAmbulanceCount);
-    }
-
-    public double getReplicationAverageInitialExamWalkIn() {
-        return avg(replicationInitialExamWalkInSum, replicationInitialExamWalkInCount);
-    }
-
-    public double getReplicationAverageDoctorExamAmbulance() {
-        return avg(replicationDoctorExamAmbulanceSum, replicationDoctorExamAmbulanceCount);
-    }
-
-    public double getReplicationAverageDoctorExamWalkIn() {
-        return avg(replicationDoctorExamWalkInSum, replicationDoctorExamWalkInCount);
     }
 
     @Override
