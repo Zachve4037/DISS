@@ -2,6 +2,7 @@ package S3.simulation;
 
 import OSPABA.*;
 import S3.entities.Clinic;
+import S3.entities.ClinicType;
 import S3.entities.Patient;
 import S3.entities.EmerDepEmployee;
 
@@ -11,6 +12,7 @@ public class Message extends OSPABA.MessageForm {
     private EmerDepEmployee nurse;
     private Clinic clinic;
     private double processDuration;
+    private ClinicType requestedClinicType;
 
     public Message(Simulation mySim) {
         super(mySim);
@@ -19,6 +21,7 @@ public class Message extends OSPABA.MessageForm {
         this.nurse = null;
         this.clinic = null;
         this.processDuration = -1;
+        this.requestedClinicType = null;
     }
 
     private Message(Message original) {
@@ -40,6 +43,7 @@ public class Message extends OSPABA.MessageForm {
         this.nurse = original.nurse;
         this.clinic = original.clinic;
         this.processDuration = original.processDuration;
+        this.requestedClinicType = original.requestedClinicType;
     }
 
     public EmerDepEmployee getNurse() {
@@ -80,5 +84,13 @@ public class Message extends OSPABA.MessageForm {
 
     public void setProcessDuration(double processDuration) {
         this.processDuration = processDuration;
+    }
+
+    public ClinicType getRequestedClinicType() {
+        return requestedClinicType;
+    }
+
+    public void setRequestedClinicType(ClinicType requestedClinicType) {
+        this.requestedClinicType = requestedClinicType;
     }
 }

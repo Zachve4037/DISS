@@ -42,17 +42,6 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
     private long replicationDoctorWaitWalkInCount;
     private long replicationSystemTimeCount;
 
-    // simulation-level exam durations
-    private double simulationInitialExamAmbulanceSum;
-    private double simulationInitialExamWalkInSum;
-    private double simulationDoctorExamAmbulanceSum;
-    private double simulationDoctorExamWalkInSum;
-
-    private long simulationInitialExamAmbulanceCount;
-    private long simulationInitialExamWalkInCount;
-    private long simulationDoctorExamAmbulanceCount;
-    private long simulationDoctorExamWalkInCount;
-
     // replication-level exam durations
     private double replicationInitialExamAmbulanceSum;
     private double replicationInitialExamWalkInSum;
@@ -68,7 +57,7 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         init();
     }
 
-    public synchronized void recordInitialExamDuration(Patient patient, double durationMinutes) {
+    public void recordInitialExamDuration(Patient patient, double durationMinutes) {
         if (patient == null) {
             return;
         }
@@ -88,7 +77,7 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         }
     }
 
-    public synchronized void recordDoctorExamDuration(Patient patient, double durationMinutes) {
+    public void recordDoctorExamDuration(Patient patient, double durationMinutes) {
         if (patient == null) {
             return;
         }
@@ -108,7 +97,7 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         }
     }
 
-    public synchronized void recordArrival(Patient patient) {
+    public void recordArrival(Patient patient) {
         if (patient == null) {
             return;
         }
@@ -125,7 +114,7 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         }
     }
 
-    public synchronized void recordDeparture(Patient patient) {
+    public void recordDeparture(Patient patient) {
         if (patient == null) {
             return;
         }
@@ -165,7 +154,7 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         }
     }
 
-    public synchronized void resetSimulationStatistics() {
+    public void resetSimulationStatistics() {
         simulationArrivals = 0;
         simulationDepartures = 0;
         simulationAmbulanceArrivals = 0;
@@ -192,7 +181,7 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         simulationDoctorExamWalkInCount = 0;
     }
 
-    public synchronized void resetReplicationStatistics() {
+    public void resetReplicationStatistics() {
         replicationArrivals = 0;
         replicationDepartures = 0;
         replicationAmbulanceArrivals = 0;
@@ -224,68 +213,68 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
     }
 
     // simulation getters
-    public synchronized long getSimulationArrivals() {
+    public long getSimulationArrivals() {
         return simulationArrivals;
     }
 
-    public synchronized long getSimulationDepartures() {
+    public long getSimulationDepartures() {
         return simulationDepartures;
     }
 
-    public synchronized long getSimulationAmbulanceArrivals() {
+    public long getSimulationAmbulanceArrivals() {
         return simulationAmbulanceArrivals;
     }
 
-    public synchronized long getSimulationWalkInArrivals() {
+    public long getSimulationWalkInArrivals() {
         return simulationWalkInArrivals;
     }
 
-    public synchronized double getSimulationAverageInitialExamWait() {
+    public double getSimulationAverageInitialExamWait() {
         return avg(simulationInitialWaitSum, simulationInitialWaitCount);
     }
 
-    public synchronized double getSimulationAverageDoctorWaitAmbulance() {
+    public double getSimulationAverageDoctorWaitAmbulance() {
         return avg(simulationDoctorWaitAmbulanceSum, simulationDoctorWaitAmbulanceCount);
     }
 
-    public synchronized double getSimulationAverageDoctorWaitWalkIn() {
+    public double getSimulationAverageDoctorWaitWalkIn() {
         return avg(simulationDoctorWaitWalkInSum, simulationDoctorWaitWalkInCount);
     }
 
-    public synchronized double getSimulationAverageSystemTime() {
+    public double getSimulationAverageSystemTime() {
         return avg(simulationSystemTimeSum, simulationSystemTimeCount);
     }
 
     // replication getters
-    public synchronized long getReplicationArrivals() {
+    public long getReplicationArrivals() {
         return replicationArrivals;
     }
 
-    public synchronized long getReplicationDepartures() {
+    public long getReplicationDepartures() {
         return replicationDepartures;
     }
 
-    public synchronized long getReplicationAmbulanceArrivals() {
+    public long getReplicationAmbulanceArrivals() {
         return replicationAmbulanceArrivals;
     }
 
-    public synchronized long getReplicationWalkInArrivals() {
+    public long getReplicationWalkInArrivals() {
         return replicationWalkInArrivals;
     }
 
-    public synchronized double getReplicationAverageInitialExamWait() {
+    public double getReplicationAverageInitialExamWait() {
         return avg(replicationInitialWaitSum, replicationInitialWaitCount);
     }
 
-    public synchronized double getReplicationAverageDoctorWaitAmbulance() {
+    public double getReplicationAverageDoctorWaitAmbulance() {
         return avg(replicationDoctorWaitAmbulanceSum, replicationDoctorWaitAmbulanceCount);
     }
 
-    public synchronized double getReplicationAverageDoctorWaitWalkIn() {
+    public double getReplicationAverageDoctorWaitWalkIn() {
         return avg(replicationDoctorWaitWalkInSum, replicationDoctorWaitWalkInCount);
     }
 
-    public synchronized double getReplicationAverageSystemTime() {
+    public double getReplicationAverageSystemTime() {
         return avg(replicationSystemTimeSum, replicationSystemTimeCount);
     }
 
@@ -293,35 +282,19 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         agentResources().setNumberOfPersonal(doctorsCount, nursesCount);
     }
 
-    public synchronized double getSimulationAverageInitialExamAmbulance() {
-        return avg(simulationInitialExamAmbulanceSum, simulationInitialExamAmbulanceCount);
-    }
-
-    public synchronized double getSimulationAverageInitialExamWalkIn() {
-        return avg(simulationInitialExamWalkInSum, simulationInitialExamWalkInCount);
-    }
-
-    public synchronized double getSimulationAverageDoctorExamAmbulance() {
-        return avg(simulationDoctorExamAmbulanceSum, simulationDoctorExamAmbulanceCount);
-    }
-
-    public synchronized double getSimulationAverageDoctorExamWalkIn() {
-        return avg(simulationDoctorExamWalkInSum, simulationDoctorExamWalkInCount);
-    }
-
-    public synchronized double getReplicationAverageInitialExamAmbulance() {
+    public double getReplicationAverageInitialExamAmbulance() {
         return avg(replicationInitialExamAmbulanceSum, replicationInitialExamAmbulanceCount);
     }
 
-    public synchronized double getReplicationAverageInitialExamWalkIn() {
+    public double getReplicationAverageInitialExamWalkIn() {
         return avg(replicationInitialExamWalkInSum, replicationInitialExamWalkInCount);
     }
 
-    public synchronized double getReplicationAverageDoctorExamAmbulance() {
+    public double getReplicationAverageDoctorExamAmbulance() {
         return avg(replicationDoctorExamAmbulanceSum, replicationDoctorExamAmbulanceCount);
     }
 
-    public synchronized double getReplicationAverageDoctorExamWalkIn() {
+    public double getReplicationAverageDoctorExamWalkIn() {
         return avg(replicationDoctorExamWalkInSum, replicationDoctorExamWalkInCount);
     }
 

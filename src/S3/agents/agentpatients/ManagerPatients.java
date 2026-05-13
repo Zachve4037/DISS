@@ -2,6 +2,7 @@ package S3.agents.agentpatients;
 
 import OSPABA.*;
 import S3.entities.Patient;
+import S3.entities.ClinicType;
 import S3.simulation.*;
 
 //meta! id="62"
@@ -25,10 +26,16 @@ public class ManagerPatients extends OSPABA.Manager {
     public void processGetPatientForDoctorsExamination(MessageForm message) {
         Message msg = (Message) message.createCopy();
 
-        Patient patient = null;
+        Patient patient;
+        ClinicType requestedType = msg.getRequestedClinicType();
 
-        if (msg.getClinic() != null) {
-            patient = myAgent().pollDoctorPatientFor(msg.getClinic().getType());
+        // Stále je to flow „najprv pacient, potom zdroje“.
+        // Rozdiel je, že sa pýtame na najlepšieho pacienta vhodného pre konkrétny typ ambulancie.
+        // Inak priority 1/2 vedia blokovať voľné B ambulancie, hoci by v nich mohli ísť pacienti 3/4/5.
+        if (requestedType != null) {
+            patient = myAgent().pollDoctorPatientFor(requestedType);
+        } else {
+            patient = myAgent().pollNextDoctorPatient();
         }
 
         msg.setPatient(patient);
@@ -38,11 +45,14 @@ public class ManagerPatients extends OSPABA.Manager {
     //meta! sender="AgentHospital", id="78", type="Request"
     public void processGetPatientForInitialExamination(MessageForm message) {
         Message msg = (Message) message.createCopy();
+        Patient patient = null;
+
         if (!myAgent().getInitialExaminationQueue().isEmpty()) {
-            Patient patient = myAgent().getInitialExaminationQueue().poll();
-            msg.setPatient(patient);
-            response(msg);
+            patient = myAgent().getInitialExaminationQueue().poll();
         }
+
+        msg.setPatient(patient);
+        response(msg);
     }
 
     //meta! userInfo="Process messages defined in code", id="0"

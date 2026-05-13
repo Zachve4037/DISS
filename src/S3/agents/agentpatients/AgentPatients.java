@@ -17,8 +17,8 @@ public class AgentPatients extends OSPABA.Agent {
 
     private Queue<Patient> doctorsExaminationQueue;
 
-    private Comparator<Patient> initialQueueComparator;
-    private Comparator<Patient> doctorQueueComparator;
+    private final Comparator<Patient> initialQueueComparator;
+    private final Comparator<Patient> doctorQueueComparator;
 
     public AgentPatients(int id, Simulation mySim, Agent parent) {
         super(id, mySim, parent);
@@ -32,6 +32,11 @@ public class AgentPatients extends OSPABA.Agent {
                 thenComparingInt(Patient::getId);
         initialExaminationQueue = new PriorityBlockingQueue<>(11, initialQueueComparator);
         doctorsExaminationQueue = new PriorityBlockingQueue<>(11, doctorQueueComparator);
+    }
+
+
+    public Patient pollNextDoctorPatient() {
+        return doctorsExaminationQueue.poll();
     }
 
     public Patient pollDoctorPatientFor(ClinicType clinicType) {
