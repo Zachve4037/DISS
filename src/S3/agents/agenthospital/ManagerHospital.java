@@ -12,7 +12,7 @@ import S3.simulation.*;
 public class ManagerHospital extends OSPABA.Manager {
     private int remainingInitialMovements;
     private boolean dispatchQueued;
-    private boolean doctorPatientRequestPending;
+    private int doctorPatientRequestsPending;
     private boolean initialPatientRequestPending;
     private int doctorResourceRequestsPending;
     private int initialResourceRequestsPending;
@@ -32,7 +32,7 @@ public class ManagerHospital extends OSPABA.Manager {
 
         remainingInitialMovements = 0;
         dispatchQueued = false;
-        doctorPatientRequestPending = false;
+        doctorPatientRequestsPending = 0;
         initialPatientRequestPending = false;
         doctorResourceRequestsPending = 0;
         initialResourceRequestsPending = 0;
@@ -82,7 +82,9 @@ public class ManagerHospital extends OSPABA.Manager {
     public void processGetPatientForDoctorsExamination(MessageForm message) {
         Message msg = (Message) message;
 
-        doctorPatientRequestPending = false;
+        if (doctorPatientRequestsPending > 0) {
+            doctorPatientRequestsPending--;
+        }
 
         if (msg.getPatient() == null) {
             scheduleDispatch();
@@ -389,21 +391,29 @@ public class ManagerHospital extends OSPABA.Manager {
             return;
         }
 
+        int freePairs = freeDoctorNursePairs();
+        boolean startedDoctor = false;
         EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
         boolean hasAOnlyPatient = sim.agentPatients().hasDoctorPatientOnlyForA();
 
-        if (hasAOnlyPatient && canTryDoctorBranch(ClinicType.A)) {
+        if (freePairs > 0 && hasAOnlyPatient && canTryDoctorBranch(ClinicType.A)) {
             requestDoctorPatientFor(ClinicType.A);
-            return;
+            freePairs--;
+            startedDoctor = true;
         }
 
-        if (canTryDoctorBranch(ClinicType.B)) {
+        if (freePairs > 0 && canTryDoctorBranch(ClinicType.B)) {
             requestDoctorPatientFor(ClinicType.B);
-            return;
+            freePairs--;
+            startedDoctor = true;
         }
 
-        if (canTryDoctorBranch(ClinicType.A)) {
+        if (freePairs > 0 && canTryDoctorBranch(ClinicType.A)) {
             requestDoctorPatientFor(ClinicType.A);
+            startedDoctor = true;
+        }
+
+        if (startedDoctor) {
             return;
         }
 
@@ -417,7 +427,7 @@ public class ManagerHospital extends OSPABA.Manager {
     }
 
     private void requestDoctorPatientFor(ClinicType clinicType) {
-        doctorPatientRequestPending = true;
+        doctorPatientRequestsPending++;
         Message req = new Message(mySim());
         req.setRequestedClinicType(clinicType);
         req.setCode(Mc.getPatientForDoctorsExamination);
@@ -426,7 +436,7 @@ public class ManagerHospital extends OSPABA.Manager {
     }
 
     private boolean hasPendingStartAttempt() {
-        return doctorPatientRequestPending
+        return doctorPatientRequestsPending > 0
                 || initialPatientRequestPending
                 || doctorResourceRequestsPending > 0
                 || initialResourceRequestsPending > 0;

@@ -31,7 +31,7 @@ public class AgentPatients extends OSPABA.Agent {
         // Lower priority number means more urgent.
         this.doctorQueueComparator = Comparator
                 .comparingInt(Patient::getPriority)
-                .thenComparingDouble(Patient::getArrivalTime)
+                .thenComparingDouble(Patient::getWaitStartTime)
                 .thenComparingInt(Patient::getId);
 
         initialExaminationQueue = new PriorityBlockingQueue<>(11, initialQueueComparator);
