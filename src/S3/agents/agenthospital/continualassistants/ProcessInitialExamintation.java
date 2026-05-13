@@ -68,6 +68,8 @@ public class ProcessInitialExamintation extends OSPABA.Process {
 
         Clinic clinic = msg.getClinic();
         clinic.setOccupied(true);
+        ((EmergencyDepartmentSimulation) mySim()).edAnimator().employeeWorking(nurse, clinic);
+        ((EmergencyDepartmentSimulation) mySim()).edAnimator().clinicOccupied(clinic, true);
 
         int priority = (patient.getType() == PatientType.AMBULANCE)
                 ? prioritySanitka.generate()

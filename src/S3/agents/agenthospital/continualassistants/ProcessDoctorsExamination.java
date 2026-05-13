@@ -5,6 +5,7 @@ import S3.RNGs.empirical.ContinuousEmpiricalDistRNG;
 import S3.RNGs.intervals.EmpiricInterval;
 import S3.RNGs.intervals.UniformInterval;
 import S3.RNGs.uniform.ContinuousUniformDistRNG;
+import S3.entities.Clinic;
 import S3.entities.EmerDepEmployee;
 import S3.entities.Patient;
 import S3.entities.PatientType;
@@ -53,6 +54,10 @@ public class ProcessDoctorsExamination extends OSPABA.Process {
 
         doctor.startWork(patient);
         nurse.startWork(patient);
+        Clinic clinic = msg.getClinic();
+        ((EmergencyDepartmentSimulation) mySim()).edAnimator().employeeWorking(doctor, clinic);
+        ((EmergencyDepartmentSimulation) mySim()).edAnimator().employeeWorking(nurse, clinic);
+        ((EmergencyDepartmentSimulation) mySim()).edAnimator().clinicOccupied(clinic, true);
 
         double time = (patient.getType() == PatientType.AMBULANCE)
                 ? examinationTimeSanitka.generate()

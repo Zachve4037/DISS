@@ -45,6 +45,7 @@ public class ManagerEnvironment extends OSPABA.Manager {
         patient.endService();
         patient.finalizeStatistics();
         EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+        sim.edAnimator().patientDeparted(patient);
         sim.recordDeparture(patient);
     }
 

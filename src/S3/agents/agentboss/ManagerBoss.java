@@ -33,6 +33,7 @@ public class ManagerBoss extends OSPABA.Manager {
 
         if (msg.getPatient() != null) {
             sim.recordArrival(msg.getPatient());
+            sim.edAnimator().patientArrived(msg.getPatient());
         }
 
         Message req = (Message) msg.createCopy();

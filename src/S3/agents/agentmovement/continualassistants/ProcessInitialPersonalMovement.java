@@ -26,7 +26,12 @@ public class ProcessInitialPersonalMovement extends OSPABA.Process {
     //meta! sender="AgentMovement", id="106", type="Start"
     public void processStart(MessageForm message) {
         Message msg = (Message) message.createCopy();
+        EmerDepEmployee employee = msg.getDoctor() != null
+                ? msg.getDoctor()
+                : msg.getNurse();
+
         double time = movementTime.generate();
+        ((EmergencyDepartmentSimulation) mySim()).edAnimator().moveInitialEmployee(employee, time);
         msg.setCode(Mc.finish);
         hold(time, msg);
     }

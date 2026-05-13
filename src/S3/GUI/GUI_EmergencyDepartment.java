@@ -1,5 +1,6 @@
 package S3.GUI;
 
+import OSPAnimator.Animator;
 import S3.agents.agentpatients.AgentPatients;
 import S3.agents.agentresources.AgentResources;
 import S3.entities.*;
@@ -56,6 +57,8 @@ public class GUI_EmergencyDepartment {
     private final JTable waitingForInitialExaminationTable;
 
     private int lastReplicationDay = -1;
+
+    private final JPanel animatorTab;
 
     public GUI_EmergencyDepartment() {
         frame = new JFrame("Emergency Department");
@@ -199,12 +202,12 @@ public class GUI_EmergencyDepartment {
 
         simulationTab.add(center, BorderLayout.CENTER);
 
-        JPanel secondTab = new JPanel(new BorderLayout());
-        JLabel placeholder = new JLabel("Second tab prepared for later use", SwingConstants.CENTER);
+        animatorTab = new JPanel(new BorderLayout());
+        JLabel placeholder = new JLabel("Animator will be shown after simulation is started", SwingConstants.CENTER);
         placeholder.setFont(placeholder.getFont().deriveFont(Font.PLAIN, 16f));
-        secondTab.add(placeholder, BorderLayout.CENTER);
+        animatorTab.add(placeholder, BorderLayout.CENTER);
 
-        tabbedPane.addTab("Animator", secondTab);
+        tabbedPane.addTab("Animator", animatorTab);
 
         frame.setContentPane(tabbedPane);
 
@@ -232,6 +235,13 @@ public class GUI_EmergencyDepartment {
 
             lastReplicationDay = -1;
             simulation = new EmergencyDepartmentSimulation();
+            if (!isMaxSpeed()) {
+                simulation.createAnimator();
+                if (simulation.animator() instanceof Animator) {
+                    ((Animator) simulation.animator()).setSynchronizedTime(false);
+                }
+            }
+            installAnimatorCanvas(simulation);
             bindSimulation(simulation);
             simulation.setParameters(getDoctorsCount(), getNursesCount());
             changeSimSpeed();
@@ -292,6 +302,35 @@ public class GUI_EmergencyDepartment {
             System.err.println("[GUI] changeSimSpeed error:");
             t.printStackTrace();
         }
+    }
+
+    private void installAnimatorCanvas(EmergencyDepartmentSimulation sim) {
+        animatorTab.removeAll();
+
+        try {
+            if (sim != null && sim.animatorExists() && sim.animator() != null) {
+                JComponent canvas = sim.animator().canvas();
+                animatorTab.add(canvas, BorderLayout.CENTER);
+
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        if (sim.animator() instanceof Animator) {
+                            ((Animator) sim.animator()).setView(0, 0, 1400, 720);
+                        }
+                    } catch (Throwable ignored) {
+                    }
+                    canvas.revalidate();
+                    canvas.repaint();
+                });
+            } else {
+                animatorTab.add(new JLabel("Animator is disabled in max-speed mode. Turn off max speed and start again to view animation.", SwingConstants.CENTER), BorderLayout.CENTER);
+            }
+        } catch (Throwable t) {
+            animatorTab.add(new JLabel("Animator could not be initialized: " + t.getMessage(), SwingConstants.CENTER), BorderLayout.CENTER);
+        }
+
+        animatorTab.revalidate();
+        animatorTab.repaint();
     }
 
     private void initRefreshTimer() {

@@ -40,6 +40,8 @@ public class ProcessPatientToWaitingRoomMovement extends OSPABA.Process {
                 ? movementTimeSanitka.generate()
                 : movementTimePeso.generate();
 
+        ((EmergencyDepartmentSimulation) mySim()).edAnimator().movePatientToWaitingRoom(patient, time);
+
         msg.setCode(Mc.finish);
         hold(time, msg);
     }

@@ -1,5 +1,6 @@
 package S3.simulation;
 
+import S3.animation.EmergencyDepartmentAnimator;
 import S3.agents.agentboss.AgentBoss;
 import S3.agents.agentenvironment.AgentEnvironment;
 import S3.agents.agenthospital.AgentHospital;
@@ -10,6 +11,12 @@ import S3.entities.Patient;
 import S3.entities.PatientType;
 
 public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
+    private final EmergencyDepartmentAnimator edAnimator = new EmergencyDepartmentAnimator(this);
+
+    public EmergencyDepartmentAnimator edAnimator() {
+        return edAnimator;
+    }
+
     // simulation-level statistics
     private long simulationArrivals;
     private long simulationDepartures;
@@ -222,6 +229,7 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
     public void prepareReplication() {
         super.prepareReplication();
         resetReplicationStatistics();
+        edAnimator.prepareReplication();
 
         agentBoss().startSimulation();
 

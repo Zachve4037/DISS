@@ -31,6 +31,7 @@ public class ManagerPatients extends OSPABA.Manager {
                 : myAgent().pollDoctorPatientFor(requestedClinicType);
 
         msg.setPatient(patient);
+        ((EmergencyDepartmentSimulation) mySim()).edAnimator().refreshQueues();
         response(msg);
     }
 
@@ -44,6 +45,7 @@ public class ManagerPatients extends OSPABA.Manager {
         }
 
         msg.setPatient(patient);
+        ((EmergencyDepartmentSimulation) mySim()).edAnimator().refreshQueues();
         response(msg);
     }
 
@@ -65,9 +67,11 @@ public class ManagerPatients extends OSPABA.Manager {
         if (current.isWaitingForInitialExam()) {
             current.startWaitingForInitialExam();
             myAgent().getInitialExaminationQueue().add(current);
+            ((EmergencyDepartmentSimulation) mySim()).edAnimator().refreshQueues();
         } else if (current.isWaitingForDoctorsExam()) {
             current.startWaitingForDoctorsExam();
             myAgent().getDoctorsExaminationQueue().add(current);
+            ((EmergencyDepartmentSimulation) mySim()).edAnimator().refreshQueues();
         } else {
             System.out.println("Patient " + current.getId() + " is not waiting for any examination.");
         }

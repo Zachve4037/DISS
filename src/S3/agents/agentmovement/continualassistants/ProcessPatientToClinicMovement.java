@@ -4,6 +4,8 @@ import OSPABA.*;
 import S3.RNGs.intervals.TriangleInterval;
 import S3.RNGs.triangle.ContinuousTriangularDistRNG;
 import S3.simulation.*;
+import S3.entities.Patient;
+import S3.entities.Clinic;
 import S3.agents.agentmovement.*;
 
 import java.util.Random;
@@ -25,8 +27,12 @@ public class ProcessPatientToClinicMovement extends OSPABA.Process {
     //meta! sender="AgentMovement", id="98", type="Start"
     public void processStart(MessageForm message) {
         Message msg = (Message) message.createCopy();
+        double time = movementTime.generate();
+        Patient patient = msg.getPatient();
+        Clinic clinic = msg.getClinic();
+        ((EmergencyDepartmentSimulation) mySim()).edAnimator().movePatientToClinic(patient, clinic, time);
         msg.setCode(Mc.finish);
-        hold(movementTime.generate(), msg);
+        hold(time, msg);
     }
 
     //meta! userInfo="Process messages defined in code", id="0"

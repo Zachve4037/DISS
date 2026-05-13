@@ -55,6 +55,8 @@ public class ManagerResources extends OSPABA.Manager {
             msg.setNurse(nurse);
             clinic.setOccupied(true);
             msg.setClinic(clinic);
+            ((EmergencyDepartmentSimulation) mySim()).edAnimator().employeeReserved(nurse, clinic);
+            ((EmergencyDepartmentSimulation) mySim()).edAnimator().clinicOccupied(clinic, true);
         }
         response(msg);
     }
@@ -86,6 +88,9 @@ public class ManagerResources extends OSPABA.Manager {
             doctor.setBusy(true);
             nurse.setBusy(true);
             clinic.setOccupied(true);
+            ((EmergencyDepartmentSimulation) mySim()).edAnimator().employeeReserved(doctor, clinic);
+            ((EmergencyDepartmentSimulation) mySim()).edAnimator().employeeReserved(nurse, clinic);
+            ((EmergencyDepartmentSimulation) mySim()).edAnimator().clinicOccupied(clinic, true);
         }
         response(msg);
     }
@@ -101,6 +106,7 @@ public class ManagerResources extends OSPABA.Manager {
             int id = c.getId();
             if (id >= 0 && id < myAgent().getClinics().size()) {
                 myAgent().getClinics().get(id).setOccupied(false);
+                ((EmergencyDepartmentSimulation) mySim()).edAnimator().clinicOccupied(myAgent().getClinics().get(id), false);
             } else {
                 System.err.println("[ManagerResources] Warning: clinic id out of bounds: " + id);
             }
@@ -109,6 +115,7 @@ public class ManagerResources extends OSPABA.Manager {
             int id = d.getId();
             if (id >= 0 && id < myAgent().getDoctors().size()) {
                 myAgent().getDoctors().get(id).setBusy(false);
+                ((EmergencyDepartmentSimulation) mySim()).edAnimator().employeeIdle(myAgent().getDoctors().get(id));
             } else {
                 System.err.println("[ManagerResources] Warning: doctor id out of bounds: " + id);
             }
@@ -117,6 +124,7 @@ public class ManagerResources extends OSPABA.Manager {
             int id = n.getId();
             if (id >= 0 && id < myAgent().getNurses().size()) {
                 myAgent().getNurses().get(id).setBusy(false);
+                ((EmergencyDepartmentSimulation) mySim()).edAnimator().employeeIdle(myAgent().getNurses().get(id));
             } else {
                 System.err.println("[ManagerResources] Warning: nurse id out of bounds: " + id);
             }

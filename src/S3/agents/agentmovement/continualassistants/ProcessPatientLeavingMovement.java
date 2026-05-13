@@ -5,6 +5,7 @@ import S3.RNGs.intervals.UniformInterval;
 import S3.RNGs.uniform.ContinuousUniformDistRNG;
 import S3.simulation.*;
 import S3.agents.agentmovement.*;
+import S3.entities.Patient;
 
 import java.util.Random;
 
@@ -24,8 +25,11 @@ public class ProcessPatientLeavingMovement extends OSPABA.Process {
     //meta! sender="AgentMovement", id="96", type="Start"
     public void processStart(MessageForm message) {
         Message msg = (Message) message.createCopy();
+        double time = timeMovement.generate();
+        Patient patient = msg.getPatient();
+        ((EmergencyDepartmentSimulation) mySim()).edAnimator().movePatientToExit(patient, time);
         msg.setCode(Mc.finish);
-        hold(timeMovement.generate(), msg);
+        hold(time, msg);
     }
 
     //meta! userInfo="Process messages defined in code", id="0"

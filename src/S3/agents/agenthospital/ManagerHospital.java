@@ -89,11 +89,13 @@ public class ManagerHospital extends OSPABA.Manager {
         EmerDepEmployee doctor = msg.getDoctor();
         if (doctor != null) {
             doctor.endWork();
+            ((EmergencyDepartmentSimulation) mySim()).edAnimator().employeeIdle(doctor);
         }
 
         EmerDepEmployee nurse = msg.getNurse();
         if (nurse != null) {
             nurse.endWork();
+            ((EmergencyDepartmentSimulation) mySim()).edAnimator().employeeIdle(nurse);
         }
 
         releaseClinicNow(msg);
@@ -129,6 +131,7 @@ public class ManagerHospital extends OSPABA.Manager {
         EmerDepEmployee nurse = msg.getNurse();
         if (nurse != null) {
             nurse.endWork();
+            ((EmergencyDepartmentSimulation) mySim()).edAnimator().employeeIdle(nurse);
         }
 
         releaseClinicNow(msg);
@@ -304,6 +307,7 @@ public class ManagerHospital extends OSPABA.Manager {
     private void releaseClinicNow(Message msg) {
         if (msg != null && msg.getClinic() != null) {
             msg.getClinic().setOccupied(false);
+            ((EmergencyDepartmentSimulation) mySim()).edAnimator().clinicOccupied(msg.getClinic(), false);
         }
     }
 
