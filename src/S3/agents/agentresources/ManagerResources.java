@@ -90,7 +90,6 @@ public class ManagerResources extends OSPABA.Manager {
         response(msg);
     }
 
-    //TODO ak to bude fungovat tak prehodit naspat na priame volanie do pola a zmazat vypisy
     public void processReleaseResources(MessageForm message) {
         Message msg = (Message) message;
 
