@@ -36,6 +36,9 @@ public class GUI_EmergencyDepartment {
     private final DefaultTableModel simulationStatsModel;
     private final JTable simulationStatsTable;
 
+    private final DefaultTableModel replicationStatsModel;
+    private final JTable replicationStatsTable;
+
     private final DefaultTableModel doctorsModel;
     private final JTable doctorsTable;
 
@@ -63,13 +66,21 @@ public class GUI_EmergencyDepartment {
 
         JPanel simulationTab = new JPanel(new BorderLayout());
 
-        simulationStatsModel = new DefaultTableModel(new Object[]{"Metric", "Value", "Detail"}, 0) {
+        simulationStatsModel = new DefaultTableModel(new Object[]{"Metric", "Value"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
         simulationStatsTable = createTable(simulationStatsModel);
+
+        replicationStatsModel = new DefaultTableModel(new Object[]{"Metric", "Value"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        replicationStatsTable = createTable(replicationStatsModel);
 
         doctorsModel = new DefaultTableModel(new Object[]{"Id", "CurrentPatient", "WorkTime", "Busy"}, 0) {
             @Override
@@ -170,13 +181,16 @@ public class GUI_EmergencyDepartment {
 
         JPanel center = new JPanel(new BorderLayout(10, 10));
 
-        JPanel simStatsPanel = createTablePanel("Simulation statistics", simulationStatsTable);
-        simStatsPanel.setMinimumSize(new Dimension(200, 150));
-        lower.setMinimumSize(new Dimension(200, 200));
+        JPanel statsPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+        statsPanel.add(createTablePanel("Simulation statistics", simulationStatsTable));
+        statsPanel.add(createTablePanel("Replication statistics", replicationStatsTable));
 
-        JSplitPane topSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, simStatsPanel, lower);
-        topSplit.setResizeWeight(0.2);
-        topSplit.setDividerLocation(400);
+        lower.setMinimumSize(new Dimension(200, 200));
+        statsPanel.setMinimumSize(new Dimension(200, 150));
+
+        JSplitPane topSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, statsPanel, lower);
+        topSplit.setResizeWeight(0.28);
+        topSplit.setDividerLocation(360);
         topSplit.setContinuousLayout(true);
         topSplit.setBorder(null);
 
@@ -368,6 +382,7 @@ public class GUI_EmergencyDepartment {
 
     private void refreshSimulationStats(List<Patient> patients, List<EmerDepEmployee> employees) {
         simulationStatsModel.setRowCount(0);
+        replicationStatsModel.setRowCount(0);
 
         long waitingInitial = patients.stream().filter(Patient::isWaitingForInitialExam).count();
         long waitingDoctors = patients.stream().filter(Patient::isWaitingForDoctorsExam).count();
@@ -394,19 +409,19 @@ public class GUI_EmergencyDepartment {
         simulationStatsModel.addRow(new Object[]{"Avg doctor exam duration - ambulance (min)", formatDouble(simulation.getSimulationAverageDoctorExamAmbulance()), "-"});
         simulationStatsModel.addRow(new Object[]{"Avg doctor exam duration - walk-in (min)", formatDouble(simulation.getSimulationAverageDoctorExamWalkIn()), "-"});
 
-        simulationStatsModel.addRow(new Object[]{"--- REPLICATION STATS ---", "", ""});
-        simulationStatsModel.addRow(new Object[]{"Patients entered system", safeNum(simulation.getReplicationArrivals()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Patients departed", safeNum(simulation.getReplicationDepartures()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Ambulance arrivals", safeNum(simulation.getReplicationAmbulanceArrivals()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Walk-in arrivals", safeNum(simulation.getReplicationWalkInArrivals()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg waiting time initial exam (s)", formatDouble(simulation.getReplicationAverageInitialExamWait()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - ambulance (s)", formatDouble(simulation.getReplicationAverageDoctorWaitAmbulance()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - walk-in (s)", formatDouble(simulation.getReplicationAverageDoctorWaitWalkIn()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg time in system (s)", formatDouble(simulation.getReplicationAverageSystemTime()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg initial exam duration - ambulance (min)", formatDouble(simulation.getReplicationAverageInitialExamAmbulance()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg initial exam duration - walk-in (min)", formatDouble(simulation.getReplicationAverageInitialExamWalkIn()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg doctor exam duration - ambulance (min)", formatDouble(simulation.getReplicationAverageDoctorExamAmbulance()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg doctor exam duration - walk-in (min)", formatDouble(simulation.getReplicationAverageDoctorExamWalkIn()), "-"});
+        replicationStatsModel.addRow(new Object[]{"--- REPLICATION STATS ---", "", ""});
+        replicationStatsModel.addRow(new Object[]{"Patients entered system", safeNum(simulation.getReplicationArrivals()), "-"});
+        replicationStatsModel.addRow(new Object[]{"Patients departed", safeNum(simulation.getReplicationDepartures()), "-"});
+        replicationStatsModel.addRow(new Object[]{"Ambulance arrivals", safeNum(simulation.getReplicationAmbulanceArrivals()), "-"});
+        replicationStatsModel.addRow(new Object[]{"Walk-in arrivals", safeNum(simulation.getReplicationWalkInArrivals()), "-"});
+        replicationStatsModel.addRow(new Object[]{"Avg waiting time initial exam (s)", formatDouble(simulation.getReplicationAverageInitialExamWait()), "-"});
+        replicationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - ambulance (s)", formatDouble(simulation.getReplicationAverageDoctorWaitAmbulance()), "-"});
+        replicationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - walk-in (s)", formatDouble(simulation.getReplicationAverageDoctorWaitWalkIn()), "-"});
+        replicationStatsModel.addRow(new Object[]{"Avg time in system (s)", formatDouble(simulation.getReplicationAverageSystemTime()), "-"});
+        replicationStatsModel.addRow(new Object[]{"Avg initial exam duration - ambulance (min)", formatDouble(simulation.getReplicationAverageInitialExamAmbulance()), "-"});
+        replicationStatsModel.addRow(new Object[]{"Avg initial exam duration - walk-in (min)", formatDouble(simulation.getReplicationAverageInitialExamWalkIn()), "-"});
+        replicationStatsModel.addRow(new Object[]{"Avg doctor exam duration - ambulance (min)", formatDouble(simulation.getReplicationAverageDoctorExamAmbulance()), "-"});
+        replicationStatsModel.addRow(new Object[]{"Avg doctor exam duration - walk-in (min)", formatDouble(simulation.getReplicationAverageDoctorExamWalkIn()), "-"});
     }
 
     private void refreshEmployees(DefaultTableModel model, List<EmerDepEmployee> employees, EmployeeType type) {
