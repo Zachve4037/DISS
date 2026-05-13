@@ -88,22 +88,29 @@ public class ManagerHospital extends OSPABA.Manager {
         Message msg = (Message) message.createCopy();
         Patient patient = msg.getPatient();
 
+        if (patient == null) {
+            return;
+        }
+
+        EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+        sim.recordDoctorExamDuration(patient, msg.getProcessDuration());
+
         patient.setWaitingForDoctorsExam(false);
 
-        EmerDepEmployee nurse = msg.getNurse();
-        nurse.endWork();
         EmerDepEmployee doctor = msg.getDoctor();
-        doctor.endWork();
+        if (doctor != null) {
+            doctor.endWork();
+        }
+
+        msg.setCode(Mc.releaseResources);
+        msg.setAddressee(mySim().findAgent(Id.agentResources));
+        notice(msg);
 
         Message departureMsg = new Message(mySim());
         departureMsg.setCode(Mc.patientDeparture);
         departureMsg.setPatient(patient);
         departureMsg.setAddressee(mySim().findAgent(Id.agentBoss));
         notice(departureMsg);
-
-        msg.setCode(Mc.releaseResources);
-        msg.setAddressee(mySim().findAgent(Id.agentResources));
-        notice(msg);
 
         Message retry = new Message(mySim());
         retry.setCode(Mc.tryStartDoctorsExamination);
@@ -116,30 +123,31 @@ public class ManagerHospital extends OSPABA.Manager {
         Message msg = (Message) message.createCopy();
         Patient patient = msg.getPatient();
 
+        if (patient == null) {
+            return;
+        }
+
+        EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+        sim.recordInitialExamDuration(patient, msg.getProcessDuration());
+
         patient.setWaitingForInitialExam(false);
         patient.setWaitingForDoctorsExam(true);
 
         EmerDepEmployee nurse = msg.getNurse();
-        nurse.endWork();
+        if (nurse != null) {
+            nurse.endWork();
+        }
 
-        // Put patient to next queue
         Message putMsg = (Message) msg.createCopy();
         putMsg.setCode(Mc.putPatient);
         putMsg.setAddressee(mySim().findAgent(Id.agentPatients));
         notice(putMsg);
 
-        // Release resources
-        msg.setCode(Mc.releaseResources);
-        msg.setAddressee(mySim().findAgent(Id.agentResources));
-        notice(msg);
-
-        //Try to start doctors examination
         Message doctorExamMsg = new Message(mySim());
         doctorExamMsg.setCode(Mc.tryStartDoctorsExamination);
         doctorExamMsg.setAddressee(myAgent());
         notice(doctorExamMsg);
 
-        // Try to start another examination
         Message retry = new Message(mySim());
         retry.setCode(Mc.tryStartInitialExamination);
         retry.setAddressee(myAgent());
@@ -213,7 +221,8 @@ public class ManagerHospital extends OSPABA.Manager {
         if (senderId == Id.agentMovement) {
 
             Message msg = (Message) message.createCopy();
-
+            Patient patient = msg.getPatient();
+            patient.endWaiting();
             msg.setCode(Mc.handlePatientToClinic);
             msg.setAddressee(mySim().findAgent(Id.agentMovement));
 

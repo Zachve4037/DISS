@@ -389,6 +389,10 @@ public class GUI_EmergencyDepartment {
         simulationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - ambulance (s)", formatDouble(simulation.getSimulationAverageDoctorWaitAmbulance()), "-"});
         simulationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - walk-in (s)", formatDouble(simulation.getSimulationAverageDoctorWaitWalkIn()), "-"});
         simulationStatsModel.addRow(new Object[]{"Avg time in system (s)", formatDouble(simulation.getSimulationAverageSystemTime()), "-"});
+        simulationStatsModel.addRow(new Object[]{"Avg initial exam duration - ambulance (min)", formatDouble(simulation.getSimulationAverageInitialExamAmbulance()), "-"});
+        simulationStatsModel.addRow(new Object[]{"Avg initial exam duration - walk-in (min)", formatDouble(simulation.getSimulationAverageInitialExamWalkIn()), "-"});
+        simulationStatsModel.addRow(new Object[]{"Avg doctor exam duration - ambulance (min)", formatDouble(simulation.getSimulationAverageDoctorExamAmbulance()), "-"});
+        simulationStatsModel.addRow(new Object[]{"Avg doctor exam duration - walk-in (min)", formatDouble(simulation.getSimulationAverageDoctorExamWalkIn()), "-"});
 
         simulationStatsModel.addRow(new Object[]{"--- REPLICATION STATS ---", "", ""});
         simulationStatsModel.addRow(new Object[]{"Patients entered system", safeNum(simulation.getReplicationArrivals()), "-"});
@@ -399,6 +403,10 @@ public class GUI_EmergencyDepartment {
         simulationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - ambulance (s)", formatDouble(simulation.getReplicationAverageDoctorWaitAmbulance()), "-"});
         simulationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - walk-in (s)", formatDouble(simulation.getReplicationAverageDoctorWaitWalkIn()), "-"});
         simulationStatsModel.addRow(new Object[]{"Avg time in system (s)", formatDouble(simulation.getReplicationAverageSystemTime()), "-"});
+        simulationStatsModel.addRow(new Object[]{"Avg initial exam duration - ambulance (min)", formatDouble(simulation.getReplicationAverageInitialExamAmbulance()), "-"});
+        simulationStatsModel.addRow(new Object[]{"Avg initial exam duration - walk-in (min)", formatDouble(simulation.getReplicationAverageInitialExamWalkIn()), "-"});
+        simulationStatsModel.addRow(new Object[]{"Avg doctor exam duration - ambulance (min)", formatDouble(simulation.getReplicationAverageDoctorExamAmbulance()), "-"});
+        simulationStatsModel.addRow(new Object[]{"Avg doctor exam duration - walk-in (min)", formatDouble(simulation.getReplicationAverageDoctorExamWalkIn()), "-"});
     }
 
     private void refreshEmployees(DefaultTableModel model, List<EmerDepEmployee> employees, EmployeeType type) {

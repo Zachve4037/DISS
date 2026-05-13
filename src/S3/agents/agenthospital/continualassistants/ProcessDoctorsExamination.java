@@ -44,21 +44,20 @@ public class ProcessDoctorsExamination extends OSPABA.Process {
         Message msg = (Message) message.createCopy();
 
         Patient patient = msg.getPatient();
-        EmerDepEmployee nurse = msg.getNurse();
         EmerDepEmployee doctor = msg.getDoctor();
 
-        if (patient == null || nurse == null || doctor == null) {
+        if (patient == null || doctor == null) {
             return;
         }
 
-        nurse.startWork(patient);
         doctor.startWork(patient);
 
         double time = (patient.getType() == PatientType.AMBULANCE)
                 ? examinationTimeSanitka.generate()
                 : examinationTimePeso.generate();
-        msg.setCode(Mc.finish);
 
+        msg.setProcessDuration(time);
+        msg.setCode(Mc.finish);
         hold(time * 60, msg);
     }
 

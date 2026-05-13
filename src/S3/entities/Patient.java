@@ -80,10 +80,6 @@ public class Patient extends Entity {
         return arrivalTime;
     }
 
-    public void startWaiting() {
-        startWaiting(WaitingPhase.NONE);
-    }
-
     public void startWaitingForInitialExam() {
         startWaiting(WaitingPhase.INITIAL_EXAM);
     }
@@ -124,10 +120,6 @@ public class Patient extends Entity {
         return waitStartTime;
     }
 
-    public boolean isWaiting() {
-        return isWaiting;
-    }
-
     public void startService() {
         endWaiting();
 
@@ -142,18 +134,6 @@ public class Patient extends Entity {
             this.isInService = false;
             this.totalServiceTime += mySim().currentTime() - this.serviceStartTime;
         }
-    }
-
-    public double getTotalServiceTime() {
-        return totalServiceTime;
-    }
-
-    public double getServiceStartTime() {
-        return serviceStartTime;
-    }
-
-    public boolean isInService() {
-        return isInService;
     }
 
     public double getInitialExamWaitTime() {
@@ -195,9 +175,5 @@ public class Patient extends Entity {
 
     public void setWaitingForInitialExam(boolean waitingForInitialExam) {
         isWaitingForInitialExam = waitingForInitialExam;
-    }
-
-    public boolean isStatisticsFinalized() {
-        return statisticsFinalized;
     }
 }

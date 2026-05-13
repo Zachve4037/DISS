@@ -50,9 +50,9 @@ Z ODOVZDAVAJUCEJ HODINY
 doktori = 6
 sestry = 8
 vstupne vysetrenie waiting time = 1.83min
-vysetrenie lekarom waiting time (sanitkou) = 11.68
-vysetrenie lekarom waiting time (peso) = 15.26
-cas v systeme = 35.39
+vysetrenie lekarom waiting time (sanitkou) = 11.68 sekund
+vysetrenie lekarom waiting time (peso) = 15.26 sekund
+cas v systeme = 35.39min
 
 DOPROGRAMOVANIE
 - po kazdom vysetreni lekarom (ak pacient prisiel sanitkou), tak bude ambulancia blokovana 5 minut
