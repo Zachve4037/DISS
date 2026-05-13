@@ -17,8 +17,8 @@ public class AgentPatients extends OSPABA.Agent {
 
     private Queue<Patient> doctorsExaminationQueue;
 
-    private final Comparator<Patient> initialQueueComparator;
-    private final Comparator<Patient> doctorQueueComparator;
+    private Comparator<Patient> initialQueueComparator;
+    private Comparator<Patient> doctorQueueComparator;
 
     public AgentPatients(int id, Simulation mySim, Agent parent) {
         super(id, mySim, parent);

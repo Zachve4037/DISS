@@ -36,9 +36,7 @@ public class ManagerHospital extends OSPABA.Manager {
             return;
         }
 
-        msg.setCode(Mc.handleNursesMovement);
-        msg.setAddressee(mySim().findAgent(Id.agentMovement));
-        request(msg);
+        startPatientMovementToClinic(msg);
 
         // Skús hneď obsadiť aj ďalšie voľné zdroje.
         scheduleTryDoctors();
@@ -192,9 +190,7 @@ public class ManagerHospital extends OSPABA.Manager {
             return;
         }
 
-        msg.setCode(Mc.handleNursesMovement);
-        msg.setAddressee(mySim().findAgent(Id.agentMovement));
-        request(msg);
+        startPatientMovementToClinic(msg);
 
         // Toto je dôležité: jeden trigger nesmie spustiť iba jedno vstupné vyšetrenie,
         // inak pri veľkom rade ostanú voľné B ambulancie/sestry nevyužité.
@@ -236,9 +232,7 @@ public class ManagerHospital extends OSPABA.Manager {
             return;
         }
 
-        msg.setCode(Mc.handleNursesMovement);
-        msg.setAddressee(mySim().findAgent(Id.agentMovement));
-        request(msg);
+        startPatientMovementToClinic(msg);
 
         // Skús hneď obsadiť aj ďalšie voľné zdroje.
         scheduleTryDoctors();
@@ -408,7 +402,59 @@ public class ManagerHospital extends OSPABA.Manager {
         }
     }
 
+
+    private void startPatientMovementToClinic(Message msg) {
+        Patient patient = msg.getPatient();
+        if (patient != null) {
+            // Čakanie končí v momente, keď je pacient vybraný zo zoznamu,
+            // má pridelené zdroje a začína jeho presun do ambulancie.
+            patient.endWaiting();
+        }
+
+        msg.setCode(Mc.handlePatientToClinic);
+        msg.setAddressee(mySim().findAgent(Id.agentMovement));
+        request(msg);
+    }
+
+    private boolean canStartDoctorExaminationNow() {
+        EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+
+        boolean freeDoctor = sim.agentResources().getDoctors().stream().anyMatch(d -> !d.isBusy());
+        boolean freeNurse = sim.agentResources().getNurses().stream().anyMatch(n -> !n.isBusy());
+        if (!freeDoctor || !freeNurse) {
+            return false;
+        }
+
+        boolean freeA = sim.agentResources().getClinics().stream()
+                .anyMatch(c -> !c.isOccupied() && c.getType() == ClinicType.A);
+        boolean freeB = sim.agentResources().getClinics().stream()
+                .anyMatch(c -> !c.isOccupied() && c.getType() == ClinicType.B);
+        if (!freeA && !freeB) {
+            return false;
+        }
+
+        return sim.agentPatients().getDoctorsExaminationQueues().stream().anyMatch(patient -> {
+            int priority = patient.getPriority();
+            if (priority <= 2) {
+                return freeA;
+            }
+            if (priority == 5) {
+                return freeB;
+            }
+            return freeA || freeB;
+        });
+    }
+
     private void processTryStartInitialExamination(MessageForm message) {
+        // Default stratégia zo zadania/poznámok: lekárske vyšetrenie má prednosť
+        // pred vstupným vyšetrením. Neznamená to ale tvrdé blokovanie evidencie vždy,
+        // keď niekto čaká na lekára. Blokujeme ju iba vtedy, keď sa lekárske vyšetrenie
+        // vie spustiť hneď teraz s aktuálne voľnými zdrojmi.
+        if (canStartDoctorExaminationNow()) {
+            scheduleTryDoctors();
+            return;
+        }
+
         Message req = (Message) message.createCopy();
         req.setCode(Mc.getPatientForInitialExamination);
         req.setAddressee(mySim().findAgent(Id.agentPatients));
