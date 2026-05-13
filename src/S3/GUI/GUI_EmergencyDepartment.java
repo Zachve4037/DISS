@@ -82,7 +82,7 @@ public class GUI_EmergencyDepartment {
         };
         replicationStatsTable = createTable(replicationStatsModel);
 
-        doctorsModel = new DefaultTableModel(new Object[]{"Id", "CurrentPatient", "WorkTime", "Busy"}, 0) {
+        doctorsModel = new DefaultTableModel(new Object[]{"Id", "CurrentPatient", "WorkTime", "State"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -90,7 +90,7 @@ public class GUI_EmergencyDepartment {
         };
         doctorsTable = createTable(doctorsModel);
 
-        nursesModel = new DefaultTableModel(new Object[]{"Id", "CurrentPatient", "WorkTime", "Busy"}, 0) {
+        nursesModel = new DefaultTableModel(new Object[]{"Id", "CurrentPatient", "WorkTime", "State"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -332,8 +332,8 @@ public class GUI_EmergencyDepartment {
 
         Queue<Patient> initialQueue = (patientsAgent != null && patientsAgent.getInitialExaminationQueue() != null)
                 ? patientsAgent.getInitialExaminationQueue() : new PriorityQueue<>();
-        Queue<Patient> doctorsQueue = (patientsAgent != null && patientsAgent.getDoctorsExaminationQueues() != null)
-                ? patientsAgent.getDoctorsExaminationQueues() : new ConcurrentLinkedQueue<>();
+        Queue<Patient> doctorsQueue = (patientsAgent != null && patientsAgent.getDoctorsExaminationQueue() != null)
+                ? patientsAgent.getDoctorsExaminationQueue() : new ConcurrentLinkedQueue<>();
 
         List<Patient> waitingDoctors = doctorsQueue.stream()
                 .filter(Patient::isWaitingForDoctorsExam)
@@ -389,33 +389,33 @@ public class GUI_EmergencyDepartment {
         simulationStatsModel.addRow(new Object[]{"Busy employees", busyEmployees, "-"});
         simulationStatsModel.addRow(new Object[]{"Current sim time", formatTime((int) Math.round(simulation.currentTime())), "-"});
 
-        simulationStatsModel.addRow(new Object[]{"--- SIMULATION STATS ---", "", ""});
-        simulationStatsModel.addRow(new Object[]{"Patients entered system", safeNum(simulation.getSimulationArrivals()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Patients departed", safeNum(simulation.getSimulationDepartures()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Ambulance arrivals", safeNum(simulation.getSimulationAmbulanceArrivals()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Walk-in arrivals", safeNum(simulation.getSimulationWalkInArrivals()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg waiting time initial exam (s)", formatDouble(simulation.getSimulationAverageInitialExamWait()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - ambulance (s)", formatDouble(simulation.getSimulationAverageDoctorWaitAmbulance()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - walk-in (s)", formatDouble(simulation.getSimulationAverageDoctorWaitWalkIn()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg time in system (s)", formatDouble(simulation.getSimulationAverageSystemTime()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg initial exam duration - ambulance (min)", formatDouble(simulation.getSimulationAverageInitialExamAmbulance()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg initial exam duration - walk-in (min)", formatDouble(simulation.getSimulationAverageInitialExamWalkIn()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg doctor exam duration - ambulance (min)", formatDouble(simulation.getSimulationAverageDoctorExamAmbulance()), "-"});
-        simulationStatsModel.addRow(new Object[]{"Avg doctor exam duration - walk-in (min)", formatDouble(simulation.getSimulationAverageDoctorExamWalkIn()), "-"});
+//        simulationStatsModel.addRow(new Object[]{"--- SIMULATION STATS ---", "", ""});
+//        simulationStatsModel.addRow(new Object[]{"Patients entered system", safeNum(simulation.getSimulationArrivals()), "-"});
+//        simulationStatsModel.addRow(new Object[]{"Patients departed", safeNum(simulation.getSimulationDepartures()), "-"});
+//        simulationStatsModel.addRow(new Object[]{"Ambulance arrivals", safeNum(simulation.getSimulationAmbulanceArrivals()), "-"});
+//        simulationStatsModel.addRow(new Object[]{"Walk-in arrivals", safeNum(simulation.getSimulationWalkInArrivals()), "-"});
+//        simulationStatsModel.addRow(new Object[]{"Avg waiting time initial exam (s)", formatDouble(simulation.getSimulationAverageInitialExamWait()), "-"});
+//        simulationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - ambulance (s)", formatDouble(simulation.getSimulationAverageDoctorWaitAmbulance()), "-"});
+//        simulationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - walk-in (s)", formatDouble(simulation.getSimulationAverageDoctorWaitWalkIn()), "-"});
+//        simulationStatsModel.addRow(new Object[]{"Avg time in system (s)", formatDouble(simulation.getSimulationAverageSystemTime()), "-"});
+//        simulationStatsModel.addRow(new Object[]{"Avg initial exam duration - ambulance (min)", formatDouble(simulation.getSimulationAverageInitialExamAmbulance()), "-"});
+//        simulationStatsModel.addRow(new Object[]{"Avg initial exam duration - walk-in (min)", formatDouble(simulation.getSimulationAverageInitialExamWalkIn()), "-"});
+//        simulationStatsModel.addRow(new Object[]{"Avg doctor exam duration - ambulance (min)", formatDouble(simulation.getSimulationAverageDoctorExamAmbulance()), "-"});
+//        simulationStatsModel.addRow(new Object[]{"Avg doctor exam duration - walk-in (min)", formatDouble(simulation.getSimulationAverageDoctorExamWalkIn()), "-"});
 
-        replicationStatsModel.addRow(new Object[]{"--- REPLICATION STATS ---", "", ""});
-        replicationStatsModel.addRow(new Object[]{"Patients entered system", safeNum(simulation.getReplicationArrivals()), "-"});
-        replicationStatsModel.addRow(new Object[]{"Patients departed", safeNum(simulation.getReplicationDepartures()), "-"});
-        replicationStatsModel.addRow(new Object[]{"Ambulance arrivals", safeNum(simulation.getReplicationAmbulanceArrivals()), "-"});
-        replicationStatsModel.addRow(new Object[]{"Walk-in arrivals", safeNum(simulation.getReplicationWalkInArrivals()), "-"});
-        replicationStatsModel.addRow(new Object[]{"Avg waiting time initial exam (s)", formatDouble(simulation.getReplicationAverageInitialExamWait()), "-"});
-        replicationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - ambulance (s)", formatDouble(simulation.getReplicationAverageDoctorWaitAmbulance()), "-"});
-        replicationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - walk-in (s)", formatDouble(simulation.getReplicationAverageDoctorWaitWalkIn()), "-"});
-        replicationStatsModel.addRow(new Object[]{"Avg time in system (s)", formatDouble(simulation.getReplicationAverageSystemTime()), "-"});
-        replicationStatsModel.addRow(new Object[]{"Avg initial exam duration - ambulance (min)", formatDouble(simulation.getReplicationAverageInitialExamAmbulance()), "-"});
-        replicationStatsModel.addRow(new Object[]{"Avg initial exam duration - walk-in (min)", formatDouble(simulation.getReplicationAverageInitialExamWalkIn()), "-"});
-        replicationStatsModel.addRow(new Object[]{"Avg doctor exam duration - ambulance (min)", formatDouble(simulation.getReplicationAverageDoctorExamAmbulance()), "-"});
-        replicationStatsModel.addRow(new Object[]{"Avg doctor exam duration - walk-in (min)", formatDouble(simulation.getReplicationAverageDoctorExamWalkIn()), "-"});
+//        replicationStatsModel.addRow(new Object[]{"--- REPLICATION STATS ---", "", ""});
+//        replicationStatsModel.addRow(new Object[]{"Patients entered system", safeNum(simulation.getReplicationArrivals()), "-"});
+//        replicationStatsModel.addRow(new Object[]{"Patients departed", safeNum(simulation.getReplicationDepartures()), "-"});
+//        replicationStatsModel.addRow(new Object[]{"Ambulance arrivals", safeNum(simulation.getReplicationAmbulanceArrivals()), "-"});
+//        replicationStatsModel.addRow(new Object[]{"Walk-in arrivals", safeNum(simulation.getReplicationWalkInArrivals()), "-"});
+//        replicationStatsModel.addRow(new Object[]{"Avg waiting time initial exam (s)", formatDouble(simulation.getReplicationAverageInitialExamWait()), "-"});
+//        replicationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - ambulance (s)", formatDouble(simulation.getReplicationAverageDoctorWaitAmbulance()), "-"});
+//        replicationStatsModel.addRow(new Object[]{"Avg waiting time doctor exam - walk-in (s)", formatDouble(simulation.getReplicationAverageDoctorWaitWalkIn()), "-"});
+//        replicationStatsModel.addRow(new Object[]{"Avg time in system (s)", formatDouble(simulation.getReplicationAverageSystemTime()), "-"});
+//        replicationStatsModel.addRow(new Object[]{"Avg initial exam duration - ambulance (min)", formatDouble(simulation.getReplicationAverageInitialExamAmbulance()), "-"});
+//        replicationStatsModel.addRow(new Object[]{"Avg initial exam duration - walk-in (min)", formatDouble(simulation.getReplicationAverageInitialExamWalkIn()), "-"});
+//        replicationStatsModel.addRow(new Object[]{"Avg doctor exam duration - ambulance (min)", formatDouble(simulation.getReplicationAverageDoctorExamAmbulance()), "-"});
+//        replicationStatsModel.addRow(new Object[]{"Avg doctor exam duration - walk-in (min)", formatDouble(simulation.getReplicationAverageDoctorExamWalkIn()), "-"});
     }
 
     private void refreshEmployees(DefaultTableModel model, List<EmerDepEmployee> employees, EmployeeType type) {
@@ -428,15 +428,19 @@ public class GUI_EmergencyDepartment {
 
             Patient cp = e.getCurrentPatient();
             String currentPatient = (cp == null) ? "-" : cp.getId() + " (" + cp.getType() + ")";
-            double workTime = e.isBusy()
-                    ? simulation.currentTime() - e.getWorkStartTime()
-                    : e.getTotalWorkTime();
+            double workTime;
+
+            if (e.getCurrentPatient() != null) {
+                workTime = simulation.currentTime() - e.getWorkStartTime();
+            } else {
+                workTime = e.getTotalWorkTime();
+            }
 
             model.addRow(new Object[]{
                     e.getId(),
                     currentPatient,
                     formatDouble(workTime),
-                    e.isBusy()
+                    e.getState()
             });
         }
     }

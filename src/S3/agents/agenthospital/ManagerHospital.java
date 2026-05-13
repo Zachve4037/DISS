@@ -94,6 +94,7 @@ public class ManagerHospital extends OSPABA.Manager {
     //meta! sender="ProcessDoctorsExamination", id="42", type="Finish"
     public void processFinishProcessDoctorsExamination(MessageForm message) {
         Message msg = (Message) message.createCopy();
+
         Patient patient = msg.getPatient();
 
         if (patient == null) {
@@ -101,34 +102,49 @@ public class ManagerHospital extends OSPABA.Manager {
         }
 
         EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+
+        // trvanie lekárskeho vyšetrenia
         sim.recordDoctorExamDuration(patient, msg.getProcessDuration());
 
+        // pacient už nečaká na lekárske vyšetrenie
         patient.setWaitingForDoctorsExam(false);
 
+        // ukončenie práce doktora
         EmerDepEmployee doctor = msg.getDoctor();
         if (doctor != null) {
             doctor.endWork();
         }
 
+        // ukončenie práce sestry
         EmerDepEmployee nurse = msg.getNurse();
         if (nurse != null) {
             nurse.endWork();
         }
 
-        msg.setCode(Mc.releaseResources);
-        msg.setAddressee(mySim().findAgent(Id.agentResources));
-        notice(msg);
+        // uvoľnenie ambulancie
+        Message releaseMsg = (Message) msg.createCopy();
+        releaseMsg.setCode(Mc.releaseResources);
+        releaseMsg.setAddressee(mySim().findAgent(Id.agentResources));
+        notice(releaseMsg);
 
-        Message departureMsg = new Message(mySim());
-        departureMsg.setCode(Mc.patientDeparture);
-        departureMsg.setPatient(patient);
-        departureMsg.setAddressee(mySim().findAgent(Id.agentBoss));
-        notice(departureMsg);
+        // pacient musí fyzicky odísť zo systému cez AgentMovement
+        Message leavingMsg = (Message) msg.createCopy();
+        leavingMsg.setCode(Mc.handleLeavingPatient);
+        leavingMsg.setAddressee(mySim().findAgent(Id.agentMovement));
+        request(leavingMsg);
 
-        Message retry = new Message(mySim());
-        retry.setCode(Mc.tryStartDoctorsExamination);
-        retry.setAddressee(myAgent());
-        notice(retry);
+        // po uvoľnení zdrojov skús rozbehnúť ďalšie lekárske vyšetrenie
+        Message retryDoctors = new Message(mySim());
+        retryDoctors.setCode(Mc.tryStartDoctorsExamination);
+        retryDoctors.setAddressee(myAgent());
+        notice(retryDoctors);
+
+        // ak už nečaká nikto na lekára / alebo ostali voľné zdroje,
+        // môžeš skúsiť aj vstupné vyšetrenie
+        Message retryInitial = new Message(mySim());
+        retryInitial.setCode(Mc.tryStartInitialExamination);
+        retryInitial.setAddressee(myAgent());
+        notice(retryInitial);
     }
 
     //meta! sender="ProcessInitialExamintation", id="40", type="Finish"
@@ -351,6 +367,12 @@ public class ManagerHospital extends OSPABA.Manager {
     }
 
     private void processTryStartInitialExamination(MessageForm message) {
+        EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+
+        if (!sim.agentPatients().getDoctorsExaminationQueue().isEmpty()) {
+            return;
+        }
+
         Message req = (Message) message.createCopy();
         req.setCode(Mc.getPatientForInitialExamination);
         req.setAddressee(mySim().findAgent(Id.agentPatients));

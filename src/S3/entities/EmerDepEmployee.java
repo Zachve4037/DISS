@@ -9,7 +9,9 @@ public class EmerDepEmployee extends Entity {
 
     private Patient currentPatient;
     private Clinic currentClinic;
-    private volatile boolean busy;
+
+    private EmployeeState state;
+
     private double workTime;
     private double workStartTime;
     private double totalWorkTime;
@@ -19,11 +21,11 @@ public class EmerDepEmployee extends Entity {
         this.id = id;
         this.type = type;
         this.currentPatient = null;
-        this.busy = false;
+        this.currentClinic = null;
+        this.state = EmployeeState.IDLE;
         this.workTime = 0;
         this.workStartTime = 0;
         this.totalWorkTime = 0;
-        this.currentClinic = null;
     }
 
     public int getId() {
@@ -34,9 +36,35 @@ public class EmerDepEmployee extends Entity {
         return type;
     }
 
+    public EmployeeState getState() {
+        return state;
+    }
+
+    public boolean isBusy() {
+        return state != EmployeeState.IDLE;
+    }
+
+    public void reserve(Clinic clinic) {
+        this.currentClinic = clinic;
+        this.state = EmployeeState.RESERVED;
+    }
+
+    public void startMoving() {
+        this.state = EmployeeState.MOVING;
+    }
+
+    public void finishMoving() {
+        this.state = EmployeeState.RESERVED;
+    }
+
+    public void finishInitialMovement() {
+        this.state = EmployeeState.IDLE;
+    }
+
     public void startWork(Patient patient) {
         this.workStartTime = mySim().currentTime();
         this.currentPatient = patient;
+        this.state = EmployeeState.WORKING;
 
         if (patient != null) {
             patient.startService();
@@ -44,23 +72,22 @@ public class EmerDepEmployee extends Entity {
     }
 
     public void endWork() {
-        this.busy = false;
-        this.workTime = mySim().currentTime() - this.workStartTime;
-        this.totalWorkTime += this.workTime;
+        if (state == EmployeeState.WORKING) {
+            this.workTime = mySim().currentTime() - this.workStartTime;
+            this.totalWorkTime += this.workTime;
+        }
 
         if (currentPatient != null) {
             currentPatient.endService();
         }
 
         this.currentPatient = null;
+        this.currentClinic = null;
+        this.state = EmployeeState.IDLE;
     }
 
     public void setBusy(boolean busy) {
-        this.busy = busy;
-    }
-
-    public boolean isBusy() {
-        return busy;
+        this.state = busy ? EmployeeState.RESERVED : EmployeeState.IDLE;
     }
 
     public Patient getCurrentPatient() {
