@@ -191,7 +191,7 @@ public class GUI_EmergencyDepartment {
 
         JSplitPane topSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, statsPanel, lower);
         topSplit.setResizeWeight(0.28);
-        topSplit.setDividerLocation(360);
+        topSplit.setDividerLocation(382);
         topSplit.setContinuousLayout(true);
         topSplit.setBorder(null);
 
