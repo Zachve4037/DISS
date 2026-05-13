@@ -67,6 +67,7 @@ public class ProcessInitialExamintation extends OSPABA.Process {
         nurse.startWork(patient);
 
         Clinic clinic = msg.getClinic();
+        patient.setLastClinic(clinic);
         clinic.setOccupied(true);
         ((EmergencyDepartmentSimulation) mySim()).edAnimator().employeeWorking(nurse, clinic);
         ((EmergencyDepartmentSimulation) mySim()).edAnimator().clinicOccupied(clinic, true);

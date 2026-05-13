@@ -20,6 +20,7 @@ public class Patient extends Entity {
 
     private boolean isWaitingForDoctorsExam;
     private boolean isWaitingForInitialExam;
+    private Clinic lastClinic;
 
     private double initialExamWaitTime;
     private double doctorsExamWaitTime;
@@ -51,6 +52,7 @@ public class Patient extends Entity {
 
         this.isWaitingForInitialExam = true;
         this.isWaitingForDoctorsExam = false;
+        this.lastClinic = null;
 
         this.initialExamWaitTime = 0;
         this.doctorsExamWaitTime = 0;
@@ -175,5 +177,13 @@ public class Patient extends Entity {
 
     public void setWaitingForInitialExam(boolean waitingForInitialExam) {
         isWaitingForInitialExam = waitingForInitialExam;
+    }
+
+    public Clinic getLastClinic() {
+        return lastClinic;
+    }
+
+    public void setLastClinic(Clinic lastClinic) {
+        this.lastClinic = lastClinic;
     }
 }

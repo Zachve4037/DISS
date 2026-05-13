@@ -4,6 +4,7 @@ import OSPABA.*;
 import S3.entities.Clinic;
 import S3.entities.ClinicType;
 import S3.entities.EmerDepEmployee;
+import S3.entities.Patient;
 import S3.simulation.*;
 
 //meta! id="61"
@@ -32,9 +33,7 @@ public class ManagerResources extends OSPABA.Manager {
         EmerDepEmployee nurse = myAgent().getNurses().stream().filter(
                 n -> !n.isBusy()
         ).findFirst().orElse(null);
-        Clinic clinic = myAgent().getClinics().stream().filter(
-                c -> !c.isOccupied() && c.getType() == ClinicType.B
-        ).findFirst().orElse(null);
+        Clinic clinic = findClinicForDoctorExamination(msg.getPatient(), ClinicType.B);
         setResponseMessage(msg, doctor, nurse, clinic);
     }
 
@@ -70,10 +69,76 @@ public class ManagerResources extends OSPABA.Manager {
         EmerDepEmployee nurse = myAgent().getNurses().stream().filter(
                 n -> !n.isBusy()
         ).findFirst().orElse(null);
-        Clinic clinic = myAgent().getClinics().stream().filter(
-                c -> !c.isOccupied() && c.getType() == ClinicType.A
-        ).findFirst().orElse(null);
+        Clinic clinic = findClinicForDoctorExamination(msg.getPatient(), ClinicType.A);
         setResponseMessage(msg, doctor, nurse, clinic);
+    }
+
+    public void processAllocateDoctorsExaminationResources(MessageForm message) {
+        Message msg = (Message) message.createCopy();
+        EmerDepEmployee doctor = myAgent().getDoctors().stream().filter(
+                d -> !d.isBusy()
+        ).findFirst().orElse(null);
+        EmerDepEmployee nurse = myAgent().getNurses().stream().filter(
+                n -> !n.isBusy()
+        ).findFirst().orElse(null);
+        Clinic clinic = findClinicForDoctorExamination(msg.getPatient());
+        setResponseMessage(msg, doctor, nurse, clinic);
+    }
+
+    private Clinic findClinicForDoctorExamination(Patient patient, ClinicType requestedType) {
+        if (patient == null || requestedType == null) {
+            return null;
+        }
+
+        Clinic lastClinic = patient.getLastClinic();
+        if (lastClinic != null
+                && !lastClinic.isOccupied()
+                && lastClinic.getType() == requestedType
+                && canUseClinic(patient, requestedType)) {
+            return lastClinic;
+        }
+
+        return firstFreeClinic(requestedType);
+    }
+
+    private Clinic findClinicForDoctorExamination(Patient patient) {
+        if (patient == null) {
+            return null;
+        }
+
+        Clinic lastClinic = patient.getLastClinic();
+        if (lastClinic != null && !lastClinic.isOccupied() && canUseClinic(patient, lastClinic.getType())) {
+            return lastClinic;
+        }
+
+        if (patient.getPriority() <= 2) {
+            return firstFreeClinic(ClinicType.A);
+        }
+
+        if (patient.getPriority() == 5) {
+            return firstFreeClinic(ClinicType.B);
+        }
+
+        Clinic clinicA = firstFreeClinic(ClinicType.A);
+        return clinicA != null ? clinicA : firstFreeClinic(ClinicType.B);
+    }
+
+    private Clinic firstFreeClinic(ClinicType clinicType) {
+        return myAgent().getClinics().stream().filter(
+                c -> !c.isOccupied() && c.getType() == clinicType
+        ).findFirst().orElse(null);
+    }
+
+    private boolean canUseClinic(Patient patient, ClinicType clinicType) {
+        if (patient == null || clinicType == null) {
+            return false;
+        }
+
+        int priority = patient.getPriority();
+        if (clinicType == ClinicType.A) {
+            return priority >= 1 && priority <= 4;
+        }
+        return priority >= 3 && priority <= 5;
     }
 
     private void setResponseMessage(Message msg, EmerDepEmployee doctor, EmerDepEmployee nurse, Clinic clinic) {
@@ -154,6 +219,10 @@ public class ManagerResources extends OSPABA.Manager {
 
             case Mc.allocateDoctorsExaminationAResources:
                 processAllocateDoctorsExaminationAResources(message);
+                break;
+
+            case Mc.allocateDoctorsExaminationResources:
+                processAllocateDoctorsExaminationResources(message);
                 break;
 
             case Mc.releaseResources:

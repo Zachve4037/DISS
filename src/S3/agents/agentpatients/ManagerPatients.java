@@ -24,12 +24,10 @@ public class ManagerPatients extends OSPABA.Manager {
     //meta! sender="AgentHospital", id="79", type="Request"
     public void processGetPatientForDoctorsExamination(MessageForm message) {
         Message msg = (Message) message.createCopy();
-
         ClinicType requestedClinicType = msg.getRequestedClinicType();
         Patient patient = requestedClinicType == null
-                ? null
+                ? myAgent().pollDoctorPatient()
                 : myAgent().pollDoctorPatientFor(requestedClinicType);
-
         msg.setPatient(patient);
         ((EmergencyDepartmentSimulation) mySim()).edAnimator().refreshQueues();
         response(msg);
@@ -72,9 +70,17 @@ public class ManagerPatients extends OSPABA.Manager {
             current.startWaitingForDoctorsExam();
             myAgent().getDoctorsExaminationQueue().add(current);
             ((EmergencyDepartmentSimulation) mySim()).edAnimator().refreshQueues();
+            scheduleHospitalDispatch();
         } else {
             System.out.println("Patient " + current.getId() + " is not waiting for any examination.");
         }
+    }
+
+    private void scheduleHospitalDispatch() {
+        Message retry = new Message(mySim());
+        retry.setCode(Mc.tryStartDoctorsExamination);
+        retry.setAddressee(mySim().findAgent(Id.agentHospital));
+        notice(retry);
     }
 
     //meta! userInfo="Generated code: do not modify", tag="begin"

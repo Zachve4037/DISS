@@ -101,6 +101,31 @@ public class AgentPatients extends OSPABA.Agent {
         return best;
     }
 
+    public boolean hasDoctorPatients() {
+        return !doctorsExaminationQueue.isEmpty();
+    }
+
+    public boolean hasDoctorPatientOnlyForA() {
+        for (Patient patient : doctorsExaminationQueue) {
+            if (patient.getPriority() == 1 || patient.getPriority() == 2) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Patient peekDoctorPatient() {
+        return doctorsExaminationQueue.peek();
+    }
+
+    public Patient pollDoctorPatient() {
+        return doctorsExaminationQueue.poll();
+    }
+
+    public boolean hasInitialPatients() {
+        return !initialExaminationQueue.isEmpty();
+    }
+
     private boolean canUseClinic(Patient patient, ClinicType clinicType) {
         if (patient == null || clinicType == null) {
             return false;

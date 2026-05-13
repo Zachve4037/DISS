@@ -78,6 +78,7 @@ public class AgentResources extends OSPABA.Agent {
         addOwnMessage(Mc.allocateDoctorsExaminationBResources);
         addOwnMessage(Mc.allocateInitialExaminationResources);
         addOwnMessage(Mc.allocateDoctorsExaminationAResources);
+        addOwnMessage(Mc.allocateDoctorsExaminationResources);
         addOwnMessage(Mc.releaseResources);
     }
     //meta! tag="end"

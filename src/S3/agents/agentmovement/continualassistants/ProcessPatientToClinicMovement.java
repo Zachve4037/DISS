@@ -12,6 +12,7 @@ import java.util.Random;
 
 //meta! id="97"
 public class ProcessPatientToClinicMovement extends OSPABA.Process {
+    private static final double SAME_CLINIC_TRANSFER_EPSILON = 1e-6;
     private ContinuousTriangularDistRNG movementTime = new ContinuousTriangularDistRNG(new Random(), new TriangleInterval(15, 20, 45));
 
     public ProcessPatientToClinicMovement(int id, Simulation mySim, CommonAgent myAgent) {
@@ -27,12 +28,21 @@ public class ProcessPatientToClinicMovement extends OSPABA.Process {
     //meta! sender="AgentMovement", id="98", type="Start"
     public void processStart(MessageForm message) {
         Message msg = (Message) message.createCopy();
-        double time = movementTime.generate();
         Patient patient = msg.getPatient();
         Clinic clinic = msg.getClinic();
+        double time = isSameClinicDoctorExamination(patient, clinic)
+                ? SAME_CLINIC_TRANSFER_EPSILON
+                : movementTime.generate();
         ((EmergencyDepartmentSimulation) mySim()).edAnimator().movePatientToClinic(patient, clinic, time);
         msg.setCode(Mc.finish);
         hold(time, msg);
+    }
+
+    private boolean isSameClinicDoctorExamination(Patient patient, Clinic clinic) {
+        return patient != null
+                && clinic != null
+                && patient.isWaitingForDoctorsExam()
+                && patient.getLastClinic() == clinic;
     }
 
     //meta! userInfo="Process messages defined in code", id="0"
