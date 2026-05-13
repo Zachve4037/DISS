@@ -30,14 +30,8 @@ public class ManagerMovement extends OSPABA.Manager {
 
     //meta! sender="AgentHospital", id="72", type="Request"
     public void processHandeDoctorsMovement(MessageForm message) {
-        Message msg = (Message) message;
-
-        if (msg.getDoctor() != null) {
-            msg.getDoctor().startMoving();
-        }
-
-        msg.setAddressee(myAgent().findAssistant(Id.processDoctorsMovement));
-        startContinualAssistant(msg);
+        message.setAddressee(myAgent().findAssistant(Id.processDoctorsMovement));
+        startContinualAssistant(message);
     }
 
     //meta! sender="AgentHospital", id="75", type="Request"
@@ -48,14 +42,8 @@ public class ManagerMovement extends OSPABA.Manager {
 
     //meta! sender="AgentHospital", id="73", type="Request"
     public void processHandleNursesMovement(MessageForm message) {
-        Message msg = (Message) message;
-
-        if (msg.getNurse() != null) {
-            msg.getNurse().startMoving();
-        }
-
-        msg.setAddressee(myAgent().findAssistant(Id.processNursesMovement));
-        startContinualAssistant(msg);
+        message.setAddressee(myAgent().findAssistant(Id.processNursesMovement));
+        startContinualAssistant(message);
     }
 
     //meta! sender="AgentHospital", id="76", type="Request"
@@ -78,14 +66,9 @@ public class ManagerMovement extends OSPABA.Manager {
 
     //meta! sender="ProcessDoctorsMovement", id="90", type="Finish"
     public void processFinishProcessDoctorsMovement(MessageForm message) {
-        Message msg = (Message) message;
-
-        if (msg.getDoctor() != null) {
-            msg.getDoctor().finishMoving();
-        }
-
-        msg.setCode(Mc.handleDoctorsMovement);
-        response(msg);
+        message.setCode(Mc.handleDoctorsMovement);
+        EmerDepEmployee doctor = ((Message)message).getDoctor();
+        response(message);
     }
 
     //meta! sender="ProcessPatientToClinicMovement", id="98", type="Finish"
@@ -98,14 +81,8 @@ public class ManagerMovement extends OSPABA.Manager {
 
     //meta! sender="ProcessNursesMovement", id="92", type="Finish"
     public void processFinishProcessNursesMovement(MessageForm message) {
-        Message msg = (Message) message;
-
-        if (msg.getNurse() != null) {
-            msg.getNurse().finishMoving();
-        }
-
-        msg.setCode(Mc.handleNursesMovement);
-        response(msg);
+        message.setCode(Mc.handleNursesMovement);
+        response(message);
     }
 
     //meta! sender="ProcessPatientLeavingMovement", id="96", type="Finish"
@@ -116,34 +93,18 @@ public class ManagerMovement extends OSPABA.Manager {
 
     //meta! sender="AgentHospital", id="109", type="Request"
     public void processHandleInitialPersonalMovement(MessageForm message) {
-        Message msg = (Message) message;
-
-        EmerDepEmployee employee = msg.getDoctor() != null
-                ? msg.getDoctor()
-                : msg.getNurse();
-
-        if (employee != null) {
-            employee.startMoving();
-        }
-
-        msg.setAddressee(myAgent().findAssistant(Id.processInitialPersonalMovement));
-        startContinualAssistant(msg);
+        message.setAddressee(myAgent().findAssistant(Id.processInitialPersonalMovement));
+        startContinualAssistant(message);
     }
 
     //meta! sender="ProcessInitialPersonalMovement", id="106", type="Finish"
     public void processFinishProcessInitialPersonalMovement(MessageForm message) {
-        Message msg = (Message) message;
-
-        EmerDepEmployee employee = msg.getDoctor() != null
-                ? msg.getDoctor()
-                : msg.getNurse();
-
-        if (employee != null) {
-            employee.finishInitialMovement();
-        }
-
-        msg.setCode(Mc.handleInitialPersonalMovement);
-        response(msg);
+        message.setCode(Mc.handleInitialPersonalMovement);
+        EmerDepEmployee employee = ((Message) message).getDoctor() != null
+                ? ((Message) message).getDoctor()
+                : ((Message) message).getNurse();
+        employee.setBusy(false);
+        response(message);
     }
 
     //meta! userInfo="Generated code: do not modify", tag="begin"

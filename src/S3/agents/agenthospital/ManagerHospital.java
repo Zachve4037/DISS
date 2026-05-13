@@ -20,7 +20,6 @@ public class ManagerHospital extends OSPABA.Manager {
     @Override
     public void prepareReplication() {
         super.prepareReplication();
-        // Setup component for the next replication
 
         if (petriNet() != null) {
             petriNet().clear();
@@ -29,33 +28,18 @@ public class ManagerHospital extends OSPABA.Manager {
 
     //meta! sender="AgentResources", id="71", type="Response"
     public void processAllocateDoctorsExaminationBResources(MessageForm message) {
-        Message msg = (Message) message;
-        if (msg.getNurse() == null || msg.getClinic() == null || msg.getPatient() == null || msg.getDoctor() == null) {
-            requeuePatient(msg);
-            scheduleTryInitial();
-            return;
-        }
-
-        startPatientMovementToClinic(msg);
-
-        // Skús hneď obsadiť aj ďalšie voľné zdroje.
-        scheduleTryDoctors();
+        startDoctorExaminationIfResourcesAllocated((Message) message);
     }
 
     //meta! sender="AgentMovement", id="74", type="Response"
     public void processHandlePatientToWaitingRoom(MessageForm message) {
         Message msg = (Message) message.createCopy();
-
         msg.setCode(Mc.putPatient);
         msg.setAddressee(mySim().findAgent(Id.agentPatients));
-
         notice(msg);
 
-        Message startMsg = new Message(mySim());
-        startMsg.setCode(Mc.tryStartInitialExamination);
-        startMsg.setAddressee(myAgent());
-
-        notice(startMsg);
+        scheduleTryDoctors();
+        scheduleTryInitial();
     }
 
     //meta! sender="AgentMovement", id="72", type="Response"
@@ -76,23 +60,15 @@ public class ManagerHospital extends OSPABA.Manager {
     //meta! sender="AgentPatients", id="79", type="Response"
     public void processGetPatientForDoctorsExamination(MessageForm message) {
         Message msg = (Message) message;
-        Patient p = msg.getPatient();
 
-        if (p == null) {
-            // Pre daný typ ambulancie nie je vhodný pacient. Voľné zdroje môžu ísť na vstupné vyšetrenie.
+        if (msg.getPatient() == null || msg.getRequestedClinicType() == null) {
             scheduleTryInitial();
             return;
         }
 
-        ClinicType requestedType = msg.getRequestedClinicType();
-
-        if (requestedType == ClinicType.B) {
-            msg.setCode(Mc.allocateDoctorsExaminationBResources);
-        } else {
-            // Defaultne A. Pre priority 1/2 je to jediná možnosť; pre 3/4 je to A-vetva.
-            msg.setCode(Mc.allocateDoctorsExaminationAResources);
-        }
-
+        msg.setCode(msg.getRequestedClinicType() == ClinicType.A
+                ? Mc.allocateDoctorsExaminationAResources
+                : Mc.allocateDoctorsExaminationBResources);
         msg.setAddressee(mySim().findAgent(Id.agentResources));
         request(msg);
     }
@@ -100,7 +76,6 @@ public class ManagerHospital extends OSPABA.Manager {
     //meta! sender="ProcessDoctorsExamination", id="42", type="Finish"
     public void processFinishProcessDoctorsExamination(MessageForm message) {
         Message msg = (Message) message.createCopy();
-
         Patient patient = msg.getPatient();
 
         if (patient == null) {
@@ -109,42 +84,32 @@ public class ManagerHospital extends OSPABA.Manager {
 
         EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
 
-        // pacient už nečaká na lekárske vyšetrenie
         patient.setWaitingForDoctorsExam(false);
 
-        // ukončenie práce doktora
         EmerDepEmployee doctor = msg.getDoctor();
         if (doctor != null) {
             doctor.endWork();
         }
 
-        // ukončenie práce sestry
         EmerDepEmployee nurse = msg.getNurse();
         if (nurse != null) {
             nurse.endWork();
         }
 
-        // uvoľnenie ambulancie musí prebehnúť pred retry správami, inak retry často vidí kliniku ešte obsadenú.
-        releaseResourcesNow(msg);
+        releaseClinicNow(msg);
+        Message releaseMsg = (Message) msg.createCopy();
+        releaseMsg.setCode(Mc.releaseResources);
+        releaseMsg.setAddressee(mySim().findAgent(Id.agentResources));
+        notice(releaseMsg);
 
-        // pacient musí fyzicky odísť zo systému cez AgentMovement
+        // After doctor examination the patient still has to leave the department physically.
         Message leavingMsg = (Message) msg.createCopy();
         leavingMsg.setCode(Mc.handleLeavingPatient);
         leavingMsg.setAddressee(mySim().findAgent(Id.agentMovement));
         request(leavingMsg);
 
-        // po uvoľnení zdrojov skús rozbehnúť ďalšie lekárske vyšetrenie
-        Message retryDoctors = new Message(mySim());
-        retryDoctors.setCode(Mc.tryStartDoctorsExamination);
-        retryDoctors.setAddressee(myAgent());
-        notice(retryDoctors);
-
-        // ak už nečaká nikto na lekára / alebo ostali voľné zdroje,
-        // môžeš skúsiť aj vstupné vyšetrenie
-        Message retryInitial = new Message(mySim());
-        retryInitial.setCode(Mc.tryStartInitialExamination);
-        retryInitial.setAddressee(myAgent());
-        notice(retryInitial);
+        scheduleTryDoctors();
+        scheduleTryInitial();
     }
 
     //meta! sender="ProcessInitialExamintation", id="40", type="Finish"
@@ -156,6 +121,8 @@ public class ManagerHospital extends OSPABA.Manager {
             return;
         }
 
+        EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+
         patient.setWaitingForInitialExam(false);
         patient.setWaitingForDoctorsExam(true);
 
@@ -164,36 +131,43 @@ public class ManagerHospital extends OSPABA.Manager {
             nurse.endWork();
         }
 
-        releaseResourcesNow(msg);
+        releaseClinicNow(msg);
+        Message releaseMsg = (Message) msg.createCopy();
+        releaseMsg.setCode(Mc.releaseResources);
+        releaseMsg.setAddressee(mySim().findAgent(Id.agentResources));
+        notice(releaseMsg);
 
         Message putMsg = (Message) msg.createCopy();
+        putMsg.setDoctor(null);
+        putMsg.setNurse(null);
+        putMsg.setClinic(null);
+        putMsg.setRequestedClinicType(null);
         putMsg.setCode(Mc.putPatient);
         putMsg.setAddressee(mySim().findAgent(Id.agentPatients));
         notice(putMsg);
 
-        Message doctorExamMsg = new Message(mySim());
-        doctorExamMsg.setCode(Mc.tryStartDoctorsExamination);
-        doctorExamMsg.setAddressee(myAgent());
-        notice(doctorExamMsg);
-
-        Message retry = new Message(mySim());
-        retry.setCode(Mc.tryStartInitialExamination);
-        retry.setAddressee(myAgent());
-        notice(retry);
+        scheduleTryDoctors();
+        scheduleTryInitial();
     }
 
     //meta! sender="AgentResources", id="69", type="Response"
     public void processAllocateInitialExaminationResources(MessageForm message) {
         Message msg = (Message) message;
+
         if (msg.getNurse() == null || msg.getClinic() == null || msg.getPatient() == null) {
             requeuePatient(msg);
+            scheduleTryDoctors();
             return;
         }
 
-        startPatientMovementToClinic(msg);
+        // Waiting ends when the patient is selected and starts moving to the clinic.
+        msg.getPatient().endWaiting();
 
-        // Toto je dôležité: jeden trigger nesmie spustiť iba jedno vstupné vyšetrenie,
-        // inak pri veľkom rade ostanú voľné B ambulancie/sestry nevyužité.
+        msg.setCode(Mc.handlePatientToClinic);
+        msg.setAddressee(mySim().findAgent(Id.agentMovement));
+        request(msg);
+
+        scheduleTryDoctors();
         scheduleTryInitial();
     }
 
@@ -225,17 +199,7 @@ public class ManagerHospital extends OSPABA.Manager {
 
     //meta! sender="AgentResources", id="70", type="Response"
     public void processAllocateDoctorsExaminationAResources(MessageForm message) {
-        Message msg = (Message) message;
-        if (msg.getNurse() == null || msg.getClinic() == null || msg.getPatient() == null || msg.getDoctor() == null) {
-            requeuePatient(msg);
-            scheduleTryInitial();
-            return;
-        }
-
-        startPatientMovementToClinic(msg);
-
-        // Skús hneď obsadiť aj ďalšie voľné zdroje.
-        scheduleTryDoctors();
+        startDoctorExaminationIfResourcesAllocated((Message) message);
     }
 
     //meta! sender="AgentPatients", id="78", type="Response"
@@ -244,6 +208,7 @@ public class ManagerHospital extends OSPABA.Manager {
         if (msg.getPatient() == null) {
             return;
         }
+
         msg.setCode(Mc.allocateInitialExaminationResources);
         msg.setAddressee(mySim().findAgent(Id.agentResources));
         request(msg);
@@ -253,26 +218,20 @@ public class ManagerHospital extends OSPABA.Manager {
     public void processHandleNursesMovement(MessageForm message) {
         int senderId = message.sender().id();
 
-        // movement dokončený
         if (senderId == Id.agentMovement) {
-
             Message msg = (Message) message.createCopy();
-            Patient patient = msg.getPatient();
-            patient.endWaiting();
+            if (msg.getPatient() != null) {
+                msg.getPatient().endWaiting();
+            }
             msg.setCode(Mc.handlePatientToClinic);
             msg.setAddressee(mySim().findAgent(Id.agentMovement));
-
             request(msg);
-
             return;
         }
 
-        // spustenie movementu
         Message req = (Message) message.createCopy();
-
         req.setCode(Mc.handleNursesMovement);
         req.setAddressee(mySim().findAgent(Id.agentMovement));
-
         request(req);
     }
 
@@ -299,9 +258,7 @@ public class ManagerHospital extends OSPABA.Manager {
                 msg.setCode(Mc.start);
                 msg.setAddressee(myAgent().findAssistant(Id.processDoctorsExamination));
                 startContinualAssistant(msg);
-                return;
             }
-
             return;
         }
 
@@ -309,6 +266,24 @@ public class ManagerHospital extends OSPABA.Manager {
         req.setCode(Mc.handlePatientToClinic);
         req.setAddressee(mySim().findAgent(Id.agentMovement));
         request(req);
+    }
+
+    private void startDoctorExaminationIfResourcesAllocated(Message msg) {
+        if (msg.getNurse() == null || msg.getClinic() == null || msg.getPatient() == null || msg.getDoctor() == null) {
+            requeuePatient(msg);
+            scheduleTryInitial();
+            return;
+        }
+
+        // Waiting ends as soon as the patient is selected and starts moving to the clinic.
+        msg.getPatient().endWaiting();
+
+        msg.setCode(Mc.handlePatientToClinic);
+        msg.setAddressee(mySim().findAgent(Id.agentMovement));
+        request(msg);
+
+        scheduleTryDoctors();
+        scheduleTryInitial();
     }
 
     private void requeuePatient(Message msg) {
@@ -320,35 +295,16 @@ public class ManagerHospital extends OSPABA.Manager {
         putBack.setDoctor(null);
         putBack.setNurse(null);
         putBack.setClinic(null);
+        putBack.setRequestedClinicType(null);
         putBack.setCode(Mc.putPatient);
         putBack.setAddressee(mySim().findAgent(Id.agentPatients));
         notice(putBack);
     }
 
-
-    private void releaseResourcesNow(Message msg) {
-        if (msg == null) {
-            return;
+    private void releaseClinicNow(Message msg) {
+        if (msg != null && msg.getClinic() != null) {
+            msg.getClinic().setOccupied(false);
         }
-
-        Clinic clinic = msg.getClinic();
-        if (clinic != null) {
-            clinic.setOccupied(false);
-        }
-    }
-
-    private void scheduleTryDoctors() {
-        Message retryDoctors = new Message(mySim());
-        retryDoctors.setCode(Mc.tryStartDoctorsExamination);
-        retryDoctors.setAddressee(myAgent());
-        notice(retryDoctors);
-    }
-
-    private void scheduleTryInitial() {
-        Message retryInitial = new Message(mySim());
-        retryInitial.setCode(Mc.tryStartInitialExamination);
-        retryInitial.setAddressee(myAgent());
-        notice(retryInitial);
     }
 
     //meta! userInfo="Process messages defined in code", id="0"
@@ -387,70 +343,17 @@ public class ManagerHospital extends OSPABA.Manager {
 
         if (senderId == Id.agentMovement) {
             remainingInitialMovements--;
-
             if (remainingInitialMovements <= 0) {
-                Message tryDoctors = new Message(mySim());
-                tryDoctors.setCode(Mc.tryStartDoctorsExamination);
-                tryDoctors.setAddressee(myAgent());
-                notice(tryDoctors);
-
-                Message tryInitial = new Message(mySim());
-                tryInitial.setCode(Mc.tryStartInitialExamination);
-                tryInitial.setAddressee(myAgent());
-                notice(tryInitial);
+                scheduleTryDoctors();
+                scheduleTryInitial();
             }
         }
-    }
-
-
-    private void startPatientMovementToClinic(Message msg) {
-        Patient patient = msg.getPatient();
-        if (patient != null) {
-            // Čakanie končí v momente, keď je pacient vybraný zo zoznamu,
-            // má pridelené zdroje a začína jeho presun do ambulancie.
-            patient.endWaiting();
-        }
-
-        msg.setCode(Mc.handlePatientToClinic);
-        msg.setAddressee(mySim().findAgent(Id.agentMovement));
-        request(msg);
-    }
-
-    private boolean canStartDoctorExaminationNow() {
-        EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
-
-        boolean freeDoctor = sim.agentResources().getDoctors().stream().anyMatch(d -> !d.isBusy());
-        boolean freeNurse = sim.agentResources().getNurses().stream().anyMatch(n -> !n.isBusy());
-        if (!freeDoctor || !freeNurse) {
-            return false;
-        }
-
-        boolean freeA = sim.agentResources().getClinics().stream()
-                .anyMatch(c -> !c.isOccupied() && c.getType() == ClinicType.A);
-        boolean freeB = sim.agentResources().getClinics().stream()
-                .anyMatch(c -> !c.isOccupied() && c.getType() == ClinicType.B);
-        if (!freeA && !freeB) {
-            return false;
-        }
-
-        return sim.agentPatients().getDoctorsExaminationQueues().stream().anyMatch(patient -> {
-            int priority = patient.getPriority();
-            if (priority <= 2) {
-                return freeA;
-            }
-            if (priority == 5) {
-                return freeB;
-            }
-            return freeA || freeB;
-        });
     }
 
     private void processTryStartInitialExamination(MessageForm message) {
-        // Default stratégia zo zadania/poznámok: lekárske vyšetrenie má prednosť
-        // pred vstupným vyšetrením. Neznamená to ale tvrdé blokovanie evidencie vždy,
-        // keď niekto čaká na lekára. Blokujeme ju iba vtedy, keď sa lekárske vyšetrenie
-        // vie spustiť hneď teraz s aktuálne voľnými zdrojmi.
-        if (canStartDoctorExaminationNow()) {
+        // Default policy: doctor examination has priority over initial examination,
+        // but only when a doctor examination can really start now.
+        if (canTryDoctorBranch(ClinicType.A) || canTryDoctorBranch(ClinicType.B)) {
             scheduleTryDoctors();
             return;
         }
@@ -462,26 +365,60 @@ public class ManagerHospital extends OSPABA.Manager {
     }
 
     private void processTryStartDoctorsExamination(MessageForm message) {
-        EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+        int freePairs = freeDoctorNursePairs();
 
-        if (sim.agentPatients().getDoctorsExaminationQueue().isEmpty()) {
-            scheduleTryInitial();
-            return;
+        if (freePairs > 0 && canTryDoctorBranch(ClinicType.A)) {
+            Message reqA = new Message(mySim());
+            reqA.setRequestedClinicType(ClinicType.A);
+            reqA.setCode(Mc.getPatientForDoctorsExamination);
+            reqA.setAddressee(mySim().findAgent(Id.agentPatients));
+            request(reqA);
+            freePairs--;
         }
 
-        // Pacient sa stále vyberá pred zdrojmi, ale osobitne pre A a B vetvu.
-        // Tak sa nestane, že pacient priority 1/2 zablokuje voľné B ambulancie.
-        Message reqA = (Message) message.createCopy();
-        reqA.setRequestedClinicType(ClinicType.A);
-        reqA.setCode(Mc.getPatientForDoctorsExamination);
-        reqA.setAddressee(mySim().findAgent(Id.agentPatients));
-        request(reqA);
+        if (freePairs > 0 && canTryDoctorBranch(ClinicType.B)) {
+            Message reqB = new Message(mySim());
+            reqB.setRequestedClinicType(ClinicType.B);
+            reqB.setCode(Mc.getPatientForDoctorsExamination);
+            reqB.setAddressee(mySim().findAgent(Id.agentPatients));
+            request(reqB);
+        }
+    }
 
-        Message reqB = (Message) message.createCopy();
-        reqB.setRequestedClinicType(ClinicType.B);
-        reqB.setCode(Mc.getPatientForDoctorsExamination);
-        reqB.setAddressee(mySim().findAgent(Id.agentPatients));
-        request(reqB);
+    private boolean canTryDoctorBranch(ClinicType clinicType) {
+        EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+        return freeDoctorNursePairs() > 0
+                && hasFreeClinic(clinicType)
+                && sim.agentPatients().hasDoctorPatientFor(clinicType);
+    }
+
+    private int freeDoctorNursePairs() {
+        EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+        AgentResources resources = sim.agentResources();
+
+        long freeDoctors = resources.getDoctors().stream().filter(d -> !d.isBusy()).count();
+        long freeNurses = resources.getNurses().stream().filter(n -> !n.isBusy()).count();
+        return (int) Math.min(freeDoctors, freeNurses);
+    }
+
+    private boolean hasFreeClinic(ClinicType clinicType) {
+        EmergencyDepartmentSimulation sim = (EmergencyDepartmentSimulation) mySim();
+        return sim.agentResources().getClinics().stream()
+                .anyMatch(c -> !c.isOccupied() && c.getType() == clinicType);
+    }
+
+    private void scheduleTryDoctors() {
+        Message retry = new Message(mySim());
+        retry.setCode(Mc.tryStartDoctorsExamination);
+        retry.setAddressee(myAgent());
+        notice(retry);
+    }
+
+    private void scheduleTryInitial() {
+        Message retry = new Message(mySim());
+        retry.setCode(Mc.tryStartInitialExamination);
+        retry.setAddressee(myAgent());
+        notice(retry);
     }
 
     //meta! userInfo="Generated code: do not modify", tag="begin"
@@ -570,5 +507,4 @@ public class ManagerHospital extends OSPABA.Manager {
     public AgentHospital myAgent() {
         return (AgentHospital) super.myAgent();
     }
-
 }

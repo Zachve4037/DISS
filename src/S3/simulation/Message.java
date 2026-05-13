@@ -2,17 +2,17 @@ package S3.simulation;
 
 import OSPABA.*;
 import S3.entities.Clinic;
-import S3.entities.ClinicType;
 import S3.entities.Patient;
 import S3.entities.EmerDepEmployee;
+import S3.entities.ClinicType;
 
 public class Message extends OSPABA.MessageForm {
     private Patient patient;
     private EmerDepEmployee doctor;
     private EmerDepEmployee nurse;
     private Clinic clinic;
-    private double processDuration;
     private ClinicType requestedClinicType;
+    private double processDuration;
 
     public Message(Simulation mySim) {
         super(mySim);
@@ -20,8 +20,8 @@ public class Message extends OSPABA.MessageForm {
         this.doctor = null;
         this.nurse = null;
         this.clinic = null;
-        this.processDuration = -1;
         this.requestedClinicType = null;
+        this.processDuration = -1;
     }
 
     private Message(Message original) {
@@ -42,8 +42,8 @@ public class Message extends OSPABA.MessageForm {
         this.doctor = original.doctor;
         this.nurse = original.nurse;
         this.clinic = original.clinic;
-        this.processDuration = original.processDuration;
         this.requestedClinicType = original.requestedClinicType;
+        this.processDuration = original.processDuration;
     }
 
     public EmerDepEmployee getNurse() {
@@ -78,19 +78,19 @@ public class Message extends OSPABA.MessageForm {
         this.doctor = doctor;
     }
 
-    public double getProcessDuration() {
-        return processDuration;
-    }
-
-    public void setProcessDuration(double processDuration) {
-        this.processDuration = processDuration;
-    }
-
     public ClinicType getRequestedClinicType() {
         return requestedClinicType;
     }
 
     public void setRequestedClinicType(ClinicType requestedClinicType) {
         this.requestedClinicType = requestedClinicType;
+    }
+
+    public double getProcessDuration() {
+        return processDuration;
+    }
+
+    public void setProcessDuration(double processDuration) {
+        this.processDuration = processDuration;
     }
 }

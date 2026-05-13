@@ -1,8 +1,8 @@
 package S3.agents.agentpatients;
 
 import OSPABA.*;
-import S3.entities.Patient;
 import S3.entities.ClinicType;
+import S3.entities.Patient;
 import S3.simulation.*;
 
 //meta! id="62"
@@ -15,7 +15,6 @@ public class ManagerPatients extends OSPABA.Manager {
     @Override
     public void prepareReplication() {
         super.prepareReplication();
-        // Setup component for the next replication
 
         if (petriNet() != null) {
             petriNet().clear();
@@ -26,17 +25,10 @@ public class ManagerPatients extends OSPABA.Manager {
     public void processGetPatientForDoctorsExamination(MessageForm message) {
         Message msg = (Message) message.createCopy();
 
-        Patient patient;
-        ClinicType requestedType = msg.getRequestedClinicType();
-
-        // Stále je to flow „najprv pacient, potom zdroje“.
-        // Rozdiel je, že sa pýtame na najlepšieho pacienta vhodného pre konkrétny typ ambulancie.
-        // Inak priority 1/2 vedia blokovať voľné B ambulancie, hoci by v nich mohli ísť pacienti 3/4/5.
-        if (requestedType != null) {
-            patient = myAgent().pollDoctorPatientFor(requestedType);
-        } else {
-            patient = myAgent().pollNextDoctorPatient();
-        }
+        ClinicType requestedClinicType = msg.getRequestedClinicType();
+        Patient patient = requestedClinicType == null
+                ? null
+                : myAgent().pollDoctorPatientFor(requestedClinicType);
 
         msg.setPatient(patient);
         response(msg);
@@ -45,8 +37,8 @@ public class ManagerPatients extends OSPABA.Manager {
     //meta! sender="AgentHospital", id="78", type="Request"
     public void processGetPatientForInitialExamination(MessageForm message) {
         Message msg = (Message) message.createCopy();
-        Patient patient = null;
 
+        Patient patient = null;
         if (!myAgent().getInitialExaminationQueue().isEmpty()) {
             patient = myAgent().getInitialExaminationQueue().poll();
         }
@@ -111,5 +103,4 @@ public class ManagerPatients extends OSPABA.Manager {
     public AgentPatients myAgent() {
         return (AgentPatients) super.myAgent();
     }
-
 }

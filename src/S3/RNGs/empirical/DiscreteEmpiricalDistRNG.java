@@ -1,5 +1,6 @@
 package S3.RNGs.empirical;
 
+import S3.RNGs.empirical.EmpiricGenerator;
 import S3.RNGs.intervals.EmpiricInterval;
 
 import java.util.List;
@@ -13,6 +14,8 @@ public class DiscreteEmpiricalDistRNG extends EmpiricGenerator {
     public int generate() {
         double r = this.getIntervalGenerator().nextDouble();
 
+        // EmpiricGenerator already converts probabilities to cumulative probabilities.
+        // Do not accumulate row.p() again here.
         for (int i = 0; i < this.getIntervals().size(); i++) {
             EmpiricInterval row = this.getIntervals().get(i);
 
@@ -23,7 +26,6 @@ public class DiscreteEmpiricalDistRNG extends EmpiricGenerator {
         }
 
         EmpiricInterval last = this.getIntervals().get(this.getIntervals().size() - 1);
-
         return this.getValueGenerators()[this.getIntervals().size() - 1]
                 .nextInt(last.low(), last.high());
     }

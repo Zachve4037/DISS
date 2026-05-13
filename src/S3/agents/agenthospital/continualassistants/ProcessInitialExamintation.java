@@ -62,20 +62,16 @@ public class ProcessInitialExamintation extends OSPABA.Process {
     //meta! sender="AgentHospital", id="40", type="Start"
     public void processStart(MessageForm message) {
         Message msg = (Message) message.createCopy();
-
         Patient patient = msg.getPatient();
         EmerDepEmployee nurse = msg.getNurse();
-
-        if (patient == null || nurse == null) {
-            return;
-        }
-
         nurse.startWork(patient);
+
+        Clinic clinic = msg.getClinic();
+        clinic.setOccupied(true);
 
         int priority = (patient.getType() == PatientType.AMBULANCE)
                 ? prioritySanitka.generate()
                 : priorityPeso.generate();
-
         patient.setPriority(priority);
 
         double examinationTime = (patient.getType() == PatientType.AMBULANCE)
@@ -84,7 +80,6 @@ public class ProcessInitialExamintation extends OSPABA.Process {
 
         msg.setProcessDuration(examinationTime);
         msg.setCode(Mc.finish);
-
         hold(examinationTime * 60, msg);
     }
 
