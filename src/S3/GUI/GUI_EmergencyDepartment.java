@@ -65,6 +65,7 @@ public class GUI_EmergencyDepartment {
     private int lastReplicationDay = -1;
 
     private final JPanel animatorTab;
+    private final ConvergenceChartPanel convergenceChartPanel;
 
     public GUI_EmergencyDepartment() {
         frame = new JFrame("Emergency Department");
@@ -242,6 +243,14 @@ public class GUI_EmergencyDepartment {
         animatorTab.add(placeholder, BorderLayout.CENTER);
 
         tabbedPane.addTab("Animator", animatorTab);
+
+        JPanel convergenceTab = new JPanel(new BorderLayout(10, 10));
+        JLabel recommendation = new JLabel("Recommended minimal staffing: 6 doctors / 8 nurses. Limits: ambulance <= 15 min, walk-in < 30 min.", SwingConstants.CENTER);
+        recommendation.setBorder(BorderFactory.createEmptyBorder(8, 8, 0, 8));
+        convergenceChartPanel = new ConvergenceChartPanel();
+        convergenceTab.add(recommendation, BorderLayout.NORTH);
+        convergenceTab.add(convergenceChartPanel, BorderLayout.CENTER);
+        tabbedPane.addTab("Convergence", convergenceTab);
 
         frame.setContentPane(tabbedPane);
 
@@ -455,6 +464,10 @@ public class GUI_EmergencyDepartment {
         refreshClinics(clinicsModel, clinics);
         refreshPatients(waitingForDoctorsModel, waitingDoctors);
         refreshPatients(waitingForInitialModel, waitingInitial);
+        convergenceChartPanel.setData(
+                simulation.getDoctorWaitAmbulanceConvergence(),
+                simulation.getDoctorWaitWalkInConvergence()
+        );
 
         setSimTimeSeconds((int) Math.round(simulation.currentTime()));
         setReplicationsLabel(simulation.currentReplication());
@@ -710,5 +723,149 @@ public class GUI_EmergencyDepartment {
         table.setRowHeight(24);
         table.setAutoCreateRowSorter(true);
         return table;
+    }
+
+    private static class ConvergenceChartPanel extends JPanel {
+        private static final double AMBULANCE_LIMIT_MIN = 15.0;
+        private static final double WALK_IN_LIMIT_MIN = 30.0;
+
+        private List<Double> ambulanceSeconds = Collections.emptyList();
+        private List<Double> walkInSeconds = Collections.emptyList();
+
+        ConvergenceChartPanel() {
+            setBackground(Color.WHITE);
+            setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+        }
+
+        void setData(List<Double> ambulanceSeconds, List<Double> walkInSeconds) {
+            this.ambulanceSeconds = ambulanceSeconds == null ? Collections.emptyList() : List.copyOf(ambulanceSeconds);
+            this.walkInSeconds = walkInSeconds == null ? Collections.emptyList() : List.copyOf(walkInSeconds);
+            repaint();
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g.create();
+            try {
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int w = getWidth();
+                int h = getHeight();
+                int left = 78;
+                int right = 28;
+                int top = 34;
+                int bottom = 58;
+                int plotW = Math.max(1, w - left - right);
+                int plotH = Math.max(1, h - top - bottom);
+
+                g2.setColor(new Color(248, 250, 252));
+                g2.fillRect(left, top, plotW, plotH);
+                g2.setColor(new Color(203, 213, 225));
+                g2.drawRect(left, top, plotW, plotH);
+
+                int points = Math.max(ambulanceSeconds.size(), walkInSeconds.size());
+                if (points == 0) {
+                    g2.setColor(Color.DARK_GRAY);
+                    g2.drawString("Convergence graph will appear after simulation replications finish.", left + 18, top + 30);
+                    g2.dispose();
+                    return;
+                }
+
+                double maxMinutes = Math.max(WALK_IN_LIMIT_MIN, maxMinutes(ambulanceSeconds, walkInSeconds));
+                maxMinutes = Math.ceil(maxMinutes * 1.12 / 5.0) * 5.0;
+
+                drawGrid(g2, left, top, plotW, plotH, maxMinutes);
+                drawLimit(g2, left, top, plotW, plotH, maxMinutes, AMBULANCE_LIMIT_MIN, new Color(220, 38, 38), "Ambulance limit 15 min");
+                drawLimit(g2, left, top, plotW, plotH, maxMinutes, WALK_IN_LIMIT_MIN, new Color(234, 88, 12), "Walk-in limit 30 min");
+                drawSeries(g2, ambulanceSeconds, left, top, plotW, plotH, maxMinutes, new Color(37, 99, 235));
+                drawSeries(g2, walkInSeconds, left, top, plotW, plotH, maxMinutes, new Color(22, 163, 74));
+                drawLabels(g2, left, top, plotW, plotH, points);
+            } finally {
+                g2.dispose();
+            }
+        }
+
+        private double maxMinutes(List<Double> first, List<Double> second) {
+            double max = 0.0;
+            for (double value : first) {
+                max = Math.max(max, value / 60.0);
+            }
+            for (double value : second) {
+                max = Math.max(max, value / 60.0);
+            }
+            return max;
+        }
+
+        private void drawGrid(Graphics2D g2, int left, int top, int plotW, int plotH, double maxMinutes) {
+            g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 11f));
+            for (int i = 0; i <= 6; i++) {
+                double value = maxMinutes * i / 6.0;
+                int y = top + plotH - (int) Math.round((value / maxMinutes) * plotH);
+                g2.setColor(new Color(226, 232, 240));
+                g2.drawLine(left, y, left + plotW, y);
+                g2.setColor(new Color(71, 85, 105));
+                g2.drawString(String.format("%.0f", value), left - 42, y + 4);
+            }
+        }
+
+        private void drawLimit(Graphics2D g2, int left, int top, int plotW, int plotH, double maxMinutes, double limit, Color color, String label) {
+            int y = top + plotH - (int) Math.round((limit / maxMinutes) * plotH);
+            Stroke oldStroke = g2.getStroke();
+            g2.setStroke(new BasicStroke(1.4f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{7, 5}, 0));
+            g2.setColor(color);
+            g2.drawLine(left, y, left + plotW, y);
+            g2.setStroke(oldStroke);
+            g2.drawString(label, left + plotW - 150, y - 4);
+        }
+
+        private void drawSeries(Graphics2D g2, List<Double> seconds, int left, int top, int plotW, int plotH, double maxMinutes, Color color) {
+            if (seconds.size() < 2) {
+                return;
+            }
+
+            int maxIndex = seconds.size() - 1;
+            g2.setColor(color);
+            g2.setStroke(new BasicStroke(2.2f));
+            int prevX = left;
+            int prevY = yFor(seconds.get(0), top, plotH, maxMinutes);
+
+            for (int i = 1; i < seconds.size(); i++) {
+                int x = left + (int) Math.round((i / (double) maxIndex) * plotW);
+                int y = yFor(seconds.get(i), top, plotH, maxMinutes);
+                g2.drawLine(prevX, prevY, x, y);
+                prevX = x;
+                prevY = y;
+            }
+        }
+
+        private int yFor(double seconds, int top, int plotH, double maxMinutes) {
+            double minutes = seconds / 60.0;
+            return top + plotH - (int) Math.round((minutes / maxMinutes) * plotH);
+        }
+
+        private void drawLabels(Graphics2D g2, int left, int top, int plotW, int plotH, int points) {
+            g2.setFont(g2.getFont().deriveFont(Font.BOLD, 14f));
+            g2.setColor(Color.DARK_GRAY);
+            g2.drawString("Stabilization of average waiting time for start of doctor examination", left, 18);
+
+            g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 12f));
+            g2.drawString("Replications", left + plotW / 2 - 35, top + plotH + 40);
+            g2.rotate(-Math.PI / 2);
+            g2.drawString("Minutes", -(top + plotH / 2 + 18), 22);
+            g2.rotate(Math.PI / 2);
+
+            g2.setColor(new Color(37, 99, 235));
+            g2.fillRect(left + 8, top + 10, 12, 12);
+            g2.drawString("Ambulance patients", left + 26, top + 21);
+
+            g2.setColor(new Color(22, 163, 74));
+            g2.fillRect(left + 160, top + 10, 12, 12);
+            g2.drawString("Walk-in patients", left + 178, top + 21);
+
+            g2.setColor(new Color(71, 85, 105));
+            g2.drawString("1", left - 3, top + plotH + 22);
+            g2.drawString(String.valueOf(points), left + plotW - 8, top + plotH + 22);
+        }
     }
 }

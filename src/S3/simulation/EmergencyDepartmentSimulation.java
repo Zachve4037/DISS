@@ -12,6 +12,9 @@ import S3.agents.agentresources.AgentResources;
 import S3.entities.Patient;
 import S3.entities.PatientType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
     private final EmergencyDepartmentAnimator edAnimator = new EmergencyDepartmentAnimator(this);
 
@@ -74,6 +77,9 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
     private ConfidenceIntervalStatistic simulationDoctorWaitAmbulanceCi;
     private ConfidenceIntervalStatistic simulationDoctorWaitWalkInCi;
     private ConfidenceIntervalStatistic simulationSystemTimeCi;
+
+    private List<Double> doctorWaitAmbulanceConvergence;
+    private List<Double> doctorWaitWalkInConvergence;
 
     public EmergencyDepartmentSimulation() {
         init();
@@ -171,6 +177,9 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         simulationDoctorWaitAmbulanceCi = new ConfidenceIntervalStatistic();
         simulationDoctorWaitWalkInCi = new ConfidenceIntervalStatistic();
         simulationSystemTimeCi = new ConfidenceIntervalStatistic();
+
+        doctorWaitAmbulanceConvergence = new ArrayList<>();
+        doctorWaitWalkInConvergence = new ArrayList<>();
     }
 
     public void resetReplicationStatistics() {
@@ -291,6 +300,14 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         return simulationSystemTimeCi.getValue();
     }
 
+    public List<Double> getDoctorWaitAmbulanceConvergence() {
+        return List.copyOf(doctorWaitAmbulanceConvergence);
+    }
+
+    public List<Double> getDoctorWaitWalkInConvergence() {
+        return List.copyOf(doctorWaitWalkInConvergence);
+    }
+
     // replication getters
     public long getReplicationArrivals() {
         return replicationArrivals;
@@ -409,6 +426,8 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         addReplicationValue(simulationDoctorWaitAmbulanceMean, simulationDoctorWaitAmbulanceCi, getReplicationAverageDoctorWaitAmbulance());
         addReplicationValue(simulationDoctorWaitWalkInMean, simulationDoctorWaitWalkInCi, getReplicationAverageDoctorWaitWalkIn());
         addReplicationValue(simulationSystemTimeMean, simulationSystemTimeCi, getReplicationAverageSystemTime());
+        doctorWaitAmbulanceConvergence.add(simulationDoctorWaitAmbulanceMean.getValue());
+        doctorWaitWalkInConvergence.add(simulationDoctorWaitWalkInMean.getValue());
     }
 
     private void addReplicationValue(ArithmeticalStatistic mean, ConfidenceIntervalStatistic ci, double value) {
