@@ -69,6 +69,11 @@ public class ProcessInitialExamintation extends OSPABA.Process {
         Clinic clinic = msg.getClinic();
         clinic.setOccupied(true);
 
+        int priority = (patient.getType() == PatientType.AMBULANCE)
+                ? prioritySanitka.generate()
+                : priorityPeso.generate();
+        patient.setPriority(priority);
+
         double examinationTime = (patient.getType() == PatientType.AMBULANCE)
                 ? examinationTimeSanitka.generate()
                 : examinationTimePeso.generate();

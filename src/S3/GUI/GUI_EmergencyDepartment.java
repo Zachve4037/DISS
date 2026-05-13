@@ -245,7 +245,7 @@ public class GUI_EmergencyDepartment {
                 try {
                     System.out.println("[SIM] Worker thread started");
                     simulation.setParameters(getDoctorsCount(), getNursesCount());
-                    simulation.simulate(100000, 8 * 24 * 3600);
+                    simulation.simulate(1000, 8 * 24 * 3600);
                     System.out.println("[SIM] Simulation call finished");
                 } catch (Throwable t) {
                     System.err.println("[SIM] Simulation crashed:");
@@ -307,12 +307,6 @@ public class GUI_EmergencyDepartment {
     private void refreshFromEmergencyDepartment() {
         if (simulation == null) {
             return;
-        }
-
-        int currentDay = (int) (simulation.currentTime() / (24 * 3600));
-        if (currentDay != lastReplicationDay) {
-            simulation.resetReplicationStatistics();
-            lastReplicationDay = currentDay;
         }
 
         AgentResources resources = null;

@@ -27,6 +27,14 @@ public class ManagerHospital extends OSPABA.Manager {
 
     //meta! sender="AgentResources", id="71", type="Response"
     public void processAllocateDoctorsExaminationBResources(MessageForm message) {
+        Message msg = (Message) message;
+        if (msg.getNurse() == null || msg.getClinic() == null || msg.getPatient() == null || msg.getDoctor() == null) {
+            requeuePatient(msg);
+            return;
+        }
+        msg.setCode(Mc.handleNursesMovement);
+        msg.setAddressee(mySim().findAgent(Id.agentMovement));
+        request(msg);
     }
 
     //meta! sender="AgentMovement", id="74", type="Response"
@@ -102,6 +110,11 @@ public class ManagerHospital extends OSPABA.Manager {
             doctor.endWork();
         }
 
+        EmerDepEmployee nurse = msg.getNurse();
+        if (nurse != null) {
+            nurse.endWork();
+        }
+
         msg.setCode(Mc.releaseResources);
         msg.setAddressee(mySim().findAgent(Id.agentResources));
         notice(msg);
@@ -138,6 +151,11 @@ public class ManagerHospital extends OSPABA.Manager {
             nurse.endWork();
         }
 
+        Message releaseMsg = (Message) msg.createCopy();
+        releaseMsg.setCode(Mc.releaseResources);
+        releaseMsg.setAddressee(mySim().findAgent(Id.agentResources));
+        notice(releaseMsg);
+
         Message putMsg = (Message) msg.createCopy();
         putMsg.setCode(Mc.putPatient);
         putMsg.setAddressee(mySim().findAgent(Id.agentPatients));
@@ -158,6 +176,7 @@ public class ManagerHospital extends OSPABA.Manager {
     public void processAllocateInitialExaminationResources(MessageForm message) {
         Message msg = (Message) message;
         if (msg.getNurse() == null || msg.getClinic() == null || msg.getPatient() == null) {
+            requeuePatient(msg);
             return;
         }
         msg.setCode(Mc.handleNursesMovement);
@@ -195,6 +214,14 @@ public class ManagerHospital extends OSPABA.Manager {
     public void processAllocateDoctorsExaminationAResources(MessageForm message) {
         Message msg = (Message) message;
         if (msg.getNurse() == null || msg.getClinic() == null || msg.getPatient() == null || msg.getDoctor() == null) {
+            Patient patient = msg.getPatient();
+            if (patient != null && (patient.getPriority() == 3 || patient.getPriority() == 4)) {
+                msg.setCode(Mc.allocateDoctorsExaminationBResources);
+                msg.setAddressee(mySim().findAgent(Id.agentResources));
+                request(msg);
+            } else {
+                requeuePatient(msg);
+            }
             return;
         }
         msg.setCode(Mc.handleNursesMovement);
@@ -273,6 +300,20 @@ public class ManagerHospital extends OSPABA.Manager {
         req.setCode(Mc.handlePatientToClinic);
         req.setAddressee(mySim().findAgent(Id.agentMovement));
         request(req);
+    }
+
+    private void requeuePatient(Message msg) {
+        if (msg == null || msg.getPatient() == null) {
+            return;
+        }
+
+        Message putBack = (Message) msg.createCopy();
+        putBack.setDoctor(null);
+        putBack.setNurse(null);
+        putBack.setClinic(null);
+        putBack.setCode(Mc.putPatient);
+        putBack.setAddressee(mySim().findAgent(Id.agentPatients));
+        notice(putBack);
     }
 
     //meta! userInfo="Process messages defined in code", id="0"

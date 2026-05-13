@@ -45,12 +45,14 @@ public class ProcessDoctorsExamination extends OSPABA.Process {
 
         Patient patient = msg.getPatient();
         EmerDepEmployee doctor = msg.getDoctor();
+        EmerDepEmployee nurse = msg.getNurse();
 
-        if (patient == null || doctor == null) {
+        if (patient == null || doctor == null || nurse == null) {
             return;
         }
 
         doctor.startWork(patient);
+        nurse.startWork(patient);
 
         double time = (patient.getType() == PatientType.AMBULANCE)
                 ? examinationTimeSanitka.generate()

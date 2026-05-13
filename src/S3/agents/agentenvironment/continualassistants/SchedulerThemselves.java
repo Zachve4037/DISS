@@ -1,7 +1,7 @@
 package S3.agents.agentenvironment.continualassistants;
 
 import OSPABA.*;
-import S2.RNGs.exponential.ContinuousExponentialDistRNG;
+import S3.RNGs.exponential.ContinuousExponentialDistRNG;
 import S3.simulation.*;
 import S3.agents.agentenvironment.*;
 import S3.entities.Patient;
