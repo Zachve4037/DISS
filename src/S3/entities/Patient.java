@@ -25,6 +25,10 @@ public class Patient extends Entity {
     private double initialExamWaitTime;
     private double doctorsExamWaitTime;
 
+    private double doctorsExamWaitStartTime;
+    private boolean doctorsExamWaitRunning;
+    private boolean doctorsExamWaitRecorded;
+
     private double finalizedTotalTimeInSystem;
     private boolean statisticsFinalized;
 
@@ -56,6 +60,9 @@ public class Patient extends Entity {
 
         this.initialExamWaitTime = 0;
         this.doctorsExamWaitTime = 0;
+        this.doctorsExamWaitStartTime = 0;
+        this.doctorsExamWaitRunning = false;
+        this.doctorsExamWaitRecorded = false;
 
         this.finalizedTotalTimeInSystem = 0;
         this.statisticsFinalized = false;
@@ -83,10 +90,18 @@ public class Patient extends Entity {
     }
 
     public void startWaitingForInitialExam() {
+        // According to the assignment/statistics definition, the waiting time
+        // for the doctor examination starts at the first entrance into the
+        // waiting room, not only after the initial examination is finished.
+        startDoctorsExamWaitIfNeeded();
         startWaiting(WaitingPhase.INITIAL_EXAM);
     }
 
     public void startWaitingForDoctorsExam() {
+        // Do not reset the doctor waiting statistic here.  The timer was
+        // already started when the patient entered the waiting room.  This
+        // call only starts/continues the physical doctor queue phase.
+        startDoctorsExamWaitIfNeeded();
         startWaiting(WaitingPhase.DOCTORS_EXAM);
     }
 
@@ -106,11 +121,26 @@ public class Patient extends Entity {
             if (waitingPhase == WaitingPhase.INITIAL_EXAM) {
                 this.initialExamWaitTime += waited;
             } else if (waitingPhase == WaitingPhase.DOCTORS_EXAM) {
-                this.doctorsExamWaitTime += waited;
+                endDoctorsExamWaitIfRunning();
             }
 
             this.isWaiting = false;
             this.waitingPhase = WaitingPhase.NONE;
+        }
+    }
+
+    private void startDoctorsExamWaitIfNeeded() {
+        if (!doctorsExamWaitRunning && !doctorsExamWaitRecorded) {
+            this.doctorsExamWaitStartTime = mySim().currentTime();
+            this.doctorsExamWaitRunning = true;
+        }
+    }
+
+    private void endDoctorsExamWaitIfRunning() {
+        if (doctorsExamWaitRunning && !doctorsExamWaitRecorded) {
+            this.doctorsExamWaitTime = mySim().currentTime() - this.doctorsExamWaitStartTime;
+            this.doctorsExamWaitRunning = false;
+            this.doctorsExamWaitRecorded = true;
         }
     }
 
@@ -149,6 +179,9 @@ public class Patient extends Entity {
     public void finalizeStatistics() {
         if (isWaiting) {
             endWaiting();
+        }
+        if (doctorsExamWaitRunning) {
+            endDoctorsExamWaitIfRunning();
         }
         if (isInService) {
             endService();
