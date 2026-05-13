@@ -133,7 +133,6 @@ public class ManagerHospital extends OSPABA.Manager {
             releaseClinicNow(msg);
         }
 
-        // After doctor examination the patient still has to leave the department physically.
         Message leavingMsg = (Message) msg.createCopy();
         leavingMsg.setCode(Mc.handleLeavingPatient);
         leavingMsg.setAddressee(mySim().findAgent(Id.agentMovement));
@@ -188,7 +187,6 @@ public class ManagerHospital extends OSPABA.Manager {
             return;
         }
 
-        // Waiting ends when the patient is selected and starts moving to the clinic.
         msg.getPatient().endWaiting();
 
         msg.setCode(Mc.handlePatientToClinic);
@@ -307,7 +305,6 @@ public class ManagerHospital extends OSPABA.Manager {
             return;
         }
 
-        // Waiting ends as soon as the patient is selected and starts moving to the clinic.
         msg.getPatient().endWaiting();
 
         msg.setCode(Mc.handlePatientToClinic);

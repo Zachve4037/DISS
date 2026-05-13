@@ -22,7 +22,6 @@ public class AgentEnvironment extends OSPABA.Agent {
     public void prepareReplication() {
         this.id = 0;
         super.prepareReplication();
-        // Setup component for the next replication
     }
 
     //meta! userInfo="Generated code: do not modify", tag="begin"

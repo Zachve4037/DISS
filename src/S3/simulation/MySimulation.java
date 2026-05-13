@@ -15,24 +15,20 @@ public class MySimulation extends OSPABA.Simulation {
     @Override
     public void prepareSimulation() {
         super.prepareSimulation();
-        // Create global statistcis
     }
 
     @Override
     public void prepareReplication() {
         super.prepareReplication();
-        // Reset entities, queues, local statistics, etc...
     }
 
     @Override
     public void replicationFinished() {
-        // Collect local statistics into global, update UI, etc...
         super.replicationFinished();
     }
 
     @Override
     public void simulationFinished() {
-        // Display simulation results
         super.simulationFinished();
     }
 

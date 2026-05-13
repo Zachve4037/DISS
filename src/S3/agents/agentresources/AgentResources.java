@@ -181,14 +181,9 @@ public class AgentResources extends OSPABA.Agent {
         return clinics.stream().anyMatch(Clinic::isOverflowActive);
     }
 
-    public boolean hasInitialOnlyClinicFree() {
-        return clinics.stream().anyMatch(c -> c.isInitialOnly() && canClinicServeInitial(c, false));
-    }
-
     @Override
     public void prepareReplication() {
         super.prepareReplication();
-        // Setup component for the next replication
         initClinics();
     }
 

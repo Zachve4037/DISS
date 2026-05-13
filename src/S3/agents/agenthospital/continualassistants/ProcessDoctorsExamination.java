@@ -37,7 +37,6 @@ public class ProcessDoctorsExamination extends OSPABA.Process {
     @Override
     public void prepareReplication() {
         super.prepareReplication();
-        // Setup component for the next replication
     }
 
     //meta! sender="AgentHospital", id="42", type="Start"
@@ -64,7 +63,6 @@ public class ProcessDoctorsExamination extends OSPABA.Process {
                 ? examinationTimeSanitka.generate()
                 : examinationTimePeso.generate();
 
-        msg.setProcessDuration(time);
         msg.setCode(Mc.finish);
         hold(time * 60, msg);
     }

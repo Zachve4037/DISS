@@ -22,7 +22,6 @@ public class ProcessPatientToClinicMovement extends OSPABA.Process {
     @Override
     public void prepareReplication() {
         super.prepareReplication();
-        // Setup component for the next replication
     }
 
     //meta! sender="AgentMovement", id="98", type="Start"

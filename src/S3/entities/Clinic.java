@@ -23,10 +23,6 @@ public class Clinic {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public boolean isOccupied() {
         return isOccupied;
     }
@@ -71,7 +67,4 @@ public class Clinic {
         return type;
     }
 
-    public void setType(ClinicType type) {
-        this.type = type;
-    }
 }

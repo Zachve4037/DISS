@@ -14,7 +14,6 @@ public class ManagerBoss extends OSPABA.Manager {
     @Override
     public void prepareReplication() {
         super.prepareReplication();
-        // Setup component for the next replication
 
         if (petriNet() != null) {
             petriNet().clear();
@@ -23,7 +22,6 @@ public class ManagerBoss extends OSPABA.Manager {
 
     //meta! sender="AgentHospital", id="33", type="Response"
     public void processHandlePatient(MessageForm message) {
-        //TODO ked pacient odchadza zo systemu
     }
 
     //meta! sender="AgentEnvironment", id="23", type="Notice"

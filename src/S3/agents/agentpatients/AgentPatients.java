@@ -28,7 +28,6 @@ public class AgentPatients extends OSPABA.Agent {
                 .thenComparingDouble(Patient::getArrivalTime)
                 .thenComparingInt(Patient::getId);
 
-        // Lower priority number means more urgent.
         this.doctorQueueComparator = Comparator
                 .comparingInt(Patient::getPriority)
                 .thenComparingDouble(Patient::getWaitStartTime)
@@ -44,33 +43,6 @@ public class AgentPatients extends OSPABA.Agent {
 
     public Queue<Patient> getDoctorsExaminationQueue() {
         return doctorsExaminationQueue;
-    }
-
-    public Queue<Patient> getDoctorsExaminationQueues() {
-        Queue<Patient> copy = new PriorityBlockingQueue<>(Math.max(11, doctorsExaminationQueue.size() + 1), doctorQueueComparator);
-        copy.addAll(doctorsExaminationQueue);
-        return copy;
-    }
-
-    // Compatibility helpers kept for older GUI/manager code.
-    public Queue<Patient> getDoctorsExaminationQueueA() {
-        Queue<Patient> copy = new PriorityBlockingQueue<>(11, doctorQueueComparator);
-        for (Patient p : doctorsExaminationQueue) {
-            if (canUseClinic(p, ClinicType.A)) {
-                copy.add(p);
-            }
-        }
-        return copy;
-    }
-
-    public Queue<Patient> getDoctorsExaminationQueueB() {
-        Queue<Patient> copy = new PriorityBlockingQueue<>(11, doctorQueueComparator);
-        for (Patient p : doctorsExaminationQueue) {
-            if (canUseClinic(p, ClinicType.B)) {
-                copy.add(p);
-            }
-        }
-        return copy;
     }
 
     public boolean hasDoctorPatientFor(ClinicType clinicType) {

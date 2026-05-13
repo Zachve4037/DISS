@@ -15,7 +15,6 @@ public class AgentHospital extends OSPABA.Agent {
     @Override
     public void prepareReplication() {
         super.prepareReplication();
-        // Setup component for the next replication
     }
 
     //meta! userInfo="Generated code: do not modify", tag="begin"

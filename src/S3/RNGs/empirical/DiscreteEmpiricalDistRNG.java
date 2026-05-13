@@ -14,8 +14,6 @@ public class DiscreteEmpiricalDistRNG extends EmpiricGenerator {
     public int generate() {
         double r = this.getIntervalGenerator().nextDouble();
 
-        // EmpiricGenerator already converts probabilities to cumulative probabilities.
-        // Do not accumulate row.p() again here.
         for (int i = 0; i < this.getIntervals().size(); i++) {
             EmpiricInterval row = this.getIntervals().get(i);
 

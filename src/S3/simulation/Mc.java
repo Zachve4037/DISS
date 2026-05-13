@@ -24,5 +24,4 @@ public class Mc extends OSPABA.IdList
 	public static final int tryStartDoctorsExamination = 2003;
 	public static final int allocateDoctorsExaminationResources = 2004;
 
-	// 1..1000 range reserved for user
 }

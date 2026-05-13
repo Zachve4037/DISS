@@ -13,7 +13,6 @@ public class AgentBoss extends OSPABA.Agent {
     @Override
     public void prepareReplication() {
         super.prepareReplication();
-        // Setup component for the next replication
     }
 
     public void startSimulation() {

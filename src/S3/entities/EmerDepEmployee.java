@@ -94,10 +94,6 @@ public class EmerDepEmployee extends Entity {
         return currentPatient;
     }
 
-    public double getWorkTime() {
-        return workTime;
-    }
-
     public double getTotalWorkTime() {
         return totalWorkTime;
     }
@@ -106,11 +102,4 @@ public class EmerDepEmployee extends Entity {
         return workStartTime;
     }
 
-    public Clinic getCurrentClinic() {
-        return currentClinic;
-    }
-
-    public void setCurrentClinic(Clinic clinic) {
-        this.currentClinic = clinic;
-    }
 }

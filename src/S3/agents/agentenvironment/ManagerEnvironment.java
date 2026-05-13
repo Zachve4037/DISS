@@ -15,7 +15,6 @@ public class ManagerEnvironment extends OSPABA.Manager {
     @Override
     public void prepareReplication() {
         super.prepareReplication();
-        // Setup component for the next replication
 
         if (petriNet() != null) {
             petriNet().clear();

@@ -9,7 +9,6 @@ public class MyMessage extends OSPABA.MessageForm {
 
     public MyMessage(MyMessage original) {
         super(original);
-        // copy() is called in superclass
     }
 
     @Override
@@ -21,6 +20,5 @@ public class MyMessage extends OSPABA.MessageForm {
     protected void copy(MessageForm message) {
         super.copy(message);
         MyMessage original = (MyMessage) message;
-        // Copy attributes
     }
 }

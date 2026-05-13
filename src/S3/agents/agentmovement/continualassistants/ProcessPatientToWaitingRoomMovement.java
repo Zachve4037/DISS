@@ -24,7 +24,6 @@ public class ProcessPatientToWaitingRoomMovement extends OSPABA.Process {
     @Override
     public void prepareReplication() {
         super.prepareReplication();
-        // Setup component for the next replication
     }
 
     //meta! sender="AgentMovement", id="94", type="Start"

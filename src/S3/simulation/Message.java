@@ -12,7 +12,6 @@ public class Message extends OSPABA.MessageForm {
     private EmerDepEmployee nurse;
     private Clinic clinic;
     private ClinicType requestedClinicType;
-    private double processDuration;
     private boolean overflowInitialRequest;
 
     public Message(Simulation mySim) {
@@ -22,13 +21,11 @@ public class Message extends OSPABA.MessageForm {
         this.nurse = null;
         this.clinic = null;
         this.requestedClinicType = null;
-        this.processDuration = -1;
         this.overflowInitialRequest = false;
     }
 
     private Message(Message original) {
         super(original);
-        // copy() is called in superclass
     }
 
     @Override
@@ -45,7 +42,6 @@ public class Message extends OSPABA.MessageForm {
         this.nurse = original.nurse;
         this.clinic = original.clinic;
         this.requestedClinicType = original.requestedClinicType;
-        this.processDuration = original.processDuration;
         this.overflowInitialRequest = original.overflowInitialRequest;
     }
 
@@ -87,14 +83,6 @@ public class Message extends OSPABA.MessageForm {
 
     public void setRequestedClinicType(ClinicType requestedClinicType) {
         this.requestedClinicType = requestedClinicType;
-    }
-
-    public double getProcessDuration() {
-        return processDuration;
-    }
-
-    public void setProcessDuration(double processDuration) {
-        this.processDuration = processDuration;
     }
 
     public boolean isOverflowInitialRequest() {
