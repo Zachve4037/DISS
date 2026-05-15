@@ -33,6 +33,9 @@ public class GUI_EmergencyDepartment {
     private final JCheckBox reservePriority12ClinicCheckBox;
     private final JCheckBox dynamicInitialOverflowCheckBox;
     private final JSpinner overflowThresholdSpinner;
+    private final JSpinner simulationDaysSpinner;
+    private final JSpinner warmupDaysSpinner;
+    private final JSpinner replicationsSpinner;
     private final JButton startSimButton;
     private final JButton stopSimButton;
 
@@ -62,10 +65,12 @@ public class GUI_EmergencyDepartment {
     private final DefaultTableModel waitingForInitialModel;
     private final JTable waitingForInitialExaminationTable;
 
-    private int lastReplicationDay = -1;
+    private final DefaultTableModel patientsModel;
+    private final JTable patientsTable;
 
     private final JPanel animatorTab;
-    private final ConvergenceChartPanel convergenceChartPanel;
+    private final ConvergenceChartPanel ambulanceConvergenceChartPanel;
+    private final ConvergenceChartPanel walkInConvergenceChartPanel;
 
     public GUI_EmergencyDepartment() {
         frame = new JFrame("Emergency Department");
@@ -133,7 +138,25 @@ public class GUI_EmergencyDepartment {
         };
         waitingForInitialExaminationTable = createTable(waitingForInitialModel);
 
+        patientsModel = new DefaultTableModel(new Object[]{
+                "Id", "Type", "Priority", "ArrivalTime", "WaitStart", "TotalWait",
+                "InitialWait", "DoctorWait", "SystemTime", "Waiting", "WaitingInitial",
+                "WaitingDoctor", "InService", "ServiceStart", "TotalService",
+                "DoctorWaitStart", "DoctorWaitRunning", "DoctorWaitRecorded",
+                "StatsFinalized", "LastClinic", "Phase"
+        }, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        patientsTable = createTable(patientsModel);
+
         tabbedPane.addTab("Statistics", simulationTab);
+
+        JPanel patientsTab = new JPanel(new BorderLayout());
+        patientsTab.add(createTablePanel("Patients currently in system", patientsTable), BorderLayout.CENTER);
+        tabbedPane.addTab("Patients", patientsTab);
 
         JPanel controls = new JPanel();
         controls.setLayout(new BoxLayout(controls, BoxLayout.Y_AXIS));
@@ -147,6 +170,9 @@ public class GUI_EmergencyDepartment {
                 "6 doctors / 8 nurses",
                 "6 doctors / 10 nurses"
         });
+        simulationDaysSpinner = new JSpinner(new SpinnerNumberModel(8, 1, 365, 1));
+        warmupDaysSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 365, 1));
+        replicationsSpinner = new JSpinner(new SpinnerNumberModel(1000, 1, 100000, 1));
         startSimButton = new JButton("Start Simulation");
         stopSimButton = new JButton("Stop");
         stopSimButton.setEnabled(false);
@@ -159,6 +185,15 @@ public class GUI_EmergencyDepartment {
         row1.add(Box.createHorizontalStrut(12));
         row1.add(new JLabel("Staffing scenario:"));
         row1.add(staffingScenarioCombo);
+        row1.add(Box.createHorizontalStrut(12));
+        row1.add(new JLabel("Warm-up days:"));
+        row1.add(warmupDaysSpinner);
+        row1.add(Box.createHorizontalStrut(8));
+        row1.add(new JLabel("Simulation days:"));
+        row1.add(simulationDaysSpinner);
+        row1.add(Box.createHorizontalStrut(12));
+        row1.add(new JLabel("Replications:"));
+        row1.add(replicationsSpinner);
         row1.add(Box.createHorizontalStrut(12));
         row1.add(startSimButton);
         row1.add(stopSimButton);
@@ -247,9 +282,28 @@ public class GUI_EmergencyDepartment {
         JPanel convergenceTab = new JPanel(new BorderLayout(10, 10));
         JLabel recommendation = new JLabel("Recommended minimal staffing: 6 doctors / 8 nurses. Limits: ambulance <= 15 min, walk-in < 30 min.", SwingConstants.CENTER);
         recommendation.setBorder(BorderFactory.createEmptyBorder(8, 8, 0, 8));
-        convergenceChartPanel = new ConvergenceChartPanel();
+        ambulanceConvergenceChartPanel = new ConvergenceChartPanel(
+                "Ambulance patients: average waiting time for start of doctor examination",
+                "Ambulance patients",
+                15.0,
+                "Limit 15 min",
+                new Color(37, 99, 235),
+                new Color(220, 38, 38)
+        );
+        walkInConvergenceChartPanel = new ConvergenceChartPanel(
+                "Walk-in patients: average waiting time for start of doctor examination",
+                "Walk-in patients",
+                30.0,
+                "Limit 30 min",
+                new Color(22, 163, 74),
+                new Color(234, 88, 12)
+        );
+        JPanel convergenceCharts = new JPanel(new GridLayout(2, 1, 0, 10));
+        convergenceCharts.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        convergenceCharts.add(ambulanceConvergenceChartPanel);
+        convergenceCharts.add(walkInConvergenceChartPanel);
         convergenceTab.add(recommendation, BorderLayout.NORTH);
-        convergenceTab.add(convergenceChartPanel, BorderLayout.CENTER);
+        convergenceTab.add(convergenceCharts, BorderLayout.CENTER);
         tabbedPane.addTab("Convergence", convergenceTab);
 
         frame.setContentPane(tabbedPane);
@@ -279,10 +333,16 @@ public class GUI_EmergencyDepartment {
                 return;
             }
 
-            lastReplicationDay = -1;
             simulation = new EmergencyDepartmentSimulation();
             int doctorsCount = getEffectiveDoctorsCount();
             int nursesCount = getEffectiveNursesCount();
+            int warmupDays = getWarmupDays();
+            int simulationDays = getSimulationDays();
+            int replicationCount = getReplicationCount();
+            if (warmupDays >= simulationDays) {
+                JOptionPane.showMessageDialog(frame, "Warm-up days must be lower than simulation days.");
+                return;
+            }
             boolean cleanupBlock = isAmbulanceCleanupBlockEnabled();
             boolean reserveInitial = isReserveInitialClinicsEnabled();
             boolean reservePriority12 = isReservePriority12ClinicEnabled();
@@ -296,6 +356,7 @@ public class GUI_EmergencyDepartment {
                     dynamicOverflow,
                     overflowThreshold
             );
+            simulation.setWarmupDays(warmupDays);
             if (!isMaxSpeed()) {
                 simulation.createAnimator();
                 if (simulation.animator() instanceof Animator) {
@@ -307,8 +368,8 @@ public class GUI_EmergencyDepartment {
             simulation.setParameters(doctorsCount, nursesCount);
             changeSimSpeed();
 
-            System.out.printf("[GUI] params: doctors=%d, nurses=%d, speed=%d, maxSpeed=%s, cleanup=%s, initialOnly=%s, p12Only=%s, overflow=%s(threshold=%d)%n",
-                    doctorsCount, nursesCount, getSpeedFactor(), isMaxSpeed(),
+            System.out.printf("[GUI] params: doctors=%d, nurses=%d, warmupDays=%d, simulationDays=%d, replications=%d, speed=%d, maxSpeed=%s, cleanup=%s, initialOnly=%s, p12Only=%s, overflow=%s(threshold=%d)%n",
+                    doctorsCount, nursesCount, warmupDays, simulationDays, replicationCount, getSpeedFactor(), isMaxSpeed(),
                     cleanupBlock, reserveInitial, reservePriority12, dynamicOverflow, overflowThreshold);
 
             startSimButton.setEnabled(false);
@@ -318,7 +379,7 @@ public class GUI_EmergencyDepartment {
                 try {
                     System.out.println("[SIM] Worker thread started");
                     simulation.setParameters(doctorsCount, nursesCount);
-                    simulation.simulate(1000, 8 * 24 * 3600);
+                    simulation.simulate(replicationCount, simulationDays * 24 * 3600.0);
                     System.out.println("[SIM] Simulation call finished");
                 } catch (Throwable t) {
                     System.err.println("[SIM] Simulation crashed:");
@@ -430,6 +491,7 @@ public class GUI_EmergencyDepartment {
 
         Queue<Patient> initialQueue = patientsAgent.getInitialExaminationQueue();
         Queue<Patient> doctorsQueue = patientsAgent.getDoctorsExaminationQueue();
+        List<Patient> currentPatients = simulation.getCurrentPatientsSnapshot();
 
         int waitingInitialCount = initialQueue == null ? 0 : initialQueue.size();
         int waitingDoctorsCount = doctorsQueue == null ? 0 : doctorsQueue.size();
@@ -458,29 +520,26 @@ public class GUI_EmergencyDepartment {
                         .limit(MAX_DISPLAYED_PATIENT_ROWS)
                         .collect(Collectors.toList());
 
-        refreshSimulationStats(waitingInitialCount, waitingDoctorsCount, busyEmployees);
+        refreshSimulationStats(waitingInitialCount, waitingDoctorsCount, busyEmployees, currentPatients.size());
         refreshEmployees(doctorsModel, doctors, EmployeeType.DOCTOR);
         refreshEmployees(nursesModel, nurses, EmployeeType.NURSE);
         refreshClinics(clinicsModel, clinics);
         refreshPatients(waitingForDoctorsModel, waitingDoctors);
         refreshPatients(waitingForInitialModel, waitingInitial);
-        convergenceChartPanel.setData(
-                simulation.getDoctorWaitAmbulanceConvergence(),
-                simulation.getDoctorWaitWalkInConvergence()
-        );
+        refreshCurrentPatients(currentPatients);
+        ambulanceConvergenceChartPanel.setData(simulation.getDoctorWaitAmbulanceConvergence());
+        walkInConvergenceChartPanel.setData(simulation.getDoctorWaitWalkInConvergence());
 
         setSimTimeSeconds((int) Math.round(simulation.currentTime()));
         setReplicationsLabel(simulation.currentReplication());
     }
 
-    private void refreshSimulationStats(int waitingInitial, int waitingDoctors, int busyEmployees) {
+    private void refreshSimulationStats(int waitingInitial, int waitingDoctors, int busyEmployees, int currentInSystem) {
         simulationStatsModel.setRowCount(0);
         replicationStatsModel.setRowCount(0);
 
-        long inSystem = Math.max(simulation.getReplicationArrivals() - simulation.getReplicationDepartures(), 0);
-
         replicationStatsModel.addRow(new Object[]{"--- CURRENT STATE ---", ""});
-        replicationStatsModel.addRow(new Object[]{"Patients currently in system", safeNum(inSystem)});
+        replicationStatsModel.addRow(new Object[]{"Patients currently in system", safeNum(currentInSystem)});
         replicationStatsModel.addRow(new Object[]{"Waiting for initial exam", safeNum(waitingInitial)});
         replicationStatsModel.addRow(new Object[]{"Waiting for doctors exam", safeNum(waitingDoctors)});
         replicationStatsModel.addRow(new Object[]{"Busy employees", safeNum(busyEmployees)});
@@ -556,6 +615,39 @@ public class GUI_EmergencyDepartment {
                     formatDouble(p.getWaitStartTime()),
                     formatDouble(p.getTotalWaitTime()),
                     formatDouble(p.getTotalTimeInSystem())
+            });
+        }
+    }
+
+    private void refreshCurrentPatients(List<Patient> patients) {
+        patientsModel.setRowCount(0);
+
+        for (Patient p : patients) {
+            Clinic clinic = p.getLastClinic();
+            String lastClinic = clinic == null ? "-" : clinic.getId() + " (" + clinic.getType() + ")";
+
+            patientsModel.addRow(new Object[]{
+                    p.getId(),
+                    p.getType(),
+                    p.getPriority(),
+                    formatDouble(p.getArrivalTime()),
+                    formatDouble(p.getWaitStartTime()),
+                    formatDouble(p.getTotalWaitTime()),
+                    formatDouble(p.getInitialExamWaitTime()),
+                    formatDouble(p.getDoctorsExamWaitTime()),
+                    formatDouble(p.getTotalTimeInSystem()),
+                    p.isWaiting(),
+                    p.isWaitingForInitialExam(),
+                    p.isWaitingForDoctorsExam(),
+                    p.isInService(),
+                    formatDouble(p.getServiceStartTime()),
+                    formatDouble(p.getTotalServiceTime()),
+                    formatDouble(p.getDoctorsExamWaitStartTime()),
+                    p.isDoctorsExamWaitRunning(),
+                    p.isDoctorsExamWaitRecorded(),
+                    p.isStatisticsFinalized(),
+                    lastClinic,
+                    p.getWaitingPhaseName()
             });
         }
     }
@@ -650,6 +742,18 @@ public class GUI_EmergencyDepartment {
         return ((Number) overflowThresholdSpinner.getValue()).intValue();
     }
 
+    private int getSimulationDays() {
+        return ((Number) simulationDaysSpinner.getValue()).intValue();
+    }
+
+    private int getWarmupDays() {
+        return ((Number) warmupDaysSpinner.getValue()).intValue();
+    }
+
+    private int getReplicationCount() {
+        return ((Number) replicationsSpinner.getValue()).intValue();
+    }
+
     private void updateStaffingControls() {
         boolean defaultScenario = staffingScenarioCombo.getSelectedIndex() == 0;
         doctorsCountCombo.setEnabled(defaultScenario);
@@ -726,20 +830,29 @@ public class GUI_EmergencyDepartment {
     }
 
     private static class ConvergenceChartPanel extends JPanel {
-        private static final double AMBULANCE_LIMIT_MIN = 15.0;
-        private static final double WALK_IN_LIMIT_MIN = 30.0;
+        private static final int WINDOW_SIZE = 100;
 
-        private List<Double> ambulanceSeconds = Collections.emptyList();
-        private List<Double> walkInSeconds = Collections.emptyList();
+        private final String title;
+        private final String seriesLabel;
+        private final double limitMinutes;
+        private final String limitLabel;
+        private final Color seriesColor;
+        private final Color limitColor;
+        private List<Double> seconds = Collections.emptyList();
 
-        ConvergenceChartPanel() {
+        ConvergenceChartPanel(String title, String seriesLabel, double limitMinutes, String limitLabel, Color seriesColor, Color limitColor) {
+            this.title = title;
+            this.seriesLabel = seriesLabel;
+            this.limitMinutes = limitMinutes;
+            this.limitLabel = limitLabel;
+            this.seriesColor = seriesColor;
+            this.limitColor = limitColor;
             setBackground(Color.WHITE);
             setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
         }
 
-        void setData(List<Double> ambulanceSeconds, List<Double> walkInSeconds) {
-            this.ambulanceSeconds = ambulanceSeconds == null ? Collections.emptyList() : List.copyOf(ambulanceSeconds);
-            this.walkInSeconds = walkInSeconds == null ? Collections.emptyList() : List.copyOf(walkInSeconds);
+        void setData(List<Double> seconds) {
+            this.seconds = seconds == null ? Collections.emptyList() : List.copyOf(seconds);
             repaint();
         }
 
@@ -764,90 +877,138 @@ public class GUI_EmergencyDepartment {
                 g2.setColor(new Color(203, 213, 225));
                 g2.drawRect(left, top, plotW, plotH);
 
-                int points = Math.max(ambulanceSeconds.size(), walkInSeconds.size());
+                int points = seconds.size();
                 if (points == 0) {
                     g2.setColor(Color.DARK_GRAY);
                     g2.drawString("Convergence graph will appear after simulation replications finish.", left + 18, top + 30);
-                    g2.dispose();
                     return;
                 }
 
-                double maxMinutes = Math.max(WALK_IN_LIMIT_MIN, maxMinutes(ambulanceSeconds, walkInSeconds));
-                maxMinutes = Math.ceil(maxMinutes * 1.12 / 5.0) * 5.0;
+                int windowStart = Math.max(0, points - WINDOW_SIZE);
+                int windowEnd = points;
+                double[] range = visibleMinuteRange(windowStart, windowEnd);
 
-                drawGrid(g2, left, top, plotW, plotH, maxMinutes);
-                drawLimit(g2, left, top, plotW, plotH, maxMinutes, AMBULANCE_LIMIT_MIN, new Color(220, 38, 38), "Ambulance limit 15 min");
-                drawLimit(g2, left, top, plotW, plotH, maxMinutes, WALK_IN_LIMIT_MIN, new Color(234, 88, 12), "Walk-in limit 30 min");
-                drawSeries(g2, ambulanceSeconds, left, top, plotW, plotH, maxMinutes, new Color(37, 99, 235));
-                drawSeries(g2, walkInSeconds, left, top, plotW, plotH, maxMinutes, new Color(22, 163, 74));
-                drawLabels(g2, left, top, plotW, plotH, points);
+                drawGrid(g2, left, top, plotW, plotH, range[0], range[1]);
+                drawLimit(g2, left, top, plotW, plotH, range[0], range[1]);
+                drawSeries(g2, left, top, plotW, plotH, range[0], range[1], windowStart, windowEnd);
+                drawLabels(g2, left, top, plotW, plotH, windowStart + 1, windowEnd);
             } finally {
                 g2.dispose();
             }
         }
 
-        private double maxMinutes(List<Double> first, List<Double> second) {
-            double max = 0.0;
-            for (double value : first) {
-                max = Math.max(max, value / 60.0);
+        private double[] visibleMinuteRange(int start, int end) {
+            double min = Double.POSITIVE_INFINITY;
+            double max = Double.NEGATIVE_INFINITY;
+
+            for (int i = start; i < end && i < seconds.size(); i++) {
+                double value = seconds.get(i) / 60.0;
+                if (Double.isFinite(value)) {
+                    min = Math.min(min, value);
+                    max = Math.max(max, value);
+                }
             }
-            for (double value : second) {
-                max = Math.max(max, value / 60.0);
+
+            if (!Double.isFinite(min) || !Double.isFinite(max)) {
+                return new double[]{0.0, 1.0};
             }
-            return max;
+
+            double span = Math.max(max - min, 0.0);
+            double padding = Math.max(span * 0.12, 0.01);
+
+            if (span < 0.0001) {
+                padding = Math.max(Math.abs(max) * 0.002, 0.01);
+            }
+
+            min = Math.max(0.0, min - padding);
+            max += padding;
+
+            if (max <= min) {
+                max = min + 0.02;
+            }
+
+            return new double[]{min, max};
         }
 
-        private void drawGrid(Graphics2D g2, int left, int top, int plotW, int plotH, double maxMinutes) {
+        private void drawGrid(Graphics2D g2, int left, int top, int plotW, int plotH, double minMinutes, double maxMinutes) {
             g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 11f));
             for (int i = 0; i <= 6; i++) {
-                double value = maxMinutes * i / 6.0;
-                int y = top + plotH - (int) Math.round((value / maxMinutes) * plotH);
+                double value = minMinutes + (maxMinutes - minMinutes) * i / 6.0;
+                int y = yForMinutes(value, top, plotH, minMinutes, maxMinutes);
                 g2.setColor(new Color(226, 232, 240));
                 g2.drawLine(left, y, left + plotW, y);
                 g2.setColor(new Color(71, 85, 105));
-                g2.drawString(String.format("%.0f", value), left - 42, y + 4);
+                g2.drawString(formatAxisValue(value), left - 48, y + 4);
             }
         }
 
-        private void drawLimit(Graphics2D g2, int left, int top, int plotW, int plotH, double maxMinutes, double limit, Color color, String label) {
-            int y = top + plotH - (int) Math.round((limit / maxMinutes) * plotH);
-            Stroke oldStroke = g2.getStroke();
-            g2.setStroke(new BasicStroke(1.4f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{7, 5}, 0));
-            g2.setColor(color);
-            g2.drawLine(left, y, left + plotW, y);
-            g2.setStroke(oldStroke);
-            g2.drawString(label, left + plotW - 150, y - 4);
+        private String formatAxisValue(double value) {
+            return Math.abs(value) >= 10.0 ? String.format("%.1f", value) : String.format("%.2f", value);
         }
 
-        private void drawSeries(Graphics2D g2, List<Double> seconds, int left, int top, int plotW, int plotH, double maxMinutes, Color color) {
-            if (seconds.size() < 2) {
+        private void drawLimit(Graphics2D g2, int left, int top, int plotW, int plotH, double minMinutes, double maxMinutes) {
+            if (limitMinutes < minMinutes || limitMinutes > maxMinutes) {
                 return;
             }
 
-            int maxIndex = seconds.size() - 1;
-            g2.setColor(color);
-            g2.setStroke(new BasicStroke(2.2f));
-            int prevX = left;
-            int prevY = yFor(seconds.get(0), top, plotH, maxMinutes);
+            int y = yForMinutes(limitMinutes, top, plotH, minMinutes, maxMinutes);
+            Stroke oldStroke = g2.getStroke();
+            g2.setStroke(new BasicStroke(1.4f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{7, 5}, 0));
+            g2.setColor(limitColor);
+            g2.drawLine(left, y, left + plotW, y);
+            g2.setStroke(oldStroke);
+            g2.drawString(limitLabel, left + plotW - 92, y - 4);
+        }
 
-            for (int i = 1; i < seconds.size(); i++) {
-                int x = left + (int) Math.round((i / (double) maxIndex) * plotW);
-                int y = yFor(seconds.get(i), top, plotH, maxMinutes);
+        private void drawSeries(Graphics2D g2, int left, int top, int plotW, int plotH, double minMinutes, double maxMinutes, int windowStart, int windowEnd) {
+            int from = Math.min(windowStart, seconds.size());
+            int to = Math.min(windowEnd, seconds.size());
+            int denominator = Math.max(1, windowEnd - windowStart - 1);
+
+            g2.setColor(seriesColor);
+            g2.setStroke(new BasicStroke(2.2f));
+
+            if (to - from == 1) {
+                int x = xForIndex(from, windowStart, denominator, left, plotW);
+                int y = yFor(seconds.get(from), top, plotH, minMinutes, maxMinutes);
+                g2.fillOval(x - 3, y - 3, 6, 6);
+                return;
+            }
+
+            if (to - from < 2) {
+                return;
+            }
+
+            int prevX = xForIndex(from, windowStart, denominator, left, plotW);
+            int prevY = yFor(seconds.get(from), top, plotH, minMinutes, maxMinutes);
+
+            for (int i = from + 1; i < to; i++) {
+                int x = xForIndex(i, windowStart, denominator, left, plotW);
+                int y = yFor(seconds.get(i), top, plotH, minMinutes, maxMinutes);
                 g2.drawLine(prevX, prevY, x, y);
                 prevX = x;
                 prevY = y;
             }
         }
 
-        private int yFor(double seconds, int top, int plotH, double maxMinutes) {
-            double minutes = seconds / 60.0;
-            return top + plotH - (int) Math.round((minutes / maxMinutes) * plotH);
+        private int xForIndex(int index, int windowStart, int denominator, int left, int plotW) {
+            return left + (int) Math.round(((index - windowStart) / (double) denominator) * plotW);
         }
 
-        private void drawLabels(Graphics2D g2, int left, int top, int plotW, int plotH, int points) {
+        private int yFor(double seconds, int top, int plotH, double minMinutes, double maxMinutes) {
+            double minutes = seconds / 60.0;
+            return yForMinutes(minutes, top, plotH, minMinutes, maxMinutes);
+        }
+
+        private int yForMinutes(double minutes, int top, int plotH, double minMinutes, double maxMinutes) {
+            double fraction = (minutes - minMinutes) / (maxMinutes - minMinutes);
+            return top + plotH - (int) Math.round(fraction * plotH);
+        }
+
+        private void drawLabels(Graphics2D g2, int left, int top, int plotW, int plotH, int firstReplication, int lastReplication) {
             g2.setFont(g2.getFont().deriveFont(Font.BOLD, 14f));
             g2.setColor(Color.DARK_GRAY);
-            g2.drawString("Stabilization of average waiting time for start of doctor examination", left, 18);
+            g2.drawString(title, left, 18);
 
             g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 12f));
             g2.drawString("Replications", left + plotW / 2 - 35, top + plotH + 40);
@@ -855,17 +1016,17 @@ public class GUI_EmergencyDepartment {
             g2.drawString("Minutes", -(top + plotH / 2 + 18), 22);
             g2.rotate(Math.PI / 2);
 
-            g2.setColor(new Color(37, 99, 235));
+            g2.setColor(seriesColor);
             g2.fillRect(left + 8, top + 10, 12, 12);
-            g2.drawString("Ambulance patients", left + 26, top + 21);
-
-            g2.setColor(new Color(22, 163, 74));
-            g2.fillRect(left + 160, top + 10, 12, 12);
-            g2.drawString("Walk-in patients", left + 178, top + 21);
+            g2.drawString(seriesLabel, left + 26, top + 21);
 
             g2.setColor(new Color(71, 85, 105));
-            g2.drawString("1", left - 3, top + plotH + 22);
-            g2.drawString(String.valueOf(points), left + plotW - 8, top + plotH + 22);
+            g2.drawString(String.valueOf(firstReplication), left - 3, top + plotH + 22);
+            String lastLabel = String.valueOf(lastReplication);
+            FontMetrics metrics = g2.getFontMetrics();
+            g2.drawString(lastLabel, left + plotW - metrics.stringWidth(lastLabel), top + plotH + 22);
+            String windowLabel = "Window: " + firstReplication + "-" + lastReplication;
+            g2.drawString(windowLabel, left + plotW - metrics.stringWidth(windowLabel), 18);
         }
     }
 }

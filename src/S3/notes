@@ -65,3 +65,13 @@ EXPERIMENTY
 - ziadna optimalizacia - neriesi par ktory sa nemusi hybat
 - vytiahne sa prvy ktory je v zozname
 - zahrievanie = 24 hodin
+
+
+--------------
+DOROBIT
+zahrievanie aby bolo nastavitelne
+aby sa stavy pacientov a ambulancii tiez vypisovali na gui
+grafe treba preskalovat na y-osi
+v dokumentacii dorobit tabulky pre strategie
+
+--popis gui i guess

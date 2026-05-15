@@ -13,10 +13,14 @@ import S3.entities.Patient;
 import S3.entities.PatientType;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
     private final EmergencyDepartmentAnimator edAnimator = new EmergencyDepartmentAnimator(this);
+    private final Map<Integer, Patient> currentPatients = new ConcurrentHashMap<>();
 
     public EmergencyDepartmentAnimator edAnimator() {
         return edAnimator;
@@ -27,6 +31,8 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
     private boolean reservePriority12ClinicEnabled;
     private boolean dynamicInitialOverflowEnabled;
     private int dynamicInitialOverflowThreshold = 10;
+    private int warmupDays = 0;
+    private double warmupEndTime = 0.0;
 
     private long simulationArrivals;
     private long simulationDepartures;
@@ -90,6 +96,12 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
             return;
         }
 
+        currentPatients.put(patient.getId(), patient);
+
+        if (!isStatisticsEligible(patient)) {
+            return;
+        }
+
         simulationArrivals++;
         replicationArrivals++;
 
@@ -104,6 +116,12 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
 
     public void recordDeparture(Patient patient) {
         if (patient == null) {
+            return;
+        }
+
+        currentPatients.remove(patient.getId());
+
+        if (!isStatisticsEligible(patient)) {
             return;
         }
 
@@ -195,6 +213,10 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         replicationSystemTimeCount = 0;
     }
 
+    private boolean isStatisticsEligible(Patient patient) {
+        return patient.getArrivalTime() >= warmupEndTime;
+    }
+
     private double avg(double sum, long count) {
         return count == 0 ? 0.0 : sum / count;
     }
@@ -271,6 +293,13 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
         return List.copyOf(doctorWaitWalkInConvergence);
     }
 
+    public List<Patient> getCurrentPatientsSnapshot() {
+        return currentPatients.values().stream()
+                .sorted(Comparator.comparingDouble(Patient::getArrivalTime)
+                        .thenComparingInt(Patient::getId))
+                .toList();
+    }
+
     public long getReplicationArrivals() {
         return replicationArrivals;
     }
@@ -305,6 +334,11 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
 
     public void setParameters(int doctorsCount, int nursesCount) {
         agentResources().setNumberOfPersonal(doctorsCount, nursesCount);
+    }
+
+    public void setWarmupDays(int warmupDays) {
+        this.warmupDays = Math.max(0, warmupDays);
+        this.warmupEndTime = this.warmupDays * 24.0 * 3600.0;
     }
 
     public void setExperimentSettings(
@@ -352,6 +386,8 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
     @Override
     public void prepareSimulation() {
         super.prepareSimulation();
+        warmupEndTime = warmupDays * 24.0 * 3600.0;
+        currentPatients.clear();
         resetSimulationStatistics();
         resetReplicationStatistics();
     }
@@ -359,6 +395,7 @@ public class EmergencyDepartmentSimulation extends OSPABA.Simulation {
     @Override
     public void prepareReplication() {
         super.prepareReplication();
+        currentPatients.clear();
         resetReplicationStatistics();
         edAnimator.prepareReplication();
 

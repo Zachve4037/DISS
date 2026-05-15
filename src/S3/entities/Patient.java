@@ -145,6 +145,10 @@ public class Patient extends Entity {
         return waitStartTime;
     }
 
+    public boolean isWaiting() {
+        return isWaiting;
+    }
+
     public void startService() {
         endWaiting();
 
@@ -167,6 +171,38 @@ public class Patient extends Entity {
 
     public double getDoctorsExamWaitTime() {
         return doctorsExamWaitTime;
+    }
+
+    public double getServiceStartTime() {
+        return serviceStartTime;
+    }
+
+    public double getTotalServiceTime() {
+        return totalServiceTime;
+    }
+
+    public boolean isInService() {
+        return isInService;
+    }
+
+    public double getDoctorsExamWaitStartTime() {
+        return doctorsExamWaitStartTime;
+    }
+
+    public boolean isDoctorsExamWaitRunning() {
+        return doctorsExamWaitRunning;
+    }
+
+    public boolean isDoctorsExamWaitRecorded() {
+        return doctorsExamWaitRecorded;
+    }
+
+    public boolean isStatisticsFinalized() {
+        return statisticsFinalized;
+    }
+
+    public String getWaitingPhaseName() {
+        return waitingPhase.name();
     }
 
     public void finalizeStatistics() {
